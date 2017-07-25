@@ -1,7 +1,17 @@
 <?php
-
-
-
+/**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * MODULE : Membres
+ * FILE/ROLE : Vue de la connexion
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> affiche le formulaire de connexion
+ * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
+ */
 ?>
 <section class="container">
 	<form method="post" action="connexion.mod.php" class="row">

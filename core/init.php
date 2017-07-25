@@ -4,10 +4,10 @@
  * @author  <joffreynicoloff@gmail.com>
  * 
  * CORE : 
- * FILE/ROLE : config.php
+ * FILE/ROLE : init.php
  *
  * File Last Update : 2017 07 25
  *
  * File Description :
- * -> Défini les constantes de l'application
+ * -> appel les fichiers nécessaires au fonctionnement de l'application
  */

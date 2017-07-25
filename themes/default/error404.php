@@ -1,5 +1,16 @@
 <?php
-
+/**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * THEME : Default
+ * FILE/ROLE : Error404
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> contenu de l'erreur 404
+ */
 ?>
 <section class="container">
 	<div class="row">

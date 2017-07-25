@@ -1,8 +1,29 @@
 <?php
+/**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * MODULE : Membres
+ * FILE/ROLE : Vue de l'inscription
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> affiche le formulaire d'inscription
+ * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
+ */
+
+
+//------------------------------------------------------------
+// Définition des commentaires de champ
 $commentaire_login = '<em>Au moins ' . Membre::PSEUDO_MIN_LENGHT . ' caractères alphanumériques sans espace (- et _ tolérés)</em>';
 $commentaire_email = '';
 $commentaire_password = '';
 
+
+
+
+//------------------------------------------------------------
 // Erreur login
 if (isset($_GET['error']))
 {
@@ -26,7 +47,11 @@ if (isset($_GET['error']))
 }
 
 
-// Récupération des données du formulaire
+
+
+//------------------------------------------------------------
+// Récupération des données valides du formulaire rempli la fois précédente
+// Affichera ces données dans les champs correspondants
 $ePOST = array('login' => '', 'email' => '');
 
 function verifPOST($ePOST)
@@ -40,6 +65,7 @@ function verifPOST($ePOST)
 $ePOST = verifPOST($ePOST);
 
 
+//------------------------------------------------------------
 ?>
 
 

@@ -1,7 +1,19 @@
 <?php
 /**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
  * 
+ * MODULE : Membres
+ * FILE/ROLE : Classe Membre
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> gestion des attributs du membre connecté
+ * -> contient en attribut tous les éléments de la table Membres
+ * -> permet de contrôler l'intégrité des données du membres avant insertion dans la BDD
  */
+
 class Membre {
 	
 	//------------------------------------------------------------

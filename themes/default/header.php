@@ -1,10 +1,15 @@
 <?php
 /**
- * BLOG : Jean Forteroche
- * THEME : default
- * version : 2017 07 21
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
  * 
- * Header HTML
+ * THEME : Default
+ * FILE/ROLE : Header
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> Header HTML
  */
 ?>
 <!doctype html>

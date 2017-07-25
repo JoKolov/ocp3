@@ -1,11 +1,19 @@
 <?php
-
-echo 'Hello, je suis le modèle et je dois inscrire les données dans la base de données : <br />';
-echo '<pre>';
-echo var_dump($_POST);
-echo '</pre>';
-
 /**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * MODULE : Membres
+ * FILE/ROLE : Modèle de l'inscription
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> vérifie l'intégrité des données transmises par le formulaire d'inscription
+ * -> insère les données dans la base de données si elles sont OK
+ * -> sinon, renvoi vers le formulaire d'inscription avec les erreurs
+ *
+ *
  * Utilisation des classes suivantes :
  * Membre
  * MembreMgr
@@ -14,38 +22,48 @@ echo '</pre>';
 define('URL_INSCRIPTION_ERREUR', 'Location: index.php?module=membres&page=inscription&error=');
 $erreur = '';
 
-/**
- * Contrôle des données du formulaire d'inscription
- */
+
+
+//------------------------------------------------------------
+// Contrôle des données du formulaire d'inscription
+
+// création d'un membre
+// cela permettra de contrôler les données enregistrées par le formulaire
+// via les setteurs de la classe membre
 $membre = new Membre;
+
+
+// création des données de Session
+// Initialisées à zéro pour le moment
+$_SESSION['login'] = '';
+$_SESSION['email'] = '';
+$_SESSION['password'] = '';
+
+
+// Enregistrement du login (pseudo)
 if (isset($_POST['login']) AND $membre->set_pseudo($_POST['login']))
 {
 	$_SESSION['login'] = $membre->get_pseudo();
-	echo 'Le pseudo du membre est : ' . $membre->get_pseudo() . '<br />';
 }
 else
 {
 	$erreur .= 'login';
-	$_SESSION['login'] = '';
 }
 
 
 if (isset($_POST['email']) AND $membre->set_email($_POST['email']))
 {
 	$_SESSION['email'] = $membre->get_email();
-	echo 'L\'adresse email du membre est : ' . $membre->get_email() . '<br />';
 }
 else
 {
 	$erreur .= 'email';
-	$_SESSION['email'] = '';
 }
 
 
 if (isset($_POST['password']) AND $membre->set_password($_POST['password']))
 {
-	$_SESSION['password'] = $membre->get_password();
-	echo 'Le mot de passe du membre est : ' . $membre->get_password() . '<br />';
+	$_SESSION['password'] = Membre::hashPassword($membre->get_password());
 }
 else
 {
@@ -54,6 +72,8 @@ else
 
 
 
+
+//------------------------------------------------------------
 // si la validation échoue, on renvoi vers le formulaire avec les erreurs
 if ($erreur <> '')
 {

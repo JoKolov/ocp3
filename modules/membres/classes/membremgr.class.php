@@ -1,7 +1,17 @@
 <?php
 /**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
  * 
+ * MODULE : Membres
+ * FILE/ROLE : Classe MembreMgr (Membre Manager)
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> gestion des requêtes SQL entre la BDD et la classe Membre
  */
+
 class MembreMgr {
 
 	// enregistrer un membre

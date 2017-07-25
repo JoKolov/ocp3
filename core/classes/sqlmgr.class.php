@@ -1,8 +1,21 @@
 <?php
 /**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * CORE : Class
+ * FILE/ROLE : SQLmgr (SQL Manager)
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> gestion de la connexion à la BDD
+ * -> contient l'instance PDO en attribut
+ * 
  * Design pattern SINGLETON
  * 1 seule instance autorisée
  */
+
 class SQLmgr {
 
 	//------------------------------------------------------------
@@ -40,14 +53,14 @@ class SQLmgr {
 	protected static function set_pdo() {
 		try // on tente de se connecter à la base sinon on affiche une erreur (catch)
 		{
-			$bdd = 'mysql:host=' . BDD['host'] . ';dbname=' . BDD['name'] . ';charset=utf8';
+			$bdd = 'mysql:host=' . BDD['host'] . ';dbname=' . BDD['name'] . ';charset=utf8';		
 			self::$_pdo = new PDO($bdd,BDD['login'],BDD['password']);
 		}
 
 		catch (PDOException $msg)
 		{
 			print "Erreur !: " . $msg->getMessage() . "<br />
-			=> vérifier également les paramètres du fichier config.sql.php <br />";
+			>>> vérifier les paramètres du fichier config.sql.php <br />";
 			die();
 		}
 	}

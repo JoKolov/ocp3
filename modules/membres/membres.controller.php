@@ -1,4 +1,21 @@
 <?php
+/**
+ * @project : Blog Jean Forteroche
+ * @author  <joffreynicoloff@gmail.com>
+ * 
+ * MODULE : Membres
+ * FILE/ROLE : Controller
+ *
+ * File Last Update : 2017 07 25
+ *
+ * File Description :
+ * -> vérifie l'intégrité des fichiers du module
+ * -> défini les constantes nécessaires au module
+ * -> appel les modèles du module
+ * -> appel les vues du module
+ * -> renvoi au controleur principal la vue demandée
+ */
+
 
 // constantes du fichier
 define ('MODULE_MEMBRES', 'membres');							// nom du module
@@ -21,38 +38,8 @@ if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 	// UTILISATEUR NON CONNECTE
 	else // utilisateur non connecté
 	{
-
-		// MODELES
-		if(isset($_GET['action'])) // si on veut effectuer une action
-		{
-			// on créer le lien vers le fichier du modèle
-			$file = 'modules/' . MODULE_MEMBRES . '/modeles/' . $_GET['action'] . '.mod.php';
-			if(file_exists($file)) // si le fichier existe, on l'intègre
-			{
-				require($file);
-			}
-			else // sinon on affiche une erreur
-			{
-				echo 'Erreur !: le fichier ' . $file . ' est introuvable. <br />';
-			}
-		}
-
-
-		// VUES
-		if(isset($_GET['page'])) // si on veut effectuer une action
-		{
-			// on créer le lien vers le fichier du modèle
-			$file = 'modules/' . MODULE_MEMBRES . '/views/' . $_GET['page'] . '.view.php';
-			if(file_exists($file)) // si le fichier existe, on l'intègre
-			{
-				require($file);
-			}
-			else // sinon on affiche une erreur
-			{
-				echo 'Erreur !: le fichier ' . $file . ' est introuvable. <br />';
-			}
-		}
-
+		// va chercher modèle !
+		get_model();
 	}
 //---
 }
