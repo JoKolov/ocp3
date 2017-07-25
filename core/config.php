@@ -1,0 +1,5 @@
+<?
+/**
+ * CONSTANTES DE L'APPLI
+ */
+
