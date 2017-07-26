@@ -10,6 +10,9 @@
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire d'inscription
+ * -> *************
+ * -> VERIFIER QUE LE MEMBRE N'EXISTE PAS !!!!!
+ * -> *************
  * -> insère les données dans la base de données si elles sont OK
  * -> sinon, renvoi vers le formulaire d'inscription avec les erreurs
  *

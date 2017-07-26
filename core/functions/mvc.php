@@ -76,10 +76,12 @@ function get_model()
 		if(file_exists($file)) // si le fichier existe, on l'intègre
 		{
 			require($file);
+			return TRUE;
 		}
 		else // sinon on affiche une erreur
 		{
 			echo 'Erreur !: le fichier ' . $file . ' est introuvable. <br />';
+			return FALSE;
 		}
 	}
 }

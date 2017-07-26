@@ -29,6 +29,7 @@ session_start();
  */
 require('core/config.sql.php');
 require('core/classes/sqlmgr.class.php');
+require('core/functions/common.php');
 require('modules/membres/classes/membre.class.php');
 require('modules/membres/classes/membremgr.class.php');
 require('core/functions/mvc.php');

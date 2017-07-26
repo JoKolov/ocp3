@@ -107,13 +107,13 @@ class Membre {
 	}
 
 	public function set_nom($nom) {
-		if(is_string($pseudo) AND strlen($pseudo) <= self::NOM_MAX_LENGHT)
+		if(is_string($nom) AND strlen($nom) <= self::NOM_MAX_LENGHT)
 		{
 			$this->_nom = $nom;
 		}
 	}
 
-	public function set_prenom($pseudo) {
+	public function set_prenom($prenom) {
 		if(is_string($prenom) AND strlen($prenom) <= self::PRENOM_MAX_LENGHT)
 		{
 			$this->_prenom = $prenom;
@@ -233,7 +233,7 @@ class Membre {
 	// Méthodes
 	public function hashPassword($password)
 	{
-		return hash('sha256', 'b!:' . $password . '/?e9');
+		return get_hash($password);
 	}
 
 

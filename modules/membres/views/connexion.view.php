@@ -6,24 +6,43 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la connexion
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 07 26
  *
  * File Description :
  * -> affiche le formulaire de connexion
  * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
  */
+
+/**
+ * [$error contient les erreurs formatées en code HTML]
+ * @var [array]
+ */
+$error = errorView(COMVIEW, $_GET);
+
+
+
+//------------------------------------------------------------
+// HTML
 ?>
 <section class="container">
-	<form method="post" action="connexion.mod.php" class="row">
+	<form method="post" action="?module=membres&action=connexion" class="row">
 		<h3>Connexion</h3>
+		<?php
+			/**
+			 * Affichage des erreurs
+			 */
+			foreach ($error as $key => $value) {
+			 	echo $value;
+			 };
+		?>
 		<p>
-			<input type="text" class="form-control" placeholder="login" name="login" id="login">
+			<input type="text" class="form-control" placeholder="pseudo" name="pseudo" id="pseudo">
 		</p>
 		<p>
 			<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
 		</p>
 		<p>
-			<button type="button" class="btn btn-default">Valider</button>
+			<button type="submit" class="btn btn-default">Valider</button>
 		</p>
 	</form>
 	<div class="row">

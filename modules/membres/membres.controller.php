@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Controller
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 07 26
  *
  * File Description :
  * -> vérifie l'intégrité des fichiers du module
@@ -19,14 +19,30 @@
 
 // constantes du fichier
 define ('MODULE_MEMBRES', 'membres');							// nom du module
-if(isset($_GET['module'])) 	{ $nom_module = $_GET['module']; }	// 
-if(isset($_GET['action'])) 	{ $nom_action = $_GET['action']; }	// 
-if(isset($_GET['page'])) 	{ $nom_page = $_GET['page']; }		// 
+
+//---
+//page connexion
+define ('COMVIEW', array(
+	'error-pseudo'		=> "L'identification a échoué : il manquait le pseudo...",
+	'error-password'	=> "L'identification a échoué : il manquait le mot de passe...",
+	'error-notfound'	=> "L'identification a échoué : login et/ou mot de passe incorrectes."
+	));
 
 // on vérifie que c'est bien ce controlleur qui est appelé
 if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 {
-	//------------------------------------------------------------
+	
+	if(get_model()) // si on trouve le model
+	{
+		echo '<br />modele trouvé <br />';
+	}
+	else
+	{
+		echo '<br />modele introuvable <br />';
+	}
+
+	/*
+	/------------------------------------------------------------
 	// UTILISATEUR CONNECTE
 	if (isset($_SESSION['pseudo'])) // utilisateur connecté
 	{
@@ -41,6 +57,7 @@ if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 		// va chercher modèle !
 		get_model();
 	}
+	*/
 //---
 }
 
