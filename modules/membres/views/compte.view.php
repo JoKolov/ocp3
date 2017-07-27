@@ -38,6 +38,12 @@ foreach ($formValue as $key => $value) {
 			<input type="text" class="form-control" placeholder="pseudo" name="pseudo" id="pseudo" <?php echo $formValue['pseudo']; ?>>
 		</p>
 		<p>
+			<input type="text" class="form-control" placeholder="nom" name="nom" id="nom" <?php echo $formValue['nom']; ?>>
+		</p>
+		<p>
+			<input type="text" class="form-control" placeholder="prenom" name="prenom" id="prenom" <?php echo $formValue['prenom']; ?>>
+		</p>
+		<p>
 			<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?php echo $formValue['email']; ?>>
 		</p>
 		<p>

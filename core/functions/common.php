@@ -12,6 +12,22 @@
  * -> contient des fonctions basiques communes à l'appli
  */
 
+//------------------------------------------------------------
+// Autoload générique
+/**
+ * [gene_autoload : charge les classes appelées]
+ * @param  string $dossier : url du dossier contenant les classes
+ * @param  		  $class   : nom de la classe appelée
+ */
+function gene_autoload(string $dossier, $class)
+{
+	$file = $dossier . $class . '.class.php';
+	if(file_exists($file)) { require($file); }
+}
+
+
+
+//------------------------------------------------------------
 /**
  * Hash d'un mot de passe
  */
@@ -20,6 +36,8 @@ function get_hash($text) {
 }
 
 
+
+//------------------------------------------------------------
 // Fonction pour vérifier que tous les champs obligatoires d'un formulaire sont transmis
 /**
  * [control_post description]
@@ -44,6 +62,7 @@ function control_post(array $array, array $post) {
 
 
 
+//------------------------------------------------------------
 //fonction de formatage de l'URL de redirection
 function url_format(string $module, string $action = '', string $page ='', array $param = [])
 {
@@ -64,6 +83,7 @@ function url_format(string $module, string $action = '', string $page ='', array
 
 
 
+//------------------------------------------------------------
 // formatage dans les balises alert boostrap
 function error_format_form($text)
 {
@@ -72,6 +92,7 @@ function error_format_form($text)
 
 
 
+//------------------------------------------------------------
 // contrôle un $_GET['error'] pour formatter le texte à afficher dans le code HTML
 function errorView(array $comView, array $get)
 {

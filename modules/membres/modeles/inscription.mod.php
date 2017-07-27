@@ -96,7 +96,7 @@ else // si aucune erreur, on enregistre les données dans la base de données
 	if (MembreMgr::insert_membre($membre) === TRUE)
 	{
 		$_SESSION['membre'] = $membre;
-		$_SESSION['pseudo'] = $membre->get_pseudo;
+		$_SESSION['pseudo'] = $membre->get_pseudo();
 		header('Location: index.php?module=membres&page=compte');
 	}
 	else

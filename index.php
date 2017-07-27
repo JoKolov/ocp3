@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 07 27
  *
  * File Description :
  * -> charge la session
@@ -21,22 +21,38 @@
 /**
  * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  * MEMO
- * -> Créer une focntion pour charger les fichiers CORE
+ * -> Créer une fonction pour charger les fichiers CORE
  * -> Créer l'autoload des classes
  * -> Créer le contrôle des contrôleurs
  * -> Gérer l'affichage avec plus de précision
  * <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
  */
-require('core/config.sql.php');
-require('core/classes/sqlmgr.class.php');
-require('core/functions/common.php');
-require('modules/membres/classes/membre.class.php');
-require('modules/membres/classes/membremgr.class.php');
-require('core/functions/mvc.php');
 
-session_start();
 
+//------------------------------------------------------------
+// Initialisation des constantes
+define(array(
+	'FILE_VALID'	=> TRUE 	// limiter les accès aux fichiers à l'appli
+	));
+
+
+
+//------------------------------------------------------------
+// Initialisation des fichiers
+$initFile = 'core/init.php';
+if (file_exists($initFile)) { require('core/init.php'); }
+else { echo "Erreur !: echec de l'initialisation <br /> Fichier init.php introuvable <br />"; die; }
+
+
+
+//------------------------------------------------------------
+// Appel du contrôleur approprié
 get_controller();
+
+
+
+//------------------------------------------------------------
+// Appel de la vue appropriée
 get_view();
 
 
