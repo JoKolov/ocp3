@@ -16,7 +16,7 @@
  * -> renvoi la vue appropriée
  */
 
-session_start();
+
 
 /**
  * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -34,6 +34,7 @@ require('modules/membres/classes/membre.class.php');
 require('modules/membres/classes/membremgr.class.php');
 require('core/functions/mvc.php');
 
+session_start();
 
 get_controller();
 get_view();

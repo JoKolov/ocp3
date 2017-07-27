@@ -26,6 +26,14 @@ define('URL_INSCRIPTION_ERREUR', 'Location: index.php?module=membres&page=inscri
 $erreur = '';
 
 
+// ======================================================
+// préparation à la mise en conformité avec le nouveau fonctionnement du controleur
+$formInscription = array(
+	'pseudo'	=>	'',
+	'email'		=> 	'',
+	'password'	=> 	''
+	);
+// ======================================================
 
 //------------------------------------------------------------
 // Contrôle des données du formulaire d'inscription
@@ -85,13 +93,16 @@ if ($erreur <> '')
 else // si aucune erreur, on enregistre les données dans la base de données
 {
 	// enregistrement des données dans la BDD
-	if (MembreMgr::insert_membre($membre))
+	if (MembreMgr::insert_membre($membre) === TRUE)
 	{
-		header('Location: index.php?membre-enregistre');
+		$_SESSION['membre'] = $membre;
+		$_SESSION['pseudo'] = $membre->get_pseudo;
+		header('Location: index.php?module=membres&page=compte');
 	}
 	else
 	{
-		header('Location: index.php?membre-non-enregistre');
+		$erreur = 'sql';
+		header(URL_INSCRIPTION_ERREUR . $erreur); // retour au formulaire d'inscription avec une erreur
 	}
 	// renvoi vers la page
 }

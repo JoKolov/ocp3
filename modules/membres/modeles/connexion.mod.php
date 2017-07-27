@@ -29,20 +29,23 @@ define('LOG_FORM', array(
 
 //------------------------------------------------------------
 // COMMUNICATION AVEC CONTROLEUR
-$statut_model = model_connexion();
-if ($statut_model === TRUE)
+function modele_connexion()
 {
-	echo '<br />membre trouvé !<br />';
-	// $_SESSION = instance Membre hydratée
-	// renvoyer vers mon compte
-}
-else
-{
-	echo '<br />membre introuvable !<br />';
-	// $statut_model = string avec les erreurs
-	// renvoyer vers le formulaire
-	$url = url_format('membres','','connexion',$statut_model);
-	header('location: ' . $url);
+	$statut_model = model_connexion();
+	if (model_connexion() === TRUE)
+	{
+		echo '<br />membre trouvé !<br />';
+		// $_SESSION = instance Membre hydratée
+		// renvoyer vers mon compte
+		return url_format('membres','','compte');
+	}
+	else
+	{
+		echo '<br />membre introuvable !<br />';
+		// $statut_model = string avec les erreurs
+		// renvoyer vers le formulaire
+		return url_format('membres','','connexion',$statut_model);
+	}
 }
 
 
@@ -71,6 +74,7 @@ function model_connexion()
 		if (is_object($membre))
 		{
 			$_SESSION['membre'] = $membre;
+			$_SESSION['pseudo'] = $membre->get_pseudo();
 			return TRUE; // tout est OK, on renvoi l'instance de Membre
 		}
 		else

@@ -6,7 +6,7 @@
  * THEME : Default
  * FILE/ROLE : Nav
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 07 27
  *
  * File Description :
  * -> Navigation/Menu HTML
@@ -21,7 +21,7 @@
 		  	if(isset($_SESSION['pseudo'])) // utilisateur connecté
 		  	{
 		  ?>
-		  <li role="presentation"><a href="index..php?module=membres&page=deconnexion">Deconnexion</a></li>
+		  <li role="presentation"><a href="?module=membres&action=deconnexion">Deconnexion</a></li>
 		  <?php
 		  	}
 		  	else // utilisateur non connecté

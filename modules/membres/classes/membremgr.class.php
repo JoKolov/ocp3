@@ -42,8 +42,14 @@ class MembreMgr {
 
 		try {
 			$req = SQLmgr::getPDO()->prepare($sql);
-			$req->execute($values);
-			return TRUE;
+			if($req->execute($values))
+			{
+				return TRUE; // l'insertion est confirmée
+			}
+			else
+			{
+				return FALSE; // l'insertion a échouée car un membre similaire existe déjà
+			}
 		} catch (PDOException $msg) {
 			echo "<br />ERREUR !: l'insertion dans la base de données a échoué !<br />
 			Erreur PDO !: " . $msg . '<br />';

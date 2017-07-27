@@ -237,6 +237,32 @@ class Membre {
 	}
 
 
+	// permet de récupréer tous les attributs
+	// renvoi un tableau initialisé avec $key et $value
+	public function getAttributs()
+	{
+		$table = array(
+			'id'			=>	'',
+			'pseudo'		=>	'',
+			'nom'			=>	'',
+			'prenom'		=>	'',
+			'email'			=>	'',
+			'password'		=>	'',
+			'date_create'	=>	'',
+			'date_birth'	=>	'',
+			'type'			=>	'',
+			'avatar'		=>	'');
+
+		foreach ($table as $key => $value) {
+			$method = 'get_' . $key;
+			if(method_exists($this, $method))
+			{
+				$table[$key] = $this->$method();
+			}
+		}
+		return $table; // on renvoi un tableau avec tous les attributs
+	}
+
 	//------------------------------------------------------------
 	// Méthodes magiques
 	

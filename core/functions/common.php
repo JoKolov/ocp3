@@ -6,7 +6,7 @@
  * CORE : fontions
  * FILE/ROLE : Common (fonctions communes)
  *
- * File Last Update : 2017 07 26
+ * File Last Update : 2017 07 27
  *
  * File Description :
  * -> contient des fonctions basiques communes à l'appli
@@ -25,7 +25,7 @@ function get_hash($text) {
  * [control_post description]
  * @param  [array] $array [tableau de référence contenant toutes les $key valides]
  * @param  [array] $post  [tableau du $_POST que l'on souhaite contrôler]
- * @return [boolean/string]      [renvoi 'true' si le contrôle est OK, un 'string' avec les $key manquantes]
+ * @return [boolean/string]      [renvoi 'true' si le contrôle est OK, sinon un 'string' avec les $key manquantes]
  */
 function control_post(array $array, array $post) {
 	

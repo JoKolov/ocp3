@@ -34,31 +34,14 @@ if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 	
 	if(get_model()) // si on trouve le model
 	{
-		echo '<br />modele trouvé <br />';
+		// charge les données pour la vue
+		// et on renvoi vers la vue
+		$fonctionModele = 'modele_' . $_GET['action'];
+		if(function_exists($fonctionModele))
+		{
+			header('Location: ' . $fonctionModele());
+		}
 	}
-	else
-	{
-		echo '<br />modele introuvable <br />';
-	}
-
-	/*
-	/------------------------------------------------------------
-	// UTILISATEUR CONNECTE
-	if (isset($_SESSION['pseudo'])) // utilisateur connecté
-	{
-		echo '<p>Bonjour ' . $_SESSION['pseudo'] . '</p>';
-		// afficher le pseudo
-		// afficher le bouton de déconnexion
-	}
-	//------------------------------------------------------------
-	// UTILISATEUR NON CONNECTE
-	else // utilisateur non connecté
-	{
-		// va chercher modèle !
-		get_model();
-	}
-	*/
-//---
 }
 
 ?>

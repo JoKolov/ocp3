@@ -19,6 +19,7 @@
 $commentaire_login = '<em>Au moins ' . Membre::PSEUDO_MIN_LENGHT . ' caractères alphanumériques sans espace (- et _ tolérés)</em>';
 $commentaire_email = '';
 $commentaire_password = '';
+$commentaire_sql = '';
 
 
 
@@ -43,6 +44,12 @@ if (isset($_GET['error']))
 	if (preg_match('#password#', $_GET['error']))
 	{
 		$commentaire_password = '<div class="alert alert-danger" role="alert"><strong>ERREUR "password" : Au moins 8 caractères dont au moins 1 chiffre</strong></div>';
+	}
+
+	// erreur sql
+	if (preg_match('#sql#', $_GET['error']))
+	{
+		$commentaire_sql = '<div class="alert alert-danger" role="alert"><strong>ERREUR : votre identifiant ou email existe déjà.</strong></div>';
 	}
 }
 
@@ -72,6 +79,7 @@ $ePOST = verifPOST($ePOST);
 <section class="container">
 	<form method="post" action="?module=membres&action=inscription" class="row">
 		<h3>Inscription</h3>
+		<?php echo $commentaire_sql; ?>
 		<p>
 			<input type="text" class="form-control" placeholder="login" name="login" id="login" value="<?php echo $ePOST['login']; ?>">
 			<?php echo $commentaire_login; ?>
