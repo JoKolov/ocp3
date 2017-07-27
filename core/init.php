@@ -45,8 +45,9 @@ req_file('core/config.sql.php');
 //------------------------------------------------------------
 // Chargement des fonctions
 
-req_file('core/functions/common.php');
-req_file('core/functions/mvc.php');
+foreach (glob("core/functions/*.php") as $filename) {
+	require($filename);
+}
 
 
 
