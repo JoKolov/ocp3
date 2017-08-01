@@ -34,13 +34,13 @@ session_start();
 // constantes du fichier
 define ('MODULE_MEMBRES', 'membres');	// nom du module
 
+
 //tableau des erreurs à afficher
 define ('COMVIEW', array(
 	'error-pseudo'		=> "L'identification a échoué : il manquait le pseudo...",
 	'error-password'	=> "L'identification a échoué : il manquait le mot de passe...",
 	'error-notfound'	=> "L'identification a échoué : login et/ou mot de passe incorrectes."
 	));
-
 
 
 //------------------------------------------------------------

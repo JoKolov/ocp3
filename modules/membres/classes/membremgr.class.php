@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe MembreMgr (Membre Manager)
  *
- * File Last Update : 2017 07 26
+ * File Last Update : 2017 08 01
  *
  * File Description :
  * -> gestion des requêtes SQL entre la BDD et la classe Membre
@@ -16,9 +16,51 @@ class MembreMgr {
 
 	//------------------------------------------------------------
 	// Attributs
+
+	// contantes
+	const TABLE_DB = 'ocp3_blog';
 	const TABLE = 'membres';
 
+	// mapping de la table
+	private $_map; 	// tableau contenant les colonnes de la table
+					// $key = titre colonne // $value = type donnée,*max lenght* (si existe)
 
+
+	//------------------------------------------------------------
+	// Constructeur
+	
+	public function __construct() {
+		$this->set_map();
+	}
+
+
+
+	//------------------------------------------------------------
+	// Getteurs
+	public function get_map()	{ return $this->_map; }
+
+
+	//------------------------------------------------------------
+	// Setteurs
+
+	/**
+	 * set_map récupère les noms des colonnes de la table membres
+	 */
+	public function set_map()
+	{
+		$sql = 'SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+				FROM INFORMATION_SCHEMA.COLUMNS 
+				WHERE TABLE_NAME = "' . self::TABLE . '" AND TABLE_SCHEMA = "' . self::TABLE_DB . '" 
+				ORDER BY ORDINAL_POSITION';
+		$req = SQLmgr::prepare($sql);
+		$req->execute();
+		if($req->execute() !== FALSE) {
+			while($mapping = $req->fetch())
+			{
+				$this->_map[$mapping["COLUMN_NAME"]] = $mapping["DATA_TYPE"] . ',' . $mapping['CHARACTER_MAXIMUM_LENGTH'];
+			}
+		}
+	}
 
 
 	//------------------------------------------------------------
@@ -95,11 +137,11 @@ class MembreMgr {
 	}
 	
 
-
-	// chercher un type d'utilisateur
-	public static function select_type()
+	//-------------------------
+	// Chercher un type d'utilisateur
+	public static function select_all_type()
 	{
-		$sql = SQLmgr::select('membres_types', 'type');
+		$sql = SQLmgr::select('membres_types', 'id, type');
 		$req = SQLmgr::getPDO()->prepare($sql);
 		$req->execute();
 		$tableDonnees = array();
@@ -108,6 +150,26 @@ class MembreMgr {
 			array_push($tableDonnees, $donnees['type']);
 		}
 		return $tableDonnees;
-	} 
+	}
+
+
+	//-------------------------
+	// Update des données du membre
+	public static function update_membre(Membre $membre)
+	{
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		// script d'update des données
+		// avatar
+		// pseudo
+		// nom
+		// prenom
+		// date de naissance
+		// email
+		// mot de passe
+		//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	}
+
+
+	//-------------------------
 
 }

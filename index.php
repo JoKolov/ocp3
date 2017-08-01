@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 07 27
+ * File Last Update : 2017 08 01
  *
  * File Description :
  * -> charge la session
@@ -22,7 +22,6 @@
  * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
  * MEMO
  * -> Créer une fonction pour charger les fichiers CORE
- * -> Créer l'autoload des classes
  * -> Créer le contrôle des contrôleurs
  * -> Gérer l'affichage avec plus de précision
  * <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -53,6 +52,7 @@ get_controller();
 
 //------------------------------------------------------------
 // Appel de la vue appropriée
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation de la session si elle ne l'ai pas déjà
 get_view();
 
 

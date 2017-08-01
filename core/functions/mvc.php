@@ -48,7 +48,8 @@ function get_controller()
 		}
 		else
 		{
-			require('themes/default/error404.php');
+			display_view('themes/default/error404.php');
+			die;
 		}
 	}
 	else

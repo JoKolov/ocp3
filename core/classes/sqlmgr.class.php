@@ -6,7 +6,7 @@
  * CORE : Class
  * FILE/ROLE : SQLmgr (SQL Manager)
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 01
  *
  * File Description :
  * -> gestion de la connexion à la BDD
@@ -111,6 +111,15 @@ class SQLmgr {
 	}
 
 
+
+	/**
+	 * prepare 				prépare une requête PDO
+	 * @param  string $sql 	requete SQL
+	 * @return PDO      	instance PDO->prepare($sql)
+	 */
+	public static function prepare($sql) {
+		return self::getPDO()->prepare($sql);
+	}
 
 	//------------------------------------------------------------
 	// Méthodes magiques

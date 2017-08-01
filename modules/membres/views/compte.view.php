@@ -6,51 +6,49 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la page compte membre
  *
- * File Last Update : 2017 07 27
+ * File Last Update : 2017 08 01
  *
  * File Description :
- * -> affiche le formulaire de tous les champs du membre
- * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
+ * -> affiche le tableau de bord du compte utilisateur
+ * -> informations sur le compte
+ * -> outils et services disponibles
  */
 
 //------------------------------------------------------------
 // HTML
 /** Champs du compte membre à afficher
- * PSEUDO
- * NOM
- * PRENOM
+ * PSEUDO 												20%
+ * NOM 													20%
+ * PRENOM 												20%
  * EMAIL
  * PASSWORD
- * DATE_BIRTH
+ * DATE_BIRTH 											20%
  * TYPE_ID (type de compte : ex : administrateur)
- * AVATAR_ID (afficher l'avatar et son url)
+ * AVATAR_ID (afficher l'avatar et son url) 			20%
  */
 $membre = $_SESSION['membre']; // on récupère l'objet membre contenu dans la variable $_SESSION
-$formValue = $membre->getAttributs(); // on récupère tous les attibuts de l'objet dans un tableau
-foreach ($formValue as $key => $value) {
-	if($value <> '') { $formValue[$key] = ' value="' . $value . '"'; } // on formate en code HTML
-}
+$formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts de l'objet dans un tableau
+
 ?>
 <section class="container">
-	<form method="post" action="?module=membres&action=modification" class="row">
-		<h3>Mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
-		<p>
-			<input type="text" class="form-control" placeholder="pseudo" name="pseudo" id="pseudo" <?php echo $formValue['pseudo']; ?>>
-		</p>
-		<p>
-			<input type="text" class="form-control" placeholder="nom" name="nom" id="nom" <?php echo $formValue['nom']; ?>>
-		</p>
-		<p>
-			<input type="text" class="form-control" placeholder="prenom" name="prenom" id="prenom" <?php echo $formValue['prenom']; ?>>
-		</p>
-		<p>
-			<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?php echo $formValue['email']; ?>>
-		</p>
-		<p>
-			<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
-		</p>
-		<p>
-			<button type="submit" class="btn btn-default">Modifier</button>
-		</p>
-	</form>
+	<div class="row">
+		<h1>Tableau de bord</h1>
+
+		<div class="col-xs-12 col-sm-4">
+		<h3>Services</h3>
+		<?php
+			include('modules/membres/views/nav.view.php');
+		?>
+		</div>
+
+		<div class="col-xs-12 col-sm-8">
+			<h3>Profil</h3>
+			<?php 
+			// affichage des attributs du profil
+			foreach ($formValue as $key => $value) {
+				echo '<p>' . ucfirst($key) . ' : ' . $value . '</p>';
+			}
+			?>
+		</div>
+	</div>
 </section>

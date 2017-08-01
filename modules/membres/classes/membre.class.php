@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 07 31
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -27,6 +27,7 @@ class Membre {
 	protected $_password;
 	protected $_date_create;
 	protected $_date_birth;
+	//protected $_type_id;
 	protected $_type;
 	protected $_avatar;
 
@@ -262,6 +263,35 @@ class Membre {
 		}
 		return $table; // on renvoi un tableau avec tous les attributs
 	}
+
+
+	// permet de récupréer tous les attributs pour le public
+	// renvoi un tableau initialisé avec $key et $value
+	public function getPublicAttributs()
+	{
+		$table = array(
+			'pseudo'		=>	'',
+			'nom'			=>	'',
+			'prenom'		=>	'',
+			'email'			=>	'',
+			'date_create'	=>	'',
+			'date_birth'	=>	'',
+			'type'			=>	'',
+			'avatar'		=>	'');
+
+		foreach ($table as $key => $value) {
+			$method = 'get_' . $key;
+			if(method_exists($this, $method))
+			{
+				if($key == "date_create") 		{ $key = "date d'inscription"; }
+				elseif($key == 'date_birth') 	{ $key = 'date de naissance'; }
+				$publicTable[$key] = $this->$method();
+			}
+		}
+		return $publicTable; // on renvoi un tableau avec tous les attributs
+	}
+
+
 
 	//------------------------------------------------------------
 	// Méthodes magiques

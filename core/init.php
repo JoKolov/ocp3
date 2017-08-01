@@ -6,7 +6,7 @@
  * CORE : 
  * FILE/ROLE : init.php
  *
- * File Last Update : 2017 07 27
+ * File Last Update : 2017 07 31
  *
  * File Description :
  * -> appel les fichiers nécessaires au fonctionnement de l'application
@@ -14,36 +14,18 @@
 
 
 //------------------------------------------------------------
-/**
- * req_file()
- * Vérifie si le fichier existe avant d'effectuer un require
- * @param  string $file [chemin du fichier]
- * @return [type]       [require($file) OU erreur]
- */
-function req_file(string $file)
-{
-	if(file_exists($file))
-	{
-		return require($file);
-	}
-	else
-	{
-		echo 'Erreur !: fichier non chargé : ' . $file . '<br />';
-		return die;
-	}
-}
-
-
-//------------------------------------------------------------
 // Chargement des constantes
+// tous les fichiers .php contenus dans le dossier config
 
-req_file('core/config.php');
-req_file('core/config.sql.php');
+foreach (glob("core/config/*.php") as $filename) {
+	require($filename);
+}
 
 
 
 //------------------------------------------------------------
 // Chargement des fonctions
+// tous les fichiers .php contenus dans le dossier functions
 
 foreach (glob("core/functions/*.php") as $filename) {
 	require($filename);

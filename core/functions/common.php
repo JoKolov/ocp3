@@ -120,3 +120,8 @@ function errorView(array $comView, array $get)
 	if(isset($errViewReady)) 	{ return $errViewReady; }
 	else 						{ return ''; }
 }
+
+
+
+//------------------------------------------------------------
+// contrôle de l'existence d'un fichier functions dans core
