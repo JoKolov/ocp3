@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Modèle de la connexion
  *
- * File Last Update : 2017 07 26
+ * File Last Update : 2017 08 02
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire de connexion
@@ -34,14 +34,12 @@ function modele_connexion()
 	$statut_model = model_connexion();
 	if (model_connexion() === TRUE)
 	{
-		echo '<br />membre trouvé !<br />';
-		// $_SESSION = instance Membre hydratée
+		// $_SESSION['membre'] = instance Membre hydratée
 		// renvoyer vers mon compte
 		return url_format('membres','','compte');
 	}
 	else
 	{
-		echo '<br />membre introuvable !<br />';
 		// $statut_model = string avec les erreurs
 		// renvoyer vers le formulaire
 		return url_format('membres','','connexion',$statut_model);

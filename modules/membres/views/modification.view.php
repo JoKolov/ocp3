@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 01
+ * File Last Update : 2017 08 02
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre
@@ -34,10 +34,9 @@ foreach ($formValue as $key => $value) {
 <section class="container">
 	<form method="post" action="?module=membres&action=modification" class="row">
 		<h3>Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
-		<h4><em><?php echo $formValue['type']; ?><em></h4>
 		<p>
 			<label>Avatar</label>
-			<input type="url" class="form-control" placeholder="url de votre avatar" name="avatar_url" id="avatar_url" <?php echo $formValue['avatar']; ?>>
+			<input type="url" class="form-control" placeholder="url de votre avatar" name="avatar" id="avatar" <?php echo $formValue['avatar']; ?>>
 		</p>
 		<p>
 			<label>Pseudo *</label>
@@ -60,11 +59,11 @@ foreach ($formValue as $key => $value) {
 			<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?php echo $formValue['email']; ?>>
 		</p>
 		<p>
-			<label>Mot de passe</label>
+			<label>Nouveau mot de passe</label>
 			<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
 		</p>
 		<p>
-			<label>Confirmation du mot de passe</label>
+			<label>Confirmation du nouveau mot de passe</label>
 			<input type="password" class="form-control" placeholder="mot de passe" name="password-conf" id="password-conf">
 		</p>
 		<p>

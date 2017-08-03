@@ -52,7 +52,7 @@ $_SESSION['password'] = '';
 
 
 // Enregistrement du login (pseudo)
-if (isset($_POST['login']) AND $membre->set_pseudo($_POST['login']))
+if (isset($_POST['login']) AND $membre->set_pseudo($_POST['login']) === TRUE)
 {
 	$_SESSION['login'] = $membre->get_pseudo();
 }
@@ -62,7 +62,7 @@ else
 }
 
 
-if (isset($_POST['email']) AND $membre->set_email($_POST['email']))
+if (isset($_POST['email']) AND $membre->set_email($_POST['email']) === TRUE)
 {
 	$_SESSION['email'] = $membre->get_email();
 }
@@ -72,7 +72,7 @@ else
 }
 
 
-if (isset($_POST['password']) AND $membre->set_password($_POST['password']))
+if (isset($_POST['password']) AND $membre->set_password($_POST['password']) === TRUE)
 {
 	$_SESSION['password'] = Membre::hashPassword($membre->get_password());
 }

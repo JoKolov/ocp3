@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 07 31
+ * File Last Update : 2017 08 03
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -26,7 +26,9 @@ class Membre {
 	protected $_email;
 	protected $_password;
 	protected $_date_create;
+	protected $_date_create_format; 	// date formatée jj/mm/aaaa à HHhMM
 	protected $_date_birth;
+	protected $_date_birth_format; 		// date formatée jj/mm/aaaa
 	//protected $_type_id;
 	protected $_type;
 	protected $_avatar;
@@ -61,7 +63,9 @@ class Membre {
 	public function get_email() 		{ return $this->_email; }
 	public function get_password()		{ return $this->_password; }
 	public function get_date_create() 	{ return $this->_date_create; }
+	public function get_date_create_format() 	{ return $this->_date_create_format; }
 	public function get_date_birth() 	{ return $this->_date_birth; }
+	public function get_date_birth_format() 	{ return $this->_date_birth_format; }
 	public function get_type() 			{ return $this->_type; }
 	public function get_avatar() 		{ return $this->_avatar; }
 
@@ -75,7 +79,9 @@ class Membre {
 		if(isset($id) AND $id > 0)
 		{
 			$this->_id = $id;
+			return TRUE;
 		}
+		return FALSE;
 	}
 
 	/**
@@ -97,28 +103,34 @@ class Membre {
 			if (preg_match($pattern, $pseudo) AND strlen($pseudo) >= self::PSEUDO_MIN_LENGHT) // on vérifie que le formatage est correct
 			{
 				$this->_pseudo = $pseudo;
-				return true;
+				return TRUE;
 			}
-			else { return false; }
 		}
-		else
-		{
-			return false;
-		}
+		return FALSE;
 	}
 
 	public function set_nom($nom) {
-		if(is_string($nom) AND strlen($nom) <= self::NOM_MAX_LENGHT)
+		$erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
+
+		if ($this->setNomPrenom($nom, self::NOM_MAX_LENGHT) === TRUE)
 		{
-			$this->_nom = $nom;
+			$this->_nom = htmlspecialchars($nom);
+			return TRUE;
 		}
+
+		return $erreur; // on retourne le nom de la fonction si l'insertion a échouée
 	}
 
 	public function set_prenom($prenom) {
-		if(is_string($prenom) AND strlen($prenom) <= self::PRENOM_MAX_LENGHT)
+		$erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
+
+		if ($this->setNomPrenom($prenom, self::PRENOM_MAX_LENGHT) === TRUE)
 		{
-			$this->_prenom = $prenom;
+			$this->_prenom = htmlspecialchars($prenom);
+			return TRUE;
 		}
+
+		return $erreur; // on retourne le nom de la fonction si l'insertion a échouée
 	}
 
 	/**
@@ -180,14 +192,22 @@ class Membre {
 		if(isset($date))
 		{
 			$this->_date_create = $date;
+			$date = new DateTime($date);
+			$this->_date_create_format = $date->format('d/m/Y à H\hi');
+			return TRUE;
 		}
+		return FALSE;
 	}
 
 	public function set_date_birth($date) {
-		if(isset($date))
+		if(isset($date) and $date <> 0)
 		{
 			$this->_date_birth = $date;
+			$date = new DateTime($date);
+			$this->_date_birth_format = $date->format('d/m/Y');
+			return TRUE;
 		}
+		return FALSE;
 	}
 
 	public function set_type($type) {
@@ -215,19 +235,27 @@ class Membre {
 	/**
 	 * [setFull permet d'hydrater l'objet en appelant les méthodes selon les clés du tableau en argument]
 	 * @param array $donnees [tableau contenant des $key associées à des $value]
+	 * @return   	TRUE si toutes les données ont été setté correctement, FALSE si aucune donnée n'a été envoyée, string contenant le nom des données non settés
 	 */
+
 	public function setFull(array $donnees) {
 		if (isset($donnees))
 		{
+			$validation['error'] = '';
 			foreach ($donnees as $key => $value) {
 				$method = 'set_' . $key;
 				if (method_exists($this, $method))
 				{
-					$this->$method($value);
+					$setter = $this->$method($value);
+					if ($setter !== TRUE) { $validation['error'] .= $setter; }
 				}
 			}
 		}
+		if (!isset($validation)) 			{ return FALSE; }
+		elseif ($validation['error'] == '')	{ return TRUE; }
+		else /****************************/	{ return $validation; }
 	}
+
 
 
 	//------------------------------------------------------------
@@ -274,8 +302,8 @@ class Membre {
 			'nom'			=>	'',
 			'prenom'		=>	'',
 			'email'			=>	'',
-			'date_create'	=>	'',
-			'date_birth'	=>	'',
+			'date_create_format'	=>	'',
+			'date_birth_format'	=>	'',
 			'type'			=>	'',
 			'avatar'		=>	'');
 
@@ -283,8 +311,8 @@ class Membre {
 			$method = 'get_' . $key;
 			if(method_exists($this, $method))
 			{
-				if($key == "date_create") 		{ $key = "date d'inscription"; }
-				elseif($key == 'date_birth') 	{ $key = 'date de naissance'; }
+				if($key == "date_create_format") 		{ $key = "date d'inscription"; }
+				elseif($key == 'date_birth_format') 	{ $key = 'date de naissance'; }
 				$publicTable[$key] = $this->$method();
 			}
 		}
@@ -292,9 +320,26 @@ class Membre {
 	}
 
 
+	// contrôle du champ nom ou prenom
+	protected function setNomPrenom($name, $limitMax = 0)
+	{
+		if (is_string($name))
+		{
+			if ($limitMax > 0 AND strlen($name) > $limitMax)
+			{
+				return FALSE;
+			}
+			$pattern = "#^[\p{L}\s-']*$#u"; // liste des caractères autorisés (lettres, espaces, tirets et apostrophes) ou rien *
+			if (preg_match($pattern, $name))
+			{ 
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
 
 	//------------------------------------------------------------
 	// Méthodes magiques
-	
+
 
 }

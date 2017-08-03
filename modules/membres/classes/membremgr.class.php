@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe MembreMgr (Membre Manager)
  *
- * File Last Update : 2017 08 01
+ * File Last Update : 2017 08 02
  *
  * File Description :
  * -> gestion des requêtes SQL entre la BDD et la classe Membre
@@ -109,8 +109,8 @@ class MembreMgr {
 
 		$sql = 'SELECT * FROM membres WHERE LOWER(pseudo) = :pseudo AND password = :password';
 		
-		$pseudo = strtolower(htmlspecialchars($post['pseudo']));
-		$password = get_hash(htmlspecialchars($post['password']));
+		$pseudo = strtolower(htmlspecialchars($post['pseudo']));	// on compare les pseudo en lettres minuscules
+		$password = get_hash(htmlspecialchars($post['password'])); 	// hashage du password
 
 		try {
 			$req = SQLmgr::getPDO()->prepare($sql);
@@ -125,6 +125,20 @@ class MembreMgr {
 			return FALSE;
 			die();
 		}
+
+		// récupération du type de compte
+		if(isset($donneesMembre['type_id'])) {	$type_id = (int) $donneesMembre['type_id']; }
+		if(isset($type_id) AND $type_id > 0)
+		{
+			$sql = 'SELECT type FROM membres_types WHERE id = ' . $type_id;
+			$req = SQLmgr::prepare($sql);
+			if($req->execute() !== FALSE)
+			{
+				$type = $req->fetch();
+				$donneesMembre['type'] = $type['type'];
+			}
+		}
+
 
 		if ($donneesMembre)
 		{
@@ -157,16 +171,29 @@ class MembreMgr {
 	// Update des données du membre
 	public static function update_membre(Membre $membre)
 	{
-		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		// script d'update des données
-		// avatar
-		// pseudo
-		// nom
-		// prenom
-		// date de naissance
-		// email
-		// mot de passe
-		//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		$sql = 'UPDATE membres 
+				SET pseudo = :pseudo, nom = :nom, prenom = :prenom, email = :email, password = :password, date_birth = :date_birth 
+				WHERE id = :id';
+		
+		$req = SQLmgr::prepare($sql);
+		
+		// cas particulier de la date
+		//$date_birth = new DateTime($membre->get_date_birth());
+
+		$donnees = array(	':pseudo'		=>	$membre->get_pseudo(),
+							':nom'			=>	$membre->get_nom(),
+							':prenom'		=>	$membre->get_prenom(),
+							':email'		=>	$membre->get_email(),
+							':password'		=>	$membre->get_password(),
+							':date_birth'	=>	$membre->get_date_birth(),
+							':id'			=>	$membre->get_id()	);
+		
+		if ($req->execute($donnees) !== FALSE)
+		{
+			return TRUE; // la requête a bien été effectuée
+		}
+
+		return FALSE; // la requête n'a pas fonctionnee
 	}
 
 
