@@ -75,6 +75,7 @@ function url_format(string $module, string $action = '', string $page ='', array
 	if(isset($param))
 	{
 		foreach ($param as $key => $value) {
+			debug_var($param[$key]);
 			$url .= '&' . $key . '=' . $value;
 		}
 	}

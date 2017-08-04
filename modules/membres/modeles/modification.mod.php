@@ -43,32 +43,83 @@ function modele_modification()
 	// Controle des champs envoyés
 	$controlChampsOblig = control_post($champsObligatoires, $_POST); // vérifie que les champs obligatoires ont bien été envoyés
 
-	// Vérification des données envoyées
-	if($controlChampsOblig === TRUE) // les champs obligatoires sont bien renseignés
-	{
-		$membre = $_SESSION['membre'];
-		// vérification des données des champs obligatoires en prio
-		$verifChamps = $membre->setFull($_POST);
+	//if (isset($_POST['avatar']) AND $_POST['avatar'] == '') { unset($_POST['avatar']); }
 
-		if ($verifChamps === TRUE) // tous les champs sont validés et intégrés dans les attributs de $membre
-		{
-			// on intègre les champs dans la base de données
-			if (MembreMgr::update_membre($membre) === TRUE)
+	// Vérification des données envoyées
+	if ($controlChampsOblig === TRUE) // les champs obligatoires sont bien renseignés
+	{
+		// on récupère l'instance membre du membre connecté
+		$membre = $_SESSION['membre'];
+
+		// contrôle des champs password
+		// si les 2 champs sont remplis et sont identiques, c'est bon, 
+		// sinon on créer une erreur
+		$controlChampsPassword = control_post($champsPassword, $_POST);
+		$verifPassword = function($controlChampsPassword) {
+			if ($controlChampsPassword) // si = TRUE ou string
 			{
-				echo 'UPDATE membre OK';
+				if ($controlChampsPassword === TRUE)
+				{
+					if ($_POST['password'] === $_POST['password-conf'])
+					{
+						unset($_POST['password-conf']); // le password peut être testé dans l'instance $membre
+						return FALSE;
+					}
+					else
+					{
+						unset($_POST['password']);
+						unset($_POST['password-conf']);
+						return "diff";
+					}
+				}
+				elseif ($_POST['password'] == '' AND $_POST['password-conf'] =='')
+				{
+					unset($_POST['password']);
+					unset($_POST['password-conf']);
+					return FALSE;
+				}
+				else
+				{
+					unset($_POST[$controlChampsPassword]);
+					return "less";
+				}
 			}
-			else
-			{
-				echo 'UPDATE membre foiré !!';
-			}
-		}
-		else // certains champs n'ont pas été validés, les champs validés ont été intégrés dans les attributs de $membre
+			return FALSE;
+		}; 
+
+		$erreurs['error-password'] = $verifPassword($controlChampsPassword);
+		if (!$erreurs['error-password']) { unset($erreurs['error-password']); } // on détruit l'erreur si elle est FALSE
+
+		if (!isset($erreurs['error-password']))
 		{
-			$erreurs = $verifChamps;
+			// vérification des données des champs obligatoires en prio
+			$verifChamps = $membre->setFull($_POST);
+
+			if ($verifChamps === TRUE) // tous les champs sont validés et intégrés dans les attributs de $membre
+			{
+				// on intègre les champs dans la base de données
+				if (MembreMgr::update_membre($membre) === TRUE)
+				{
+					return url_format('membres','','modification',array('success' => TRUE));
+				}
+				else
+				{
+					$erreurs['error-sql'] = 'db';
+				}
+			}
+			else // certains champs n'ont pas été validés, les champs validés ont été intégrés dans les attributs de $membre
+			{
+				$erreurs = $verifChamps; // tableau contenant les erreurs : $table['error'] = string contenant les erreurs
+				// renvoyer vers la page de modification avec les erreurs $erreurs (url?error=$erreurs)
+			}
 		}
 	}
 	else // les champs obligatoires ne sont pas tous renseignés
 	{
-
+		// $controlChampsOblig = string contenant les noms des champs non renseignés
+		$erreurs['error-req'] = $controlChampsOblig; // erreurs champs requis
 	}
+
+	// on renvoi vers la page du formulaire avec les erreurs
+	return url_format('membres','','modification', $erreurs);
 }

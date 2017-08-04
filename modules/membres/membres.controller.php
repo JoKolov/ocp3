@@ -47,7 +47,7 @@ define ('COMVIEW', array(
 // on vérifie que c'est bien ce controlleur qui est appelé
 if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 {
-	
+
 	if(get_model()) // si on trouve le model
 	{
 		// charge les données pour la vue

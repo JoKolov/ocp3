@@ -14,28 +14,30 @@
  */
 
 //------------------------------------------------------------
-// HTML
-/** Champs du compte membre à afficher
- * PSEUDO
- * NOM
- * PRENOM
- * EMAIL
- * PASSWORD
- * DATE_BIRTH
- * TYPE_ID (type de compte : ex : administrateur)
- * AVATAR_ID (afficher l'avatar et son url)
- */
+// Protocoles de sécurités
+user_connected_only();
+
+
+
+//------------------------------------------------------------
+// code à mettre dans le contrôleur
 $membre = $_SESSION['membre']; // on récupère l'objet membre contenu dans la variable $_SESSION
 $formValue = $membre->getAttributs(); // on récupère tous les attibuts de l'objet dans un tableau
 foreach ($formValue as $key => $value) {
 	if($value <> '') { $formValue[$key] = ' value="' . $value . '"'; } // on formate en code HTML
 }
+
+
+
+//------------------------------------------------------------
+// HTML
 ?>
 <section class="container">
 	<form method="post" action="?module=membres&action=modification" class="row">
 		<h3>Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
 		<p>
 			<label>Avatar</label>
+			<img src="<?php echo $membre->get_avatar(); ?>">
 			<input type="url" class="form-control" placeholder="url de votre avatar" name="avatar" id="avatar" <?php echo $formValue['avatar']; ?>>
 		</p>
 		<p>

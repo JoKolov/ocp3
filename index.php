@@ -30,9 +30,7 @@
 
 //------------------------------------------------------------
 // Initialisation des constantes
-define('APP', array(
-	'VALID'		=> 	TRUE 	// limiter les accès aux fichiers à l'appli
-	));
+define('EXECUTION', TRUE); // limiter les accès aux fichiers à l'appli
 
 
 

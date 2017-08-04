@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 03
+ * File Last Update : 2017 08 04
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -29,8 +29,9 @@ class Membre {
 	protected $_date_create_format; 	// date formatée jj/mm/aaaa à HHhMM
 	protected $_date_birth;
 	protected $_date_birth_format; 		// date formatée jj/mm/aaaa
-	//protected $_type_id;
+	protected $_type_id;				// id du type de compte
 	protected $_type;
+	protected $_avatr_id;				// id de l'avatar
 	protected $_avatar;
 
 	const PSEUDO_MIN_LENGHT 	= 4;
@@ -40,15 +41,15 @@ class Membre {
 	const EMAIL_MAX_LENGHT 		= 255;
 	const PASSWORD_MIN_LENGHT	= 8; 
 	const PASSWORD_MAX_LENGHT 	= 255;
-	const AVATAR_PAR_DEFAUT 	= '';
+	const AVATAR_PAR_DEFAUT 	= APP['url-website'] . '/' . APP['url-dir'] . '/upload/avatars/default.png';
 
 
 
 	//------------------------------------------------------------
 	// Constructeur
-	public function __construct(array $donnees = []) {
+	public function __construct(array $donnees = [], bool $hash = TRUE) {
 		// on hydrate l'objet avec les données envoyées
-		$this->setFull($donnees);
+		$this->setFull($donnees, $hash);
 	}
 
 
@@ -56,18 +57,20 @@ class Membre {
 	//------------------------------------------------------------
 	// Getteurs
 	
-	public function get_id() 			{ return $this->_id; }
-	public function get_pseudo() 		{ return $this->_pseudo; }
-	public function get_nom() 			{ return $this->_nom; }
-	public function get_prenom() 		{ return $this->_prenom; }
-	public function get_email() 		{ return $this->_email; }
-	public function get_password()		{ return $this->_password; }
-	public function get_date_create() 	{ return $this->_date_create; }
-	public function get_date_create_format() 	{ return $this->_date_create_format; }
-	public function get_date_birth() 	{ return $this->_date_birth; }
+	public function get_id() 					{ return $this->_id; 				}
+	public function get_pseudo() 				{ return $this->_pseudo; 			}
+	public function get_nom() 					{ return $this->_nom;				}
+	public function get_prenom() 				{ return $this->_prenom; 			}
+	public function get_email() 				{ return $this->_email;				}
+	public function get_password()				{ return $this->_password; 			}
+	public function get_date_create() 			{ return $this->_date_create; 		}
+	public function get_date_create_format()	{ return $this->_date_create_format; }
+	public function get_date_birth() 			{ return $this->_date_birth; 		}
 	public function get_date_birth_format() 	{ return $this->_date_birth_format; }
-	public function get_type() 			{ return $this->_type; }
-	public function get_avatar() 		{ return $this->_avatar; }
+	public function get_type_id() 				{ return $this->_type_id; 			}
+	public function get_type() 					{ return $this->_type; 				}
+	public function get_avatar_id() 			{ return $this->_avatar_id; 		}
+	public function get_avatar() 				{ return $this->_avatar; 			}
 
 
 
@@ -139,9 +142,6 @@ class Membre {
 	 */
 	public function set_email($email) {
 
-		// return initialisé sur position invalide = false
-		$validation = false;
-
 		if(is_string($email) AND strlen($email) <= self::EMAIL_MAX_LENGHT)
 		{
 			$email = htmlspecialchars($email);
@@ -153,25 +153,27 @@ class Membre {
 			if (preg_match($pattern, $email))
 			{
 				$this->_email = $email;
-				$validation = true;
+				return TRUE;
 			}
 		}
 
 		// confirmation d'execution
-		return $validation;
+		return FALSE;
 	}
 
-	public function set_password($password) {
+	public function set_password($password, bool $hash = TRUE) {
 
-		// init validation = ERREUR = false
-		$validation = false;
+		if (!$hash) // si pas de hashage, c'est le password est déjà hashé et donc déjà vérifié
+		{ 
+			$this->_password = $password;
+			return TRUE;
+		}
 
 		$password_lenght = strlen($password);
 		if(is_string($password) 
 			AND $password_lenght >= self::PASSWORD_MIN_LENGHT 
 			AND $password_lenght <= self::PASSWORD_MAX_LENGHT)
 		{
-			
 			//reformatage légé
 			$password = htmlspecialchars($password);
 
@@ -179,13 +181,14 @@ class Membre {
 
 			if(preg_match($pattern, $password))
 			{
-				$this->_password = $password;
-				$validation = true;
+				
+				$this->_password = self::hashPassword($password); 
+				return TRUE;
 			}
 		}
 
 		// confirmation d'execution
-		return $validation;
+		return FALSE;
 	}
 
 	public function set_date_create($date) {
@@ -210,15 +213,37 @@ class Membre {
 		return FALSE;
 	}
 
+	public function set_type_id($id) {
+		$id = (int) $id;
+		if(isset($id) AND $id > 0)
+		{
+			$this->_type_id = $id;
+			return TRUE;
+		}
+		return FALSE;
+	}
+
 	public function set_type($type) {
 		if(is_string($type))
 		{
 			$this->_type = $type;
+			return TRUE;
 		}
+		return FALSE;
+	}
+
+	public function set_avatar_id($id) {
+		$id = (int) $id;
+		if(isset($id) AND $id > 0)
+		{
+			$this->_avatar_id = $id;
+			return TRUE;
+		}
+		return FALSE;
 	}
 
 	public function set_avatar($avatar) {
-		if(is_string($avatar) AND file_exists($avatar))
+		if(is_string($avatar) AND $avatar <> '')
 		{
 			$this->_avatar = $avatar;
 		}
@@ -226,6 +251,7 @@ class Membre {
 		{
 			$this->_avatar = self::AVATAR_PAR_DEFAUT;
 		}
+		return TRUE;
 	}
 
 
@@ -238,7 +264,7 @@ class Membre {
 	 * @return   	TRUE si toutes les données ont été setté correctement, FALSE si aucune donnée n'a été envoyée, string contenant le nom des données non settés
 	 */
 
-	public function setFull(array $donnees) {
+	public function setFull(array $donnees, bool $hash = TRUE) {
 		if (isset($donnees))
 		{
 			$validation['error'] = '';
@@ -246,14 +272,18 @@ class Membre {
 				$method = 'set_' . $key;
 				if (method_exists($this, $method))
 				{
-					$setter = $this->$method($value);
-					if ($setter !== TRUE) { $validation['error'] .= $setter; }
+					// particularité password
+					if ($key == 'password')
+					{ $setter = $this->$method($value, $hash); }
+					else
+					{ $setter = $this->$method($value); }
+					if ($setter !== TRUE) { $validation['error'] .= $key; }
 				}
 			}
-		}
+		} 
 		if (!isset($validation)) 			{ return FALSE; }
-		elseif ($validation['error'] == '')	{ return TRUE; }
-		else /****************************/	{ return $validation; }
+		elseif ($validation['error'] <> '')	{ return $validation; }
+		else /****************************/	{ return TRUE; }
 	}
 
 
@@ -304,8 +334,7 @@ class Membre {
 			'email'			=>	'',
 			'date_create_format'	=>	'',
 			'date_birth_format'	=>	'',
-			'type'			=>	'',
-			'avatar'		=>	'');
+			'type'			=>	'');
 
 		foreach ($table as $key => $value) {
 			$method = 'get_' . $key;

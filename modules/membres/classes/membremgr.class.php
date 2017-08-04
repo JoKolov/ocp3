@@ -18,8 +18,9 @@ class MembreMgr {
 	// Attributs
 
 	// contantes
-	const TABLE_DB = 'ocp3_blog';
-	const TABLE = 'membres';
+	const DB_NAME 	= 'ocp3_blog';
+	const T_MEMBRES = 'membres';
+	const T_TYPE 	= 'membres_types';
 
 	// mapping de la table
 	private $_map; 	// tableau contenant les colonnes de la table
@@ -50,7 +51,7 @@ class MembreMgr {
 	{
 		$sql = 'SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
 				FROM INFORMATION_SCHEMA.COLUMNS 
-				WHERE TABLE_NAME = "' . self::TABLE . '" AND TABLE_SCHEMA = "' . self::TABLE_DB . '" 
+				WHERE TABLE_NAME = "' . self::T_MEMBRES . '" AND TABLE_SCHEMA = "' . self::DB_NAME . '" 
 				ORDER BY ORDINAL_POSITION';
 		$req = SQLmgr::prepare($sql);
 		$req->execute();
@@ -59,7 +60,9 @@ class MembreMgr {
 			{
 				$this->_map[$mapping["COLUMN_NAME"]] = $mapping["DATA_TYPE"] . ',' . $mapping['CHARACTER_MAXIMUM_LENGTH'];
 			}
+			return $this->_map;
 		}
+		return FALSE;
 	}
 
 
@@ -79,7 +82,7 @@ class MembreMgr {
 		$values = array(
 			':pseudo'	=> $membre->get_pseudo(),
 			':email'	=> $membre->get_email(),
-			':password'	=> Membre::hashPassword($membre->get_password())
+			':password'	=> $membre->get_password()
 			);
 
 		try {
@@ -110,7 +113,7 @@ class MembreMgr {
 		$sql = 'SELECT * FROM membres WHERE LOWER(pseudo) = :pseudo AND password = :password';
 		
 		$pseudo = strtolower(htmlspecialchars($post['pseudo']));	// on compare les pseudo en lettres minuscules
-		$password = get_hash(htmlspecialchars($post['password'])); 	// hashage du password
+		$password = get_hash(htmlspecialchars($post['password'])); 	// on compare les hash du password
 
 		try {
 			$req = SQLmgr::getPDO()->prepare($sql);
@@ -142,7 +145,7 @@ class MembreMgr {
 
 		if ($donneesMembre)
 		{
-			return new Membre($donneesMembre); // on renvoi une instance Membre hydratée
+			return new Membre($donneesMembre, FALSE); // on renvoi une instance Membre hydratée (FALSE = password à ne pas hasher)
 		}
 		else
 		{
@@ -177,9 +180,6 @@ class MembreMgr {
 		
 		$req = SQLmgr::prepare($sql);
 		
-		// cas particulier de la date
-		//$date_birth = new DateTime($membre->get_date_birth());
-
 		$donnees = array(	':pseudo'		=>	$membre->get_pseudo(),
 							':nom'			=>	$membre->get_nom(),
 							':prenom'		=>	$membre->get_prenom(),
