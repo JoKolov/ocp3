@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la connexion
  *
- * File Last Update : 2017 07 26
+ * File Last Update : 2017 08 07
  *
  * File Description :
  * -> affiche le formulaire de connexion
@@ -24,8 +24,8 @@ $error = errorView(COMVIEW, $_GET);
 //------------------------------------------------------------
 // HTML
 ?>
-<section class="container">
-	<form method="post" action="?module=membres&action=connexion" class="row">
+<section>
+	<form method="post" action="?module=membres&action=connexion">
 		<h3>Connexion</h3>
 		<?php
 			/**
@@ -45,7 +45,7 @@ $error = errorView(COMVIEW, $_GET);
 			<button type="submit" class="btn btn-default">Valider</button>
 		</p>
 	</form>
-	<div class="row">
+	<div>
 		<p class="text-right">
 			Pas encore de compte ? ..... <a href="index.php?module=membres&page=inscription">Inscris-toi vite !</a>
 		</p>

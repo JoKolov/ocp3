@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 02
+ * File Last Update : 2017 08 07
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre
@@ -28,12 +28,11 @@ foreach ($formValue as $key => $value) {
 }
 
 
-
 //------------------------------------------------------------
 // HTML
 ?>
-<section class="container">
-	<form method="post" action="?module=membres&action=modification" class="row">
+<section>
+	<form method="post" action="?module=membres&action=modification">
 		<h3>Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
 		<p>
 			<label>Avatar</label>

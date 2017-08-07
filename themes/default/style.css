@@ -5,8 +5,100 @@
  * THEME : Default
  * FILE/ROLE : style.css
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 07
  *
  * File Description :
  * -> Surcouche CSS du thème
  */
+
+/**
+ * Imports
+ */
+/* >> Logo Jean Forteroche */
+@import url('https://fonts.googleapis.com/css?family=Zeyada');
+
+
+body {
+	background-image: url("images/background.jpg");
+	background-position: top fixed;
+	background-attachment: fixed;
+	background-size: cover;
+	background-repeat: none;
+}
+
+.page-content {
+	
+}
+
+.content-background {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	padding: 0.5em;
+	background-color: rgba(255,255,255,0.9);
+}
+
+/**
+ * ----------------------------------------------------------------------
+ * Barre de navigation de l'utilisateur
+ */
+#nav-user {
+	background-color: #222;
+}
+
+.user-icon:before {
+	color: #ddd;
+}
+
+.nav li:hover a .user-icon:before {
+	color: #222;
+}
+
+.user-deconnexion-icon:before {
+	color: #ff2222;
+}
+
+.user-nav-text {
+	margin-top: 10px;
+	margin-left: 0.5em;
+	color: #fff;
+}
+
+
+/**
+ * ----------------------------------------------------------------------
+ * Header
+ */
+header {
+	
+}
+
+header h1 {
+	font-size: 3em;
+}
+
+.logo-text, .navbar-brand {
+	font-family: 'Zeyada', cursive;
+	font-weight: bold;
+}
+
+
+
+/**
+ * ----------------------------------------------------------------------
+ * Navigation
+ */
+.navbar {
+	margin-bottom: 0px !important;
+}
+
+nav .row {
+	margin-top: 0px;
+}
+
+/* supprimer le brand de la navbar bootstrap */
+.navbar .container-fluid, .navbar-collapse {
+    padding-left:0;
+}
+.navbar-collapse.in {
+    padding-left:30px;
+}

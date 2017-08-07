@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 04
+ * File Last Update : 2017 08 05
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -31,8 +31,8 @@ class Membre {
 	protected $_date_birth_format; 		// date formatée jj/mm/aaaa
 	protected $_type_id;				// id du type de compte
 	protected $_type;
-	protected $_avatr_id;				// id de l'avatar
-	protected $_avatar;
+	protected $_avatar_id;				// id de l'avatar
+	protected $_avatar;					// url de l'avatar
 
 	const PSEUDO_MIN_LENGHT 	= 4;
 	const PSEUDO_MAX_LENGHT 	= 100;
@@ -245,7 +245,13 @@ class Membre {
 	public function set_avatar($avatar) {
 		if(is_string($avatar) AND $avatar <> '')
 		{
-			$this->_avatar = $avatar;
+			$pattern = '#^http{1}s?://{1}#';
+			if (preg_match($pattern, $avatar))
+			{
+				$this->_avatar = $avatar;
+				return TRUE;
+			}
+			return FALSE;
 		}
 		else
 		{

@@ -76,8 +76,8 @@ $ePOST = verifPOST($ePOST);
 ?>
 
 
-<section class="container">
-	<form method="post" action="?module=membres&action=inscription" class="row">
+<section>
+	<form method="post" action="?module=membres&action=inscription">
 		<h3>Inscription</h3>
 		<?php echo $commentaire_sql; ?>
 		<p>

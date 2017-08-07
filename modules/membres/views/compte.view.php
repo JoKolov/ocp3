@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la page compte membre
  *
- * File Last Update : 2017 08 04
+ * File Last Update : 2017 08 07
  *
  * File Description :
  * -> affiche le tableau de bord du compte utilisateur
@@ -43,8 +43,8 @@ $formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts d
 //------------------------------------------------------------
 // HTML
 ?>
-<section class="container">
-	<div class="row">
+<section>
+	<div>
 		<h1>Tableau de bord</h1>
 
 		<div class="col-xs-12 col-sm-4">

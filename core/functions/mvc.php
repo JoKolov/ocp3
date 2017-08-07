@@ -6,7 +6,7 @@
  * CORE : Fonction
  * FILE/ROLE : MVC
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 05
  *
  * File Description :
  * -> gestion des appels des éléments du MVC
@@ -48,7 +48,7 @@ function get_controller()
 		}
 		else
 		{
-			display_view('themes/default/error404.php');
+			display_view(APP['file-404']);
 			die;
 		}
 	}
@@ -110,7 +110,7 @@ function get_view()
 		}
 		else // sinon on affiche une erreur
 		{
-			echo 'Erreur !: le fichier ' . $file . ' est introuvable. <br />';
+			$file = APP['file-404'];
 		}
 	}
 	display_view($file);

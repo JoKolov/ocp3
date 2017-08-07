@@ -6,7 +6,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe MembreMgr (Membre Manager)
  *
- * File Last Update : 2017 08 02
+ * File Last Update : 2017 08 05
  *
  * File Description :
  * -> gestion des requêtes SQL entre la BDD et la classe Membre
@@ -130,8 +130,8 @@ class MembreMgr {
 		}
 
 		// récupération du type de compte
-		if(isset($donneesMembre['type_id'])) {	$type_id = (int) $donneesMembre['type_id']; }
-		if(isset($type_id) AND $type_id > 0)
+		if (isset($donneesMembre['type_id'])) {	$type_id = (int) $donneesMembre['type_id']; }
+		if (isset($type_id) AND $type_id > 0)
 		{
 			$sql = 'SELECT type FROM membres_types WHERE id = ' . $type_id;
 			$req = SQLmgr::prepare($sql);
@@ -142,6 +142,17 @@ class MembreMgr {
 			}
 		}
 
+		// récupération de l'avatar
+		if (isset($donneesMembre['avatar_id']) AND (int) $donneesMembre > 0)
+		{
+			$sql = 'SELECT id, source, avatar FROM images WHERE id = ' . (int) $donneesMembre['avatar_id'];
+			$req = SQLmgr::prepare($sql);
+			if ($req->execute() !== FALSE)
+			{
+				$donneesTable = $req->fetch();
+				$donneesMembre['avatar'] = $donneesTable['source'];
+			}
+		}
 
 		if ($donneesMembre)
 		{
@@ -175,7 +186,13 @@ class MembreMgr {
 	public static function update_membre(Membre $membre)
 	{
 		$sql = 'UPDATE membres 
-				SET pseudo = :pseudo, nom = :nom, prenom = :prenom, email = :email, password = :password, date_birth = :date_birth 
+				SET pseudo = :pseudo, 
+					nom = :nom, 
+					prenom = :prenom, 
+					email = :email, 
+					password = :password, 
+					date_birth = :date_birth, 
+					avatar_id = :avatar_id 
 				WHERE id = :id';
 		
 		$req = SQLmgr::prepare($sql);
@@ -186,7 +203,8 @@ class MembreMgr {
 							':email'		=>	$membre->get_email(),
 							':password'		=>	$membre->get_password(),
 							':date_birth'	=>	$membre->get_date_birth(),
-							':id'			=>	$membre->get_id()	);
+							':avatar_id'	=>	$membre->get_avatar_id(),
+							':id'			=>	$membre->get_id());
 		
 		if ($req->execute($donnees) !== FALSE)
 		{

@@ -6,12 +6,13 @@
  * THEME : Default
  * FILE/ROLE : Footer
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 07
  *
  * File Description :
  * -> Footer HTML
  */
 ?>
+  </div>
 <footer>
 </footer>
 <!-- Script Area
