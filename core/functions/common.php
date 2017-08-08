@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * CORE : fontions
  * FILE/ROLE : Common (fonctions communes)
  *
- * File Last Update : 2017 08 03
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> contient des fonctions basiques communes à l'appli
@@ -21,7 +22,7 @@
  */
 function gene_autoload(string $dossier, $class)
 {
-	$file = $dossier . $class . '.class.php';
+	$file = SITE_ROOT . '/' . $dossier . strtolower($class) . '.class.php';
 	if(file_exists($file)) { require($file); }
 }
 

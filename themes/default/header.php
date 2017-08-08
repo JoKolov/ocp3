@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * THEME : Default
  * FILE/ROLE : Header
  *
- * File Last Update : 2017 08 07
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> Header HTML
@@ -43,11 +44,11 @@ else
   <meta charset="utf-8">
   <meta name="robots" content="noindex" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Jean Forteroche</title>
-  <link rel="stylesheet" href="themes/default/style.css">
+  <title>Billet Simple pour l'Alaska - Jean Forteroche</title>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <!-- ## -->
+  <link rel="stylesheet" href="themes/default/style.css">
   <!-- Font Awesome -->
   <script src="https://use.fontawesome.com/bc9335f8a6.js"></script>
   <!-- ## -->
@@ -62,9 +63,9 @@ else
     <div id="nav-user">
       <div class="row">
         <div class="col-xs-8 col-sm-8">
-          <p class="user-nav-text">Bonjour 
+          <p class="user-nav-text"> 
             <?php
-               if (isset($_SESSION['pseudo'])) { echo $_SESSION['pseudo']; }
+               if (isset($_SESSION['pseudo'])) { echo 'Bonjour ' . $_SESSION['pseudo']; }
             ?>  
           </p>
         </div>
@@ -78,7 +79,7 @@ else
             <?php
               } else {
             ?>
-            <li role="presentation" <?php echo $active['compte']; ?>><a href="?module=membres&page=compte" title="Consulter son compte"><i class="fa fa-address-card user-compte-icon user-icon" aria-hidden="true"></i></a></li>
+            <li role="presentation" <?php echo $active['compte']; ?>><a href="?module=membres&page=compte" title="Consulter son compte"><i class="fa fa-address-card user-compte-icon user-icon" aria-hidden="true"></i> Mon compte</a></li>
             <li role="presentation" <?php echo $active['deconnexion']; ?>><a href="?module=membres&action=deconnexion" title="Se déconnecter"><i class="fa fa-user-times user-deconnexion-icon" aria-hidden="true"></i></a></li>
             <?php
               }

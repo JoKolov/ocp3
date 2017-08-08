@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * CORE : 
  * FILE/ROLE : init.php
  *
- * File Last Update : 2017 07 31
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> appel les fichiers nécessaires au fonctionnement de l'application

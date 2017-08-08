@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 08 01
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> charge la session
@@ -31,7 +31,7 @@
 //------------------------------------------------------------
 // Initialisation des constantes
 define('EXECUTION', TRUE); // limiter les accès aux fichiers à l'appli
-
+define('SITE_ROOT', __DIR__);
 
 
 //------------------------------------------------------------
@@ -52,6 +52,5 @@ get_controller();
 // Appel de la vue appropriée
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation de la session si elle ne l'ai pas déjà
 get_view();
-
 
 ?>

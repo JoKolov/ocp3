@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la barre de navigation du copte utilisateur
  *
- * File Last Update : 2017 08 01
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> La nav comprend :

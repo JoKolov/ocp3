@@ -49,8 +49,22 @@ body {
 	color: #ddd;
 }
 
-.nav li:hover a .user-icon:before {
+#nav-user .nav li:hover .user-icon:before, #nav-user .nav li.active .user-icon:before {
 	color: #222;
+}
+
+#nav-user .nav-pills li a {
+	color: #ddd;
+}
+
+#nav-user .nav-pills li.active a {
+	background-color: rgb(255, 138, 0);
+	color: #222;
+}
+
+#nav-user .nav-pills li a:focus, #nav-user .nav-pills li a:hover, #nav-user .nav-pills li.active a:hover {
+	color: #222;
+	background-color: #eee;
 }
 
 .user-deconnexion-icon:before {

@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * CORE : Class
  * FILE/ROLE : SQLmgr (SQL Manager)
  *
- * File Last Update : 2017 08 01
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> gestion de la connexion à la BDD

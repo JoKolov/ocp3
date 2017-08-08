@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Modèle de l'inscription
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire d'inscription
@@ -22,87 +23,71 @@
  * MembreMgr
  */
 
-define('URL_INSCRIPTION_ERREUR', 'Location: index.php?module=membres&page=inscription&error=');
-$erreur = '';
 
-
-// ======================================================
-// préparation à la mise en conformité avec le nouveau fonctionnement du controleur
-$formInscription = array(
-	'pseudo'	=>	'',
+//------------------------------------------------------------
+// COMMUNICATION AVEC CONTROLEUR
+// renvoi une url
+function modele_inscription()
+{
+	$formInscription = array(
+	'login'		=>	'',
 	'email'		=> 	'',
 	'password'	=> 	''
 	);
-// ======================================================
 
-//------------------------------------------------------------
-// Contrôle des données du formulaire d'inscription
-
-// création d'un membre
-// cela permettra de contrôler les données enregistrées par le formulaire
-// via les setteurs de la classe membre
-$membre = new Membre;
-
-
-// création des données de Session
-// Initialisées à zéro pour le moment
-$_SESSION['login'] = '';
-$_SESSION['email'] = '';
-$_SESSION['password'] = '';
-
-
-// Enregistrement du login (pseudo)
-if (isset($_POST['login']) AND $membre->set_pseudo($_POST['login']) === TRUE)
-{
-	$_SESSION['login'] = $membre->get_pseudo();
-}
-else
-{
-	$erreur .= 'login';
-}
-
-
-if (isset($_POST['email']) AND $membre->set_email($_POST['email']) === TRUE)
-{
-	$_SESSION['email'] = $membre->get_email();
-}
-else
-{
-	$erreur .= 'email';
-}
-
-
-if (isset($_POST['password']) AND $membre->set_password($_POST['password']) === TRUE)
-{
-	$_SESSION['password'] = Membre::hashPassword($membre->get_password());
-}
-else
-{
-	$erreur .= 'password';
-}
-
-
-
-
-//------------------------------------------------------------
-// si la validation échoue, on renvoi vers le formulaire avec les erreurs
-if ($erreur <> '')
-{
-	header(URL_INSCRIPTION_ERREUR . $erreur); // retour au formulaire d'inscription avec une erreur
-}
-else // si aucune erreur, on enregistre les données dans la base de données
-{
-	// enregistrement des données dans la BDD
-	if (MembreMgr::insert_membre($membre) === TRUE)
-	{
-		$_SESSION['membre'] = $membre;
-		$_SESSION['pseudo'] = $membre->get_pseudo();
-		header('Location: index.php?module=membres&page=compte');
+	// récupération des champs dans la variable session
+	foreach ($formInscription as $key => $value) {
+		if (isset($_POST[$key])) { $_SESSION[$key] = $_POST[$key]; }
 	}
-	else
+
+	// controle des données du formulaire
+	// Controle des champs envoyés
+	$controlChamps = control_post($formInscription, $_POST); // vérifie que les champs obligatoires ont bien été envoyés
+
+	if ($controlChamps === TRUE) // les champs sont complétés
 	{
-		$erreur = 'sql';
-		header(URL_INSCRIPTION_ERREUR . $erreur); // retour au formulaire d'inscription avec une erreur
+
+		// définition des paramètres par défaut d'un noveau membre
+		$formInscription['pseudo'] = &$_POST['login'];
+		unset($_formInscription['login']);
+		$formInscription['email'] = &$_POST['email'];
+		$formInscription['password'] = &$_POST['password'];
+		$formInscription['type_id'] = 2; 	// compte abonné
+		$formInscription['avatar_id'] = 1; 	// avatar par défaut
+		$formInscription['avatar'] = '';
+
+		// test d'insertion des données du nouveau membre
+		$membre = new Membre($formInscription); // création d'un membre avec hydratation des données de paramètres
+		
+		if (is_object($membre)) // tous les champs sont validés par la classe membre
+		{
+			if (MembreMgr::insert_membre($membre) === TRUE) //on effetue l'insertion dans la BDD
+			{
+				// on récupère toutes les données de la BDD
+				$membre = MembreMgr::login_check(array(
+					'pseudo'	=> $membre->get_pseudo(),
+					'password'	=> $_POST['password']));
+				// on sauvegarde le membre dans la session
+				$_SESSION['membre'] = $membre;
+				$_SESSION['pseudo'] = $membre->get_pseudo();
+				return url_format('membres','','compte'); // on peut se connecter au compte
+			}
+			else // si l'insertion a échoué
+			{
+				$erreurs['error'] = 'sql';
+			}
+		}
+		else // certains champs sont incorects
+		{
+			$erreurs['error'] = &$membre['error'];
+		}
 	}
-	// renvoi vers la page
+	else // il manque des champs (noms des champs contenus dans $controlChamps)
+	{
+		$erreurs['error'] = &$controlChamps;
+	}
+
+
+	// En cas d'erreurs, on renvoi vers la page d'inscription avec les erreurs
+	return url_format('membres','','inscription', $erreurs);
 }

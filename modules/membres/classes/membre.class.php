@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 05
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -41,7 +42,7 @@ class Membre {
 	const EMAIL_MAX_LENGHT 		= 255;
 	const PASSWORD_MIN_LENGHT	= 8; 
 	const PASSWORD_MAX_LENGHT 	= 255;
-	const AVATAR_PAR_DEFAUT 	= APP['url-website'] . '/' . APP['url-dir'] . '/upload/avatars/default.png';
+	const AVATAR_PAR_DEFAUT 	= APP['url-website'] . '/upload/avatars/default.png';
 
 
 
@@ -182,7 +183,7 @@ class Membre {
 			if(preg_match($pattern, $password))
 			{
 				
-				$this->_password = self::hashPassword($password); 
+				$this->_password = get_hash($password); 
 				return TRUE;
 			}
 		}

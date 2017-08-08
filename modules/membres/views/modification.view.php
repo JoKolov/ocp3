@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 07
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre

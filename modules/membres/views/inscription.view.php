@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Vue de l'inscription
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> affiche le formulaire d'inscription
@@ -64,7 +65,7 @@ $ePOST = array('login' => '', 'email' => '');
 function verifPOST($ePOST)
 {
 	foreach ($ePOST as $key => $value) {
-		if(isset($_SESSION[$key])) { $ePOST[$key] = $_SESSION[$key]; }
+		if(isset($_SESSION[$key])) { $ePOST[$key] = &$_SESSION[$key]; }
 	}
 	return $ePOST;
 }
@@ -73,6 +74,7 @@ $ePOST = verifPOST($ePOST);
 
 
 //------------------------------------------------------------
+// HTML
 ?>
 
 

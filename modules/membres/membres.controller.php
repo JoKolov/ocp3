@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Controller
  *
- * File Last Update : 2017 07 27
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> vérifie l'intégrité des fichiers du module
@@ -41,6 +42,7 @@ define ('COMVIEW', array(
 	'error-password'	=> "L'identification a échoué : il manquait le mot de passe...",
 	'error-notfound'	=> "L'identification a échoué : login et/ou mot de passe incorrectes."
 	));
+
 
 
 //------------------------------------------------------------

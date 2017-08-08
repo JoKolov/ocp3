@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Modèle de la déconnexion
  *
- * File Last Update : 2017 07 26
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> détruit la session

@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * THEME : Default
  * FILE/ROLE : Footer
  *
- * File Last Update : 2017 08 07
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> Footer HTML

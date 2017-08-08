@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * CORE : Class
  * FILE/ROLE : MVC
  *
- * File Last Update : 2017 07 25
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> gestion des appels des éléments du MVC

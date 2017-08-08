@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * CORE : 
  * FILE/ROLE : config.php
  *
- * File Last Update : 2017 08 04
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> Défini les constantes de l'application

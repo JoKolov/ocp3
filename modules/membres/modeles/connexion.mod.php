@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Modèle de la connexion
  *
- * File Last Update : 2017 08 02
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire de connexion

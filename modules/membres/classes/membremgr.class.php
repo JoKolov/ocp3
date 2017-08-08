@@ -1,4 +1,5 @@
 <?php
+if (!defined('EXECUTION')) exit;
 /**
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
@@ -6,7 +7,7 @@
  * MODULE : Membres
  * FILE/ROLE : Classe MembreMgr (Membre Manager)
  *
- * File Last Update : 2017 08 05
+ * File Last Update : 2017 08 08
  *
  * File Description :
  * -> gestion des requêtes SQL entre la BDD et la classe Membre
@@ -18,9 +19,9 @@ class MembreMgr {
 	// Attributs
 
 	// contantes
-	const DB_NAME 	= 'ocp3_blog';
-	const T_MEMBRES = 'membres';
-	const T_TYPE 	= 'membres_types';
+	const DB_NAME 	= BDD['name'];
+	const T_MEMBRES = 'ocp3_Membres';
+	const T_MEMBRES_TYPES 	= 'ocp3_Membres_types';
 
 	// mapping de la table
 	private $_map; 	// tableau contenant les colonnes de la table
@@ -77,8 +78,8 @@ class MembreMgr {
 	 */
 	public static function insert_membre(Membre $membre)
 	{
-		$sql = 	'INSERT INTO membres(pseudo, email, password,date_create) 
-				VALUES(:pseudo, :email, :password, NOW())';
+		$sql = 	'INSERT INTO ' . self::T_MEMBRES . '(pseudo, email, password, date_create, type_id, avatar_id) 
+				VALUES(:pseudo, :email, :password, NOW(), 2, 1)';
 		$values = array(
 			':pseudo'	=> $membre->get_pseudo(),
 			':email'	=> $membre->get_email(),
@@ -87,7 +88,7 @@ class MembreMgr {
 
 		try {
 			$req = SQLmgr::getPDO()->prepare($sql);
-			if($req->execute($values))
+			if ($req->execute($values))
 			{
 				return TRUE; // l'insertion est confirmée
 			}
@@ -110,7 +111,7 @@ class MembreMgr {
 	public static function login_check(array $post)
 	{
 
-		$sql = 'SELECT * FROM membres WHERE LOWER(pseudo) = :pseudo AND password = :password';
+		$sql = 'SELECT * FROM ' . self::T_MEMBRES . ' WHERE LOWER(pseudo) = :pseudo AND password = :password';
 		
 		$pseudo = strtolower(htmlspecialchars($post['pseudo']));	// on compare les pseudo en lettres minuscules
 		$password = get_hash(htmlspecialchars($post['password'])); 	// on compare les hash du password
@@ -133,7 +134,7 @@ class MembreMgr {
 		if (isset($donneesMembre['type_id'])) {	$type_id = (int) $donneesMembre['type_id']; }
 		if (isset($type_id) AND $type_id > 0)
 		{
-			$sql = 'SELECT type FROM membres_types WHERE id = ' . $type_id;
+			$sql = 'SELECT type FROM ' . self::T_MEMBRES_TYPES . ' WHERE id = ' . $type_id;
 			$req = SQLmgr::prepare($sql);
 			if($req->execute() !== FALSE)
 			{
@@ -145,7 +146,7 @@ class MembreMgr {
 		// récupération de l'avatar
 		if (isset($donneesMembre['avatar_id']) AND (int) $donneesMembre > 0)
 		{
-			$sql = 'SELECT id, source, avatar FROM images WHERE id = ' . (int) $donneesMembre['avatar_id'];
+			$sql = 'SELECT id, source, avatar FROM ocp3_Images WHERE id = ' . (int) $donneesMembre['avatar_id'];
 			$req = SQLmgr::prepare($sql);
 			if ($req->execute() !== FALSE)
 			{
@@ -169,7 +170,7 @@ class MembreMgr {
 	// Chercher un type d'utilisateur
 	public static function select_all_type()
 	{
-		$sql = SQLmgr::select('membres_types', 'id, type');
+		$sql = SQLmgr::select(self::T_MEMBRES_TYPES, 'id, type');
 		$req = SQLmgr::getPDO()->prepare($sql);
 		$req->execute();
 		$tableDonnees = array();
@@ -185,7 +186,7 @@ class MembreMgr {
 	// Update des données du membre
 	public static function update_membre(Membre $membre)
 	{
-		$sql = 'UPDATE membres 
+		$sql = 'UPDATE ' . self::T_MEMBRES . ' 
 				SET pseudo = :pseudo, 
 					nom = :nom, 
 					prenom = :prenom, 
