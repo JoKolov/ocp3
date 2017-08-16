@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 15
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -204,7 +204,12 @@ class Membre {
 	}
 
 	public function set_date_birth($date) {
-		if(isset($date) and $date <> 0)
+		if ($date == '')
+		{
+			$this->_date_birth = $date;
+			return TRUE;
+		}
+		if (isset($date) AND $date <> 0)
 		{
 			$this->_date_birth = $date;
 			$date = new DateTime($date);

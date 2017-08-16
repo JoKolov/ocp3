@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de l'inscription
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 15
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire d'inscription
@@ -57,9 +57,9 @@ function modele_inscription()
 		$formInscription['avatar'] = '';
 
 		// test d'insertion des données du nouveau membre
-		$membre = new Membre($formInscription); // création d'un membre avec hydratation des données de paramètres
-		
-		if (is_object($membre)) // tous les champs sont validés par la classe membre
+		$membre = new Membre(); // création d'un objet membre
+		$verifDonnees = $membre->setFull($formInscription); /*// tentative d'hydratation de l'objet : en cas d'échec, $membre devient un array contenant les erreurs ou FALSE*/
+		if ($verifDonnees === TRUE) // tous les champs sont validés par la classe membre
 		{
 			if (MembreMgr::insert_membre($membre) === TRUE) //on effetue l'insertion dans la BDD
 			{
@@ -79,7 +79,7 @@ function modele_inscription()
 		}
 		else // certains champs sont incorects
 		{
-			$erreurs['error'] = &$membre['error'];
+			$erreurs['error'] = &$verifDonnees['error'];
 		}
 	}
 	else // il manque des champs (noms des champs contenus dans $controlChamps)

@@ -57,6 +57,7 @@ if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 		$fonctionModele = 'modele_' . $_GET['action'];
 		if(function_exists($fonctionModele))
 		{
+			$var = 'bidule';
 			header('Location: ' . $fonctionModele());
 		}
 	}

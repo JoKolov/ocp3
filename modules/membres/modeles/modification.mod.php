@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de la page compte
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 16
  *
  * File Description :
  * -> contrôle les données du formulaire de modification
@@ -40,11 +40,97 @@ function modele_modification()
 		'password'		=> '',
 		'password-conf'	=> '');
 
-
 	// Controle des champs envoyés
 	$controlChampsOblig = control_post($champsObligatoires, $_POST); // vérifie que les champs obligatoires ont bien été envoyés
 
-	//if (isset($_POST['avatar']) AND $_POST['avatar'] == '') { unset($_POST['avatar']); }
+	// GESTION DE L'AVATAR
+	//$_SESSION['avatar'] = $_FILES['image'];
+	if (isset($_FILES['image']) AND $_FILES['image']['error'] == 0)
+	{
+		$maxSize = 1048576;
+		if ($_FILES['image']['name'] <> '' AND $_FILE['avatar-file']['size'] <= $maxSize)
+		{
+			// contrôle du type de fichier
+			$extensions_valides = array('jpg', 'jpeg', 'gif', 'png');
+			$extension_upload = strtolower(substr(strrchr($_FILES['image']['name'], '.'),1));
+			//1. strrchr renvoie l'extension avec le point (« . »).
+			//2. substr(chaine,1) ignore le premier caractère de chaine.
+			//3. strtolower met l'extension en minuscules.
+			if (in_array($extension_upload,$extensions_valides))
+			{
+				// on copie le fichier dans le répertoire des images
+				$membre = $_SESSION['membre'];
+				$nom = get_hash($membre->get_id()) . '.' . $extension_upload;
+				$imgName = SITE_ROOT . '/upload/images/' . $nom;
+				$deplacement = $resultat = move_uploaded_file($_FILES['image']['tmp_name'],$imgName);
+				if ($deplacement)
+				{
+					// copie du fichier dans le dossier des avatars
+					$avatarName = SITE_ROOT . '/upload/avatars/' . $nom;
+
+					// on créer une erreur si la copie foire
+					if (!copy($imgName, $avatarName))
+					{
+						$erreurs['error-av'] = 'copy';
+					}
+					$imgName = APP['url-website'] . '/upload/images/' . $nom;
+					$avatarName = APP['url-website'] . '/upload/avatars/' . $nom;
+
+					// fichier à intégrer dans la base de données Images
+						// 	-> si l'id de l'avatar est celui par défaut on créer un nouveau fichier
+					if ($membre->get_avatar_id() == 1)
+					{
+						$sql = 'INSERT INTO ocp3_Images 
+								(source, avatar, description) 
+								VALUES (:source, :avatar, :description)';
+						$values = array(
+							':source'		=> $imgName,
+							':avatar'		=> $avatarName,
+							':description'	=> 'avatar de ' . $membre->get_pseudo());
+						$req = SQLmgr::getPDO()->prepare($sql);
+						if (!$req->execute($values))
+						{
+							$erreurs['error-av'] = 'sql-insert';
+						}
+
+
+					}
+					else //-> sinon on remplace le fichier en utilisant le même id
+					{
+						//
+						$_SESSION['avatar'] = 'insert non effectué'; //**************************
+					}
+
+
+						// on met à jour l'objet membre avec les nouvelles données de l'avatar
+						$membre->set_avatar($nom);
+						$sql = 'SELECT id 
+								FROM ocp3_Images 
+								WHERE avatar = :avatar';
+						$req = SQLmgr::getPDO()->prepare($sql);
+						$value = array(':avatar' => $avatarName);
+						if (!$req->execute($value))
+						{
+							$erreurs['error-av'] = 'sql-select';
+						}
+						else
+						{
+							$repSQL = $req->fetch();
+							$id = $repSQL['id'];
+							$membre->set_avatar_id($id);
+							$membre->set_avatar($avatarName);
+							$_SESSION['membre'] = $membre;
+						}
+
+				}
+				else
+				{
+					$erreurs['error-av'] = 'copy';
+				}
+			}
+		}
+	}
+	// FIN GESTION AVATAR
 
 	// Vérification des données envoyées
 	if ($controlChampsOblig === TRUE) // les champs obligatoires sont bien renseignés
@@ -101,6 +187,7 @@ function modele_modification()
 				// on intègre les champs dans la base de données
 				if (MembreMgr::update_membre($membre) === TRUE)
 				{
+					$_SESSION['membre'] = $membre;
 					return url_format('membres','','modification',array('success' => TRUE));
 				}
 				else

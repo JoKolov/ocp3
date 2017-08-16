@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 15
  *
  * File Description :
  * -> charge la session
@@ -52,5 +52,6 @@ get_controller();
 // Appel de la vue appropriée
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation de la session si elle ne l'ai pas déjà
 get_view();
+
 
 ?>

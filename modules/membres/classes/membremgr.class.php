@@ -151,7 +151,7 @@ class MembreMgr {
 			if ($req->execute() !== FALSE)
 			{
 				$donneesTable = $req->fetch();
-				$donneesMembre['avatar'] = $donneesTable['source'];
+				$donneesMembre['avatar'] = $donneesTable['avatar'];
 			}
 		}
 

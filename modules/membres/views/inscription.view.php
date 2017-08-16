@@ -30,7 +30,7 @@ $commentaire_sql = '';
 if (isset($_GET['error']))
 {
 	// erreur login
-	if (preg_match('#login#', $_GET['error']))
+	if (preg_match('#login#', $_GET['error']) OR preg_match('#pseudo#', $_GET['error']))
 	{
 		$commentaire_login = '<div class="alert alert-danger" role="alert"><strong>ERREUR "login" : ' . $commentaire_login . '</strong></div>';
 	}
