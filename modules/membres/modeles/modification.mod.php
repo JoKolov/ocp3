@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de la page compte
  *
- * File Last Update : 2017 08 16
+ * File Last Update : 2017 08 17
  *
  * File Description :
  * -> contrôle les données du formulaire de modification
@@ -43,6 +43,8 @@ function modele_modification()
 	// Controle des champs envoyés
 	$controlChampsOblig = control_post($champsObligatoires, $_POST); // vérifie que les champs obligatoires ont bien été envoyés
 
+//--------------------------------------------------------------------------------
+
 	// GESTION DE L'AVATAR
 	//$_SESSION['avatar'] = $_FILES['image'];
 	if (isset($_FILES['image']) AND $_FILES['image']['error'] == 0)
@@ -73,6 +75,34 @@ function modele_modification()
 					{
 						$erreurs['error-av'] = 'copy';
 					}
+					else
+					{
+						// on redimensionne l'image
+						define('AVATAR_MAX_WIDTH', 200);
+						define('AVATAR_MAX_HEIGHT', 200);
+
+						// on créer la miniature vide
+						$imgRedim = imagecreatetruecolor(AVATAR_MAX_WIDTH, AVATAR_MAX_HEIGHT);
+						$imgSource = imagecreatefromjpeg($avatarName);
+
+						// on récupère les dimensions de l'image source
+						$dimSource = getimagesize($avatarName); // [0] = width - [1] = height
+
+						// les dimensions sont supérieures aux dimensions requises, on réduit l'image
+						if ($dimSource[0] > AVATAR_MAX_WIDTH OR $dimSource[1] > AVATAR_MAX_HEIGHT)
+						{
+						// on créer la miniature
+						imagecopyresampled($imgRedim, $imgSource, 0, 0, 0, 0, AVATAR_MAX_WIDTH, AVATAR_MAX_HEIGHT, $dimSource[0], $dimSource[1]);
+
+						// on enregistre la miniature en écrasant le fichier existant
+						imagejpeg($imgRedim, $avatarName, 100);
+
+						// on détruit les images stockées en ressource PHP
+						imagedestroy($imgRedim);
+						imagedestroy($imgSource);
+						}
+
+					}
 					$imgName = APP['url-website'] . '/upload/images/' . $nom;
 					$avatarName = APP['url-website'] . '/upload/avatars/' . $nom;
 
@@ -97,8 +127,7 @@ function modele_modification()
 					}
 					else //-> sinon on remplace le fichier en utilisant le même id
 					{
-						//
-						$_SESSION['avatar'] = 'insert non effectué'; //**************************
+						//----
 					}
 
 
@@ -131,6 +160,8 @@ function modele_modification()
 		}
 	}
 	// FIN GESTION AVATAR
+
+//--------------------------------------------------------------------------------
 
 	// Vérification des données envoyées
 	if ($controlChampsOblig === TRUE) // les champs obligatoires sont bien renseignés
@@ -192,7 +223,7 @@ function modele_modification()
 				}
 				else
 				{
-					$erreurs['error-sql'] = 'db';
+					$erreurs['error'] = 'sql';
 				}
 			}
 			else // certains champs n'ont pas été validés, les champs validés ont été intégrés dans les attributs de $membre
@@ -205,7 +236,7 @@ function modele_modification()
 	else // les champs obligatoires ne sont pas tous renseignés
 	{
 		// $controlChampsOblig = string contenant les noms des champs non renseignés
-		$erreurs['error-req'] = $controlChampsOblig; // erreurs champs requis
+		$erreurs['error'] = $controlChampsOblig; // erreurs champs requis
 	}
 
 	// on renvoi vers la page du formulaire avec les erreurs

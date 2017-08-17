@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 16
+ * File Last Update : 2017 08 17
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre
@@ -28,6 +28,25 @@ foreach ($formValue as $key => $value) {
 	if($value <> '') { $formValue[$key] = ' value="' . $value . '"'; } // on formate en code HTML
 }
 
+
+//-----
+// ERREURS
+$erreur = array(
+	'avatar'		=> error_format_form("l'image envoyé est non prise en charge"),
+	'pseudo'		=> error_format_form("Pseudo obligatoire : 4 caractères minimum, lettres, chiffres et - _ autorisés"),
+	'nom'			=> error_format_form("Nom invalide"),
+	'prenom'		=> error_format_form("Prénom invalide"),
+	'date_birth'	=> error_format_form("Date de naissance invalide"),
+	'email'			=> error_format_form("Email obligatoire : adresse email valide du type nom@domaine.com"),
+	'password'		=> error_format_form("Mot de passe incorrect"));
+
+foreach ($erreur as $key => $value) {
+	$pattern = '#' . $key . '#';
+	if (!isset($_GET['error']) OR !preg_match($pattern, $_GET['error']))
+	{
+		$erreur[$key] = '';
+	}
+}
 
 //------------------------------------------------------------
 // HTML
