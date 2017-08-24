@@ -124,14 +124,14 @@ function get_view()
 function display_view($view = '')
 {
 	// affichage header
-	require('themes/default/header.php');
+	require_once('themes/default/header.php');
 
 	// affichage nav
-	require('themes/default/nav.php');
+	require_once('themes/default/nav.php');
 
 	// affichage view
-	if ($view <> '') { require($view); }
+	if ($view <> '') { require_once($view); }
 
 	// affichage footer
-	require('themes/default/footer.php');
+	require_once('themes/default/footer.php');
 }

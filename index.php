@@ -41,7 +41,6 @@ if (file_exists($initFile)) { require('core/init.php'); }
 else { echo "Erreur !: echec de l'initialisation <br /> Fichier init.php introuvable <br />"; die; }
 
 
-
 //------------------------------------------------------------
 // Appel du contrôleur approprié
 get_controller();
@@ -52,6 +51,5 @@ get_controller();
 // Appel de la vue appropriée
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation de la session si elle ne l'ai pas déjà
 get_view();
-
 
 ?>

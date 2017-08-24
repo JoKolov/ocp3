@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de la connexion
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 18
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire de connexion
@@ -32,8 +32,8 @@ define('LOG_FORM', array(
 // COMMUNICATION AVEC CONTROLEUR
 function modele_connexion()
 {
-	$statut_model = model_connexion();
-	if (model_connexion() === TRUE)
+	$statut_model = connexion_action();
+	if ($statut_model === TRUE)
 	{
 		// $_SESSION['membre'] = instance Membre hydratée
 		// renvoyer vers mon compte
@@ -55,7 +55,7 @@ function modele_connexion()
  * [model_connexion description]
  * @return [Membre/array] [Renvoi une instance de Membre si tout est OK, sinon renvoi un tableau avec les erreurs]
  */
-function model_connexion()
+function connexion_action()
 {
 
 //------------------------------------------------------------

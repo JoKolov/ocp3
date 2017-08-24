@@ -153,6 +153,8 @@ class MembreMgr {
 				$donneesTable = $req->fetch();
 				$donneesMembre['avatar'] = $donneesTable['avatar'];
 			}
+
+			// nouvelle méthode sans passer par la BDD
 		}
 
 		if ($donneesMembre)

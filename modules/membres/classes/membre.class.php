@@ -262,6 +262,7 @@ class Membre {
 		else
 		{
 			$this->_avatar = self::AVATAR_PAR_DEFAUT;
+			$this->set_avatar_id(1);
 		}
 		return TRUE;
 	}

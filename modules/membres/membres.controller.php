@@ -30,7 +30,6 @@ spl_autoload_register('membres_autoload');
 session_start();
 
 
-
 //------------------------------------------------------------
 // constantes du fichier
 define ('MODULE_MEMBRES', 'membres');	// nom du module
@@ -57,7 +56,6 @@ if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
 		$fonctionModele = 'modele_' . $_GET['action'];
 		if(function_exists($fonctionModele))
 		{
-			$var = 'bidule';
 			header('Location: ' . $fonctionModele());
 		}
 	}
