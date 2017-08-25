@@ -19,7 +19,6 @@ if (!defined('EXECUTION')) exit;
 
 //------------------------------------------------------------
 // chargement des classes du module Membres
-
 function membres_autoload($class) { gene_autoload('modules/membres/classes/', $class); }
 spl_autoload_register('membres_autoload');
 
@@ -42,7 +41,7 @@ define ('COMVIEW', array(
 	'error-notfound'	=> "L'identification a échoué : login et/ou mot de passe incorrectes."
 	));
 
-
+require ('modules/membres/config/constantes.cfg.php');
 
 //------------------------------------------------------------
 // on vérifie que c'est bien ce controlleur qui est appelé

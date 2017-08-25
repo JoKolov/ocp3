@@ -29,96 +29,128 @@ foreach ($formValue as $key => $value) {
 }
 
 
-//-----
-// ERREURS
-$erreur = array(
-	'avatar'		=> error_format_form("l'image envoyé est non prise en charge"),
-	'pseudo'		=> error_format_form("Pseudo obligatoire : 4 caractères minimum, lettres, chiffres et - _ autorisés"),
-	'nom'			=> error_format_form("Nom invalide"),
-	'prenom'		=> error_format_form("Prénom invalide"),
-	'date_birth'	=> error_format_form("Date de naissance invalide"),
-	'email'			=> error_format_form("Email obligatoire : adresse email valide du type nom@domaine.com"),
-	'password'		=> error_format_form("Mot de passe incorrect"));
-
-foreach ($erreur as $key => $value) {
-	$pattern = '#' . $key . '#';
-	if (!isset($_GET['error']) OR !preg_match($pattern, $_GET['error']))
-	{
-		$erreur[$key] = '';
-	}
-}
+//------------------------------------------------------------
+// Génération des valeurs à afficher
+set_view_var();
+$var = $_SESSION['view_var'];
 
 
 //------------------------------------------------------------
 // HTML
 ?>
 <section>
-	<form method="post" action="?module=membres&action=modification" enctype="multipart/form-data">
-		<h3>Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
+	<div class="row">
+		<div class="col-sm-2">
+			<div style="width:100px; height:100px; background-image: url('<?= $membre->get_avatar(); ?>'); background-size: cover; border-radius:5%;" class="">
+			</div>
+		</div>
 
-		<?php
-		if (isset($_GET['success'])) {
-		?>
-			<div class="alert alert-success" role="alert">
-			  <strong>Enregistré !</strong> Le compte a été mis à jour.
-			</div>
-		<?php 
-		}
-		elseif (isset($_GET['error'])) {
-		?>
-			<div class="alert alert-danger" role="alert">
-			  <strong>Erreur !</strong> Vérifiez les champs du formulaire.
-			</div>
-		<?php 
-		}
-		
-		?>
+		<div class="col-sm-10">
+			<h3 class="text-right">Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
 
-		<p>
-			<label>Avatar</label>
-			<div style="width:200px; height:200px; background-image: url('<?= $membre->get_avatar(); ?>'); background-size: cover;">
+			<?php
+			if ($var['success']['1'] <> '') {
+			?>
+				<div class="alert alert-success" role="alert">
+				  <strong><?= $var['success']['1']; ?></strong>
+				</div>
+			<?php 
+			}
+			elseif (isset($var['error'])) {
+				
+				echo $var['error']['error'];
+
+			}	
+			?>
+		</div>
+	</div>	
+	
+
+
+	<form method="post" action="?module=membres&action=modification" enctype="multipart/form-data" class="form-horizontal">
+		<div class="form-group">
+			<label for="image" class="col-sm-2 control-label"><?= $var['label']['avatar']; ?></label>
+			<div class="col-sm-10">
+				<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
+				<input type="file" class="form-control" placeholder="votre image" name="image" id="image">
 			</div>
-			<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
-			<input type="file" class="form-control" placeholder="votre image" name="image" id="image">
-			<?= $erreur['avatar']; ?>
-		</p>
-		<p>
-			<label>Pseudo *</label>
-			<input type="text" class="form-control" placeholder="pseudo" name="pseudo" id="pseudo" <?= $formValue['pseudo']; ?>>
-			<?= $erreur['pseudo']; ?>
-		</p>
-		<p>
-			<label>Nom</label>
-			<input type="text" class="form-control" placeholder="nom" name="nom" id="nom" <?= $formValue['nom']; ?>>
-			<?= $erreur['nom']; ?>
-		</p>
-		<p>
-			<label>Prénom</label>
-			<input type="text" class="form-control" placeholder="prenom" name="prenom" id="prenom" <?= $formValue['prenom']; ?>>
-			<?= $erreur['prenom']; ?>
-		</p>
-		<p>
-			<label>Date de Naissance</label>
-			<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth" <?= $formValue['date_birth']; ?>>
-			<?= $erreur['date_birth']; ?>
-		</p>
-		<p>
-			<label>Email *</label>
-			<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?= $formValue['email']; ?>>
-			<?= $erreur['email']; ?>
-		</p>
-		<p>
-			<label>Nouveau mot de passe</label>
-			<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
-			<?= $erreur['password']; ?>
-		</p>
-		<p>
-			<label>Confirmation du nouveau mot de passe</label>
-			<input type="password" class="form-control" placeholder="mot de passe" name="password-conf" id="password-conf">
-			<?= $erreur['password-conf']; ?>
-		</p>
-		<p>
-			<button type="submit" class="btn btn-default">Modifier</button>
-		</p>
+			<div class="col-sm-12">
+				<?= $var['error']['avatar']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="pseudo" class="col-sm-2 control-label"><?= $var['label']['pseudo']; ?></label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control col-xs-12 col-sm-8" placeholder="pseudo" name="pseudo" id="pseudo" <?= $formValue['pseudo']; ?>>
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['pseudo']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="nom" class="col-sm-2 control-label"><?= $var['label']['nom']; ?></label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" placeholder="nom" name="nom" id="nom" <?= $formValue['nom']; ?>>
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['nom']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="prenom" class="col-sm-2 control-label"><?= $var['label']['prenom']; ?></label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" placeholder="prenom" name="prenom" id="prenom" <?= $formValue['prenom']; ?>>
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['prenom']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="date_birth" class="col-sm-2 control-label"><?= $var['label']['date_birth']; ?></label>
+			<div class="col-sm-10">
+				<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth" <?= $formValue['date_birth']; ?>>
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['date_birth']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="email" class="col-sm-2 control-label"><?= $var['label']['email']; ?></label>
+			<div class="col-sm-10">
+				<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?= $formValue['email']; ?>>
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['email']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="password" class="col-sm-2 control-label"><?= $var['label']['password']; ?></label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['password']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="password-conf" class="col-sm-2 control-label"><?= $var['label']['password-conf']; ?></label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" placeholder="mot de passe" name="password-conf" id="password-conf">
+			</div>
+			<div class="col-sm-12">
+				<?= $var['error']['password-conf']; ?>
+			</div>
+		</div>
+
+		<div class="text-center">
+			<button type="submit" class="btn btn-primary btn-block">Modifier</button>
+		</div>
 	</form>
 </section>

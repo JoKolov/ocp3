@@ -60,14 +60,14 @@ function modele_modification()
 		// si les 2 champs sont remplis et sont identiques, c'est bon, 
 		// sinon on créer une erreur
 		$controlChampsPassword = control_post($champsPassword, $_POST);
-		$erreurs['error-password'] = check_password($controlChampsPassword);
+		$erreurs['error'] = check_password($controlChampsPassword);
 		// on détruit l'erreur si elle est FALSE
-		if (!$erreurs['error-password']) { unset($erreurs['error-password']); } 
+		if (!$erreurs['error']) { unset($erreurs['error']); } 
 
 
 		//=====================
 		// CONTROLE DES AUTRES CHAMPS
-		if (!isset($erreurs['error-password']))
+		if (!isset($erreurs['error']))
 		{
 			// vérification des données des champs obligatoires en prio
 			$verifChamps = $membre->setFull($_POST);
@@ -177,11 +177,11 @@ function check_avatar()
 				}
 			}
 		}
+		$erreur['error'] = 'avatar';
+		return $erreur;
 	}
 
-	$erreur['error'] = 'avatar';
-
-	return $erreur;
+	return TRUE;
 }
 
 
@@ -203,7 +203,7 @@ function check_password($controlChampsPassword)
 			{
 				unset($_POST['password']);
 				unset($_POST['password-conf']);
-				return "diff";
+				return "password";
 			}
 		}
 		elseif ($_POST['password'] == '' AND $_POST['password-conf'] =='')
@@ -215,7 +215,7 @@ function check_password($controlChampsPassword)
 		else
 		{
 			unset($_POST[$controlChampsPassword]);
-			return "less";
+			return "password";
 		}
 	}
 	return FALSE;

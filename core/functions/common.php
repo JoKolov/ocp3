@@ -127,6 +127,63 @@ function errorView(array $comView, array $get)
 
 
 //------------------------------------------------------------
+// Création du tableau des variables pour une vue spécifique
+function set_view_var($module = null, $page = null, $get = null)
+{
+	// setteur
+	if (is_null($module) AND isset($_GET['module']))	{ $module = &$_GET['module']; }
+	if (is_null($page) AND isset($_GET['page']))		{ $page = &$_GET['page']; }
+	if (is_null($get) AND isset($_GET))					{ $get = $_GET; }
+
+	// invlidité de la fonction
+	if (is_null($module) OR is_null($page))
+		{ return FALSE; }
+
+	// on retire de la var $_GET toutes les lignes inutiles
+	foreach (MVC_GET as $value) {
+		if (isset($get[$value])) { unset($get[$value]); }
+	}
+
+	// on travaille avec une constante qui existe !
+	// exemple : MEMBRES_CONNEXION
+	$tableConst = strtoupper($module) . "_" . strtoupper($page);
+	if (defined($tableConst)) 
+	{
+		// on récupère le tableau des constantes
+		$tableConst = constant($tableConst);
+
+		$view = [];
+
+		// on parcours le tableau de constantes 
+		// pour trouver les créer les variables qui nous interessent
+		foreach ($tableConst as $key => $value) {
+			// on extrait le type et la clé de la clé du tableau des constantes
+			// exemple : $tableConst[$key = 'label.pseudo']
+			// on extrait : $type = label et $cle = pseudo
+			list($type, $cle) = explode('.', $key);
+			// Si le type contient _GET, on sait qu'il est dépandant d'une valeur $_GET
+			if (preg_match("#^_GET#", $type))
+			{
+				$type = str_replace('_GET', '', $type);
+				if (!isset($get[$type]) OR !preg_match("#" . $cle . "#", $get[$type]) AND $cle <> $type)
+				{
+					$value = '';
+				}
+			}
+			if ($type == 'error' AND $value <> '')
+			{ $value = error_format_form($value); }
+
+			$view[$type][$cle] = $value;
+		}
+		$_SESSION['view_var'] = $view;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+
+//------------------------------------------------------------
 // DEBUG -> var_dump dans le code
 function debug_var($var)
 {

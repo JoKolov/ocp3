@@ -7,48 +7,60 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de la connexion
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 24
  *
  * File Description :
  * -> affiche le formulaire de connexion
  * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
  */
 
-/**
- * [$error contient les erreurs formatées en code HTML]
- * @var [array]
- */
-$error = errorView(COMVIEW, $_GET);
-
+//------------------------------------------------------------
+// Génération des valeurs à afficher
+set_view_var();
+$var = $_SESSION['view_var'];
 
 
 //------------------------------------------------------------
 // HTML
 ?>
 <section>
-	<form method="post" action="?module=membres&action=connexion">
-		<h3>Connexion</h3>
-		<?php
-			/**
-			 * Affichage des erreurs
-			 */
-			foreach ($error as $key => $value) {
-			 	echo $value;
-			 };
-		?>
-		<p>
-			<input type="text" class="form-control" placeholder="pseudo" name="pseudo" id="pseudo">
-		</p>
-		<p>
-			<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
-		</p>
-		<p>
-			<button type="submit" class="btn btn-default">Valider</button>
-		</p>
-	</form>
-	<div>
-		<p class="text-right">
-			Pas encore de compte ? ..... <a href="index.php?module=membres&page=inscription">Inscris-toi vite !</a>
-		</p>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h3>Connexion</h3>
+			<?php
+				/**
+				 * Affichage des erreurs
+				 */
+				if (isset($var['error']))
+				{
+				 	echo $var['error']['error'];
+				}
+			?>
+		</div>
 	</div>
+
+	<form method="post" action="?module=membres&action=connexion" class="form-horizontal">
+	
+		<div class="form-group">
+			<label for="pseudo" class="col-sm-2 control-label"><?= $var['label']['pseudo']; ?></label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" placeholder="<?= $var['placeholder']['pseudo']; ?>" name="pseudo" id="pseudo">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="password" class="col-sm-2 control-label"><?= $var['label']['password']; ?></label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" placeholder="<?= $var['placeholder']['password']; ?>" name="password" id="password">
+			</div>
+		</div>
+
+		<div class="">
+			<button type="submit" class="btn btn-primary btn-block">Connexion</button>
+			<a href="index.php?module=membres&page=inscription" class="btn btn-default btn-block">Créer un compte <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+		</div>
+			
+	</form>
+
 </section>

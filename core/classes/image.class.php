@@ -338,14 +338,17 @@ class Image {
 			'type'	=>	$this->set_type($file['name'])		// vérification du type
 			);
 
-		foreach ($verif as $key => $value) {
+		
+		
+
+		foreach ($verif as $key => $value)
+		{
 			if (!$value)
 			{
 				// on renvoi FALSE si au moins 1 élément est incorrect
 				return FALSE;
 			}
 		}
-
 
 		// on copie le fichier dans le répertoire des images
 		// et on renvoi FALSE si le fichier ne s'est pas copié

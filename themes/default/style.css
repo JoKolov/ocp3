@@ -111,8 +111,22 @@ nav .row {
 
 /* supprimer le brand de la navbar bootstrap */
 .navbar .container-fluid, .navbar-collapse {
-    padding-left:0;
+    padding-left: 0;
 }
 .navbar-collapse.in {
-    padding-left:30px;
+    padding-left: 30px;
+}
+
+
+
+/**
+ * ----------------------------------------------------------------------
+ * Utilisateur
+ */
+
+.compte-avatar {
+	width: 200px;
+	height: 200px;
+	border-radius: 5%;
+	background-size: cover;
 }

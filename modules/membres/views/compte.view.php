@@ -48,23 +48,24 @@ $formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts d
 	<div>
 		<h1>Tableau de bord</h1>
 
-		<div class="col-xs-12 col-sm-4">
-		<h3>Services</h3>
-		<?php
-			include('modules/membres/views/nav.view.php');
-		?>
+		<div class="col-sm-3">
+			<h3>Services</h3>
+			<?php
+				include('modules/membres/views/nav.view.php');
+			?>
 		</div>
 
-		<div class="col-xs-12 col-sm-8">
+		<div class="col-sm-9">
 			<h3>Profil</h3>
-			<div style="width:200px; height:200px; background-image: url('<?php echo $membre->get_avatar(); ?>'); background-size: cover;">
+			<div class="compte-avatar col-sm-6" style="background-image: url('<?php echo $membre->get_avatar(); ?>');"></div>
+			<div class="col-sm-6">
+				<?php 
+				// affichage des attributs du profil
+				foreach ($formValue as $key => $value) {
+					echo '<p>' . ucfirst($key) . ' : ' . $value . '</p>';
+				}
+				?>
 			</div>
-			<?php 
-			// affichage des attributs du profil
-			foreach ($formValue as $key => $value) {
-				echo '<p>' . ucfirst($key) . ' : ' . $value . '</p>';
-			}
-			?>
 		</div>
 	</div>
 </section>
