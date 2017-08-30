@@ -4,24 +4,26 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * CORE : Class
- * FILE/ROLE : image Manager
+ * MODULE : Billets
+ * FILE/ROLE : Billet Manager
  *
- * File Last Update : 2017 08 29
+ * File Last Update : 2017 08 30
  *
  * File Description :
  * -> gestion des images dans la BDD
  */
 
-class ImageMgr {
+class BilletMgr {
 
 	//------------------------------------------------------------
 	// Attributs
+	private static $_last_billets_id;			// Dernier id dans la table billets
 
 	// contantes
-	const DB_NAME 	= BDD['name'];
-	const TABLE_IMAGES 	= 'ocp3_Images';
-	const LIST_INSERT = '(source, billet, vignette, avatar, description)';
+	const DB_NAME 			= BDD['name'];
+
+	const TABLE_BILLETS 	= 'ocp3_Billets';
+	const LIST_BILLETS_INSERT 		= '(titre, contenu, extrait, auteur_id, date_publie, date_modif, image_id, statut)';
 
 	// mapping de la table
 	private $_map; 	// tableau contenant les colonnes de la table
@@ -33,6 +35,7 @@ class ImageMgr {
 	
 	public function __construct() {
 		$this->set_map();
+		self::set_last_billets_id();
 	}
 
 
@@ -40,13 +43,26 @@ class ImageMgr {
 	//------------------------------------------------------------
 	// Getteurs
 	
-	public function get_map()	{ return $this->_map; }
+	public function get_map()				{ return $this->_map; 						}
+	public function get_last_billets_id()	{ return self::$_last_billets_id; 			}
+	public function get_new_billets_id()	{ return $this->getteur_new_billets_id();	}
+
+
+	//----------
+	// GET NEW_BILLET_ID
+	public function getteur_new_billets_id()
+	{
+		$id = $this->get_last_billets_id() + 1;
+		return $id;
+	}
+
 
 
 	//------------------------------------------------------------
 	// Setteurs
 
-	public function set_map()	{ return $this->setteur_map(); }
+	public function set_map()									{ return $this->setteur_map(); 					}
+	private static function set_last_billets_id($id = null)		{ return self::setteur_last_billets_id($id); 	}
 
 	/**
 	 * set_map récupère les noms des colonnes de la table membres
@@ -55,10 +71,9 @@ class ImageMgr {
 	{
 		$sql = 'SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
 				FROM INFORMATION_SCHEMA.COLUMNS 
-				WHERE TABLE_NAME = "' . self::TABLE_IMAGES . '" AND TABLE_SCHEMA = "' . self::DB_NAME . '" 
+				WHERE TABLE_NAME = "' . self::TABLE_BILLETS . '" AND TABLE_SCHEMA = "' . self::DB_NAME . '" 
 				ORDER BY ORDINAL_POSITION';
 		$req = SQLmgr::prepare($sql);
-		$req->execute();
 		if($req->execute() !== FALSE) {
 			while($mapping = $req->fetch())
 			{
@@ -70,33 +85,80 @@ class ImageMgr {
 	}
 
 
+	/**
+	 * récupère le dernier id de la table billet
+	 */
+	private static function setteur_last_billets_id($id = null)
+	{
+		// on va chercher une valeur d'id
+		if (is_null($id))
+		{
+			$sql = 'SELECT MAX(id) FROM ' . self::TABLE_BILLETS;
+			$req = SQLmgr::prepare($sql);
+			$req->execute();
+			$id = $req->fetch(PDO::FETCH_ASSOC);
+			$id = (int) $id['MAX(id)'];
+		}
+		
+		if (is_int($id) AND $id > 0)
+		{
+			self::$_last_billets_id = $id;
+		}
+		else
+		{
+			self::$_last_billets_id = 0;
+		}
+	}
+
+
 	//------------------------------------------------------------
 	// Méthodes
 
 	//-------------------------
-	// Enregistrer une image
-	public function insert(Image $image)
+	// Enregistrer un billet
+	public function insert(Billet $billet)
 	{
-		$sql = 'INSERT INTO ' . self::TABLE_IMAGES . ' (source, billet, vignette, avatar, description) 
-				VALUES (:source, :billet, :vignette, :avatar, :description)';
-		
+		$sql = 'INSERT INTO ' . self::TABLE_BILLETS . ' (
+					id,
+					titre, 
+					contenu, 
+					extrait, 
+					auteur_id, 
+					date_publie, 
+					image_id, 
+					statut) 
+				VALUES (
+					:id,
+					:titre, 
+					:contenu, 
+					:extrait, 
+					:auteur_id, 
+					NOW(), 
+					:image_id, 
+					:statut) ';
+
 		$values = array(
-			':source'		=> $image->get_source(),
-			':billet'		=> $image->get_billet(),
-			':vignette'		=> $image->get_vignette(),
-			':avatar'		=> $image->get_avatar(),
-			':description'	=> $image->get_description());
+			':id'			=> $this->get_new_billets_id(),
+			':titre'		=> $billet->get_titre(),
+			':contenu'		=> $billet->get_contenu(),
+			':extrait'		=> $billet->get_extrait(),
+			':auteur_id'	=> $billet->get_auteur_id(),
+			':image_id'		=> 0,
+			':statut'		=> $billet->get_statut()
+			);
 
-		$req = SQLmgr::getPDO()->prepare($sql);
+		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute($values);
+		if ($rep) { self::set_last_billets_id(self::get_new_billets_id()); }
 
-		return $req->execute($values);
+		return $rep;
 	}
 
 
 
 	//-------------------------
-	// Modifier une image
-	public function update(Image $image)
+	// Modifier un billet
+	public function update(Billet $billet)
 	{
 		$sql = 'UPDATE ' . self::TABLE_IMAGES . ' 
 				SET source = :source, 
@@ -114,7 +176,7 @@ class ImageMgr {
 			':description'	=> $image->get_description(),
 			':id'			=> $image->get_id());
 
-		$req = SQLmgr::getPDO()->prepare($sql);
+		$req = SQLmgr::prepare($sql);
 
 		return $req->execute($values);
 	}
@@ -122,7 +184,7 @@ class ImageMgr {
 
 
 	//-------------------------
-	// Récupérer une image
+	// Récupérer un billet
 	// $critere = array($key = colonne, $value = valeur recherchée)
 	public function select(array $critere)
 	{
@@ -138,10 +200,10 @@ class ImageMgr {
 		}
 
 		$sql = 'SELECT id, source, billet, vignette, avatar, description 
-				FROM ' . self::TABLE_IMAGES . ' 
+				FROM ' . self::TABLE_BILLETS . ' 
 				WHERE ' . $condition;
 
-		$req = SQLmgr::getPDO()->prepare($sql);
+		$req = SQLmgr::prepare($sql);
 		$rep = $req->execute();
 
 		if ($rep)
@@ -157,8 +219,8 @@ class ImageMgr {
 
 
 	//-------------------------
-	// Supprimer une image
-	// $id = id de l'image à supprimer
+	// Supprimer un billet
+	// $id = id du billet à supprimer
 	public function delete(int $id)
 	{
 		if ($id > 1)
@@ -166,7 +228,7 @@ class ImageMgr {
 			$sql = 'DELETE FROM ' . self::TABLE_IMAGES . '
 					WHERE id =' . $id;
 
-			$req = SQLmgr::getPDO()->prepare($sql);
+			$req = SQLmgr::prepare($sql);
 
 			return $req->execute();
 		}

@@ -5,7 +5,7 @@
  * THEME : Default
  * FILE/ROLE : style.css
  *
- * File Last Update : 2017 08 07
+ * File Last Update : 2017 08 30
  *
  * File Description :
  * -> Surcouche CSS du thème
@@ -15,7 +15,7 @@
  * Imports
  */
 /* >> Logo Jean Forteroche */
-@import url('https://fonts.googleapis.com/css?family=Zeyada');
+@import url('https://fonts.googleapis.com/css?family=Sedgwick+Ave');
 
 
 body {
@@ -86,15 +86,17 @@ header {
 	
 }
 
-header h1 {
-	font-size: 3em;
-}
-
 .logo-text, .navbar-brand {
-	font-family: 'Zeyada', cursive;
-	font-weight: bold;
+	font-family: 'Sedgwick Ave', cursive;
 }
 
+.header-logo-background {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	padding: 0.5em;
+	background-color: rgba(34,34,34,0.6);
+	color: rgb(255,138,0);
+}
 
 
 /**
@@ -118,6 +120,18 @@ nav .row {
 }
 
 
+/**
+ * ----------------------------------------------------------------------
+ * Footer
+ */
+footer {
+	min-height: 1.5em;
+	background-color: rgba(34,34,34,1);
+	color: #fff;
+}
+
+
+
 
 /**
  * ----------------------------------------------------------------------
@@ -130,3 +144,32 @@ nav .row {
 	border-radius: 5%;
 	background-size: cover;
 }
+
+
+
+
+/**
+ * ----------------------------------------------------------------------
+ * Icones bootstrap
+ */
+
+.glyphicon {
+	margin-right: 0.5em;
+}
+
+
+
+
+/**
+ * ----------------------------------------------------------------------
+ * Page édition d'un billet
+ */
+#billet-menu-edit {
+	position: fixed;
+	left: 0;
+	top: 50%;
+	max-width: 20em;
+	background-color: rgba(255,138,0,0.9);
+	padding: 0.5em;
+}
+

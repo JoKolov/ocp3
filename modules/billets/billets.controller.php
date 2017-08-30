@@ -4,7 +4,7 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Membres
+ * MODULE : Billets
  * FILE/ROLE : Controller
  *
  * File Last Update : 2017 08 30
@@ -25,14 +25,13 @@ session_start();
 
 //------------------------------------------------------------
 // constantes du fichier
-define ('MODULE_MEMBRES', 'membres');	// nom du module
-require ('modules/membres/config/constantes.cfg.php');
+require ('modules/billets/config/constantes.cfg.php');
 
 
 
 //------------------------------------------------------------
 // on vérifie que c'est bien ce controlleur qui est appelé
-if(isset($_GET['module']) AND $_GET['module'] == MODULE_MEMBRES)
+if(isset($_GET['module']) AND $_GET['module'] == MODULE_BILLETS)
 {
 
 	if(get_model()) // si on trouve le model

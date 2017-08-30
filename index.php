@@ -53,7 +53,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation 
 get_view();
 
 
-
+debug_var($_SESSION['debug']);
+unset($_SESSION['debug']);
 //------------------------------------------------------------
 // Suppression de la variable d'affichage des données des vues
 unset($_SESSION['view_var']);

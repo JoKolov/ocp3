@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * THEME : Default
  * FILE/ROLE : Header
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 29
  *
  * File Description :
  * -> Header HTML
@@ -53,6 +53,11 @@ else
   <script src="https://use.fontawesome.com/bc9335f8a6.js"></script>
   <!-- ## -->
   <script src="script.js"></script>
+  <!-- TinyMCE -->
+  <script src="https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=9pda1elbtff18o1jlm56gldul3nlvb4kk8wq6zrbyvgei1ml"></script>
+  <script> tinymce.init({ selector: '#contenu' });
+  </script>
+  <!-- ## -->
 </head>
 <body>
 
@@ -89,8 +94,8 @@ else
       </div>
     </div>
     <!-- Logo -->
-    <div class="row">
-      <h1 class="logo-text col-xs-12 col-sm-8">Billet simple pour l'Alaska</h1>
-      <h3 class="logo-text col-xs-12 col-sm-4 text-right">par Jean Forteroche</h3>
+    <div class="row header-logo-background">
+      <h1 class="logo-text col-xs-12 col-sm-7">Billet simple pour l'Alaska</h1>
+      <h4 class="logo-text col-xs-12 col-sm-5 text-right">par Jean Forteroche</h4>
     </div>
   </header>

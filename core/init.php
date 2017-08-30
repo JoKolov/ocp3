@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : 
  * FILE/ROLE : init.php
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 30
  *
  * File Description :
  * -> appel les fichiers nécessaires au fonctionnement de l'application
@@ -40,3 +40,5 @@ foreach (glob("core/functions/*.php") as $filename) {
 function core_autoload($class) { gene_autoload('core/classes/', $class); }
 spl_autoload_register('core_autoload');
 
+// Chargement de toutes les classes de chaque module
+spl_autoload_register('autoload_modules');

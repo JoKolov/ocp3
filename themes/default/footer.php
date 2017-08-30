@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * THEME : Default
  * FILE/ROLE : Footer
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 30
  *
  * File Description :
  * -> Footer HTML
@@ -15,6 +15,11 @@ if (!defined('EXECUTION')) exit;
 ?>
   </div>
 <footer>
+  <div id="page-content" class="container">
+  	<div class="row">
+
+  	</div>
+  </div>
 </footer>
 <!-- Script Area
 ========================================-->

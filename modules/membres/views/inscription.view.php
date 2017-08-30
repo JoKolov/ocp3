@@ -73,7 +73,7 @@ $ePOST = verifPOST($ePOST);
 		</div>
 	
 		<div class="form-group">
-			<label for="pseudo" class="col-sm-2 control-label"><?= $var['label']['pseudo']; ?></label>
+			<label for="email" class="col-sm-2 control-label"><?= $var['label']['email']; ?></label>
 			<div class="col-sm-10">
 				<input type="email" class="form-control" placeholder="<?= $var['placeholder']['email']; ?>" name="email" id="email" value="<?php echo $ePOST['email']; ?>">
 			</div>

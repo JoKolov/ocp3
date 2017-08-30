@@ -25,19 +25,31 @@ if (!defined('EXECUTION')) exit;
 // préparation de la class active en fonction de la page
 $active['compte'] = '';
 $active['modification'] = '';
-$active['deconnexion'] = '';
+$active['billets'] = '';
 
 if(isset($_GET['page']))
 {
 	$active[$_GET['page']] = 'active';
 }
+$membre = $_SESSION['membre'];
 
 
 //------------------------------------------------------------
 // HTML
 ?>
-<ul class="nav nav-pills nav-stacked">
+<ul class="nav nav-pills nav-stacked" id="admin-nav">
   <li role="presentation" class="<?php echo $active['compte']; ?>"><a href="?module=membres&page=compte" role="button" class="btn btn-default">Tableau de bord</a></li>
-  <li role="presentation" class="<?php echo $active['modification']; ?>"><a href="?module=membres&page=modification" role="button" class="btn btn-default">Modifier Profil</a></li>
-  <li role="presentation" class="<?php echo $active['deconnexion']; ?>"><a href="?module=membres&action=deconnexion" role="button" class="btn btn-default">Déconnexion</a></li>
+  <li role="presentation" class="<?php echo $active['modification']; ?>"><a href="?module=membres&page=modification" role="button" class="btn btn-default">Mon Profil</a></li>
+  
+  <!-- RESERVE AUX ADMINS -->
+  <?php
+  	if ($membre->get_type_id() == 1) // type_id = 1 correspond à un admin
+  	{ 
+  ?>
+  		<li role="presentation" class="<?php echo $active['billets']; ?>"><a href="?module=billets&page=admin" role="button" class="btn btn-default">Mes Billets</a></li>
+  <?php
+  	} 
+  ?>
+  <!-- # ADMIN # -->
+  
 </ul>

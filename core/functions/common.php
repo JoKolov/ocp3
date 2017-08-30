@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : fontions
  * FILE/ROLE : Common (fonctions communes)
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 30
  *
  * File Description :
  * -> contient des fonctions basiques communes à l'appli
@@ -16,7 +16,7 @@ if (!defined('EXECUTION')) exit;
 //------------------------------------------------------------
 // Autoload générique
 /**
- * [gene_autoload : charge les classes appelées]
+ * gene_autoload : charge les classes appelées
  * @param  string $dossier : url du dossier contenant les classes
  * @param  		  $class   : nom de la classe appelée
  */
@@ -24,6 +24,27 @@ function gene_autoload(string $dossier, $class)
 {
 	$file = SITE_ROOT . '/' . $dossier . strtolower($class) . '.class.php';
 	if(file_exists($file)) { require($file); }
+}
+
+//------------------------------------------------------------
+// Autoload générique
+/**
+ * autoload_modules : charge les classes appelées appartenant à des modules indépendants
+ * Récupère les noms des dossiers contenus dans le dossier des modules
+ * Peut ainsi charger les classes de modules indépendants
+ */
+function autoload_modules($class)
+{
+	$dir = SITE_ROOT . '/modules';
+	$scan = scandir($dir); // scan du dossier des modules
+
+	foreach ($scan as $key => $dossier)
+	{
+		if (!preg_match("#\.#", $dossier)) // si c'est bien un dossier (et pas un fichier)
+		{
+			gene_autoload('modules/' . $dossier . '/classes/', $class);
+		}
+	}
 }
 
 

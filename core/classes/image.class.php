@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : Class
  * FILE/ROLE : image
  *
- * File Last Update : 2017 08 23
+ * File Last Update : 2017 08 29
  *
  * File Description :
  * -> gestion des images
@@ -39,33 +39,33 @@ class Image {
 	protected $_filename;		// nom du fichier incluant le type
 
 	// constantes
-	const CHEMIN_SOURCE = '/upload/images/';
-	const CHEMIN_BILLET = '/upload/billets/';
-	const CHEMIN_VIGNETTE = '/upload/vignettes/';
-	const CHEMIN_AVATAR = '/upload/avatars/';
-	const DIR_SOURCE = SITE_ROOT . self::CHEMIN_SOURCE;
-	const DIR_BILLET = SITE_ROOT . self::CHEMIN_BILLET;
-	const DIR_VIGNETTE = SITE_ROOT . self::CHEMIN_VIGNETTE;
-	const DIR_AVATAR = SITE_ROOT . self::CHEMIN_AVATAR;
-	const URL_SOURCE = APP['url-website'] . self::CHEMIN_SOURCE;
-	const URL_BILLET = APP['url-website'] . self::CHEMIN_BILLET;
-	const URL_VIGNETTE = APP['url-website'] . self::CHEMIN_VIGNETTE;
-	const URL_AVATAR = APP['url-website'] . self::CHEMIN_AVATAR;
-	const IMG_DEFAUT_AVATAR = APP['url-website'] . '/upload/avatars/default.png';
-	const IMG_DEFAUT_BILLET = '';
-	const IMG_DEFAUT_VIGNETTE = '';
-	const IMG_SIZE_MAX = 1048576;
-	const AVATAR_MAX_WIDTH = 200;
-	const AVATAR_MAX_HEIGHT = 200;
+	const CHEMIN_SOURCE 		= 	'/upload/images/';
+	const CHEMIN_BILLET 		= 	'/upload/billets/';
+	const CHEMIN_VIGNETTE 		= 	'/upload/vignettes/';
+	const CHEMIN_AVATAR 		= 	'/upload/avatars/';
+	const DIR_SOURCE 			= 	SITE_ROOT . self::CHEMIN_SOURCE;
+	const DIR_BILLET 			= 	SITE_ROOT . self::CHEMIN_BILLET;
+	const DIR_VIGNETTE 			= 	SITE_ROOT . self::CHEMIN_VIGNETTE;
+	const DIR_AVATAR 			= 	SITE_ROOT . self::CHEMIN_AVATAR;
+	const URL_SOURCE 			= 	APP['url-website'] . self::CHEMIN_SOURCE;
+	const URL_BILLET 			= 	APP['url-website'] . self::CHEMIN_BILLET;
+	const URL_VIGNETTE 			= 	APP['url-website'] . self::CHEMIN_VIGNETTE;
+	const URL_AVATAR 			= 	APP['url-website'] . self::CHEMIN_AVATAR;
+	const IMG_DEFAUT_AVATAR_ID 	= 	1;
+	const IMG_DEFAUT_AVATAR 	= 	APP['url-website'] . '/upload/avatars/default.png';
+	const IMG_DEFAUT_BILLET 	= 	'';
+	const IMG_DEFAUT_VIGNETTE 	= 	'';
+	const IMG_SIZE_MAX 			= 	1048576;
+	const AVATAR_MAX_WIDTH 		= 	200;
+	const AVATAR_MAX_HEIGHT 	= 	200;
 
 
 
 	//------------------------------------------------------------
-	// Constructeur
+	// Constructeur et méthodes magiques
 	
 	public function __construct(array $donnees = [], $fromSQL = FALSE) {
-		$this->set_fromSQL($fromSQL); // on indique 
-
+		$this->set_fromSQL($fromSQL); // on indique si les données proviennent de la BDD
 	}
 
 
@@ -73,39 +73,39 @@ class Image {
 	//------------------------------------------------------------
 	// Getteurs
 	
-	public function get_fromSQL()			{ return $this->_fromSQL; }
-	public function get_name()				{ return $this->_name; }
-	public function get_filename()		{ return $this->_filename;	}
-	public function get_type()				{ return $this->_type; }
-	public function get_size()				{ return $this->_size; }
-	public function get_img_sizes()		{ return $this->_img_sizes; }
-	public function get_img_width()		{ return $this->_img_sizes['width']; }
-	public function get_img_height()		{ return $this->_img_sizes['height']; }
-	public function get_tmp_name()		{ return $this->_tmp_name; }
-	public function get_id()				{ return $this->_id; }
-	public function get_source()			{ return $this->_source; }
-	public function get_billet()			{ return $this->_billet; }
-	public function get_vignette()		{ return $this->_vignette; }
-	public function get_avatar()			{ return $this->_avatar; }
-	public function get_description()	{ return $this->_description; }
+	protected function get_fromSQL()		{ return $this->_fromSQL; 				}
+	public function get_name()				{ return $this->_name; 					}
+	public function get_filename()			{ return $this->_filename;				}
+	public function get_type()				{ return $this->_type; 					}
+	public function get_size()				{ return $this->_size; 					}
+	public function get_img_sizes()			{ return $this->_img_sizes; 			}
+	public function get_img_width()			{ return $this->_img_sizes['width']; 	}
+	public function get_img_height()		{ return $this->_img_sizes['height']; 	}
+	public function get_tmp_name()			{ return $this->_tmp_name; 				}
+	public function get_id()				{ return $this->_id; 					}
+	public function get_source()			{ return $this->_source; 				}
+	public function get_billet()			{ return $this->_billet; 				}
+	public function get_vignette()			{ return $this->_vignette; 				}
+	public function get_avatar()			{ return $this->_avatar; 				}
+	public function get_description()		{ return $this->_description; 			}
 
 
 
 	//------------------------------------------------------------
 	// Setteurs
 	
-	public function set_fromSQL(bool $fromSQL)	{ return $this->setteur_fromSQL($fromSQL); }
-	public function set_name(string $name) 		{ return $this->setteur_name($name); }
-	public function set_filename(string $name)	{ return $this->setteur_filename(); }
-	public function set_type($name) 					{ return $this->setteur_type($name); }
-	public function set_size(int $size)				{ return $this->setteur_size($size); }
-	public function set_img_sizes()					{ return $this->setteur_img_sizes(); }
-	public function set_source()						{ return $this->setteur_source(); }
-	public function set_billet()						{ return $this->setteur_billet(); }
-	public function set_vignette()					{ return $this->setteur_vignette(); }
-	public function set_avatar()						{ return $this->setteur_avatar(); }
-	public function set_description(string $description)	{ return $this->setteur_description($description); }
-	public function set_id(int $id)					{ return $this->setteur_id($id); }
+	protected function set_fromSQL(bool $fromSQL)				{ return $this->setteur_fromSQL($fromSQL); 			}
+	public function set_name(string $name) 						{ return $this->setteur_name($name); 				}
+	public function set_filename(string $name)					{ return $this->setteur_filename(); 				}
+	public function set_type($name) 							{ return $this->setteur_type($name); 				}
+	public function set_size(int $size)							{ return $this->setteur_size($size); 				}
+	public function set_img_sizes()								{ return $this->setteur_img_sizes(); 				}
+	public function set_source($url = null)						{ return $this->setteur_source($url); 				}
+	public function set_billet($url = null)						{ return $this->setteur_billet($url); 				}
+	public function set_vignette($url = null)					{ return $this->setteur_vignette($url); 			}
+	public function set_avatar($url = null)						{ return $this->setteur_avatar($url); 				}
+	public function set_description(string $description)		{ return $this->setteur_description($description); 	}
+	public function set_id(int $id)								{ return $this->setteur_id($id); 					}
 
 
 	//==============================
@@ -201,7 +201,15 @@ class Image {
 
 	//==============================
 	// SET _source	
-	protected function setteur_source() {
+	protected function setteur_source($url = null) {
+		// si on a une url en provenance de la BDD on la prend
+		if (!is_null($url) OR $this->get_fromSQL())
+		{
+			$this->_source = $url;
+			return TRUE;
+		}
+
+		// creation de l'image source
 		$filename = $this->get_filename();
 		if ($filename <> '' AND !is_null($filename))
 		{
@@ -214,21 +222,28 @@ class Image {
 
 	//==============================
 	// SET _billet
-	protected function setteur_billet() {
+	protected function setteur_billet($url = null) {
 		return FALSE;
 	}
 
 
 	//==============================
 	// SET _vignette
-	protected function setteur_vignette() {
+	protected function setteur_vignette($url = null) {
 		return FALSE;
 	}
 
 
 	//==============================
 	// SET _avatar 
-	protected function setteur_avatar() {
+	protected function setteur_avatar($url = null) {
+		// si on a une url en provenance de la BDD on la prend
+		if (!is_null($url) OR $this->get_fromSQL())
+		{
+			$this->_avatar = $url;
+			return TRUE;
+		}
+
 		// créer une image tampon
 		// redimensionne l'image aux cotes de l'avatar
 		// copie l'image tampon dans le dossier des avatars
@@ -258,7 +273,7 @@ class Image {
 			if (!imagecopyresampled($imgAvatar, $imgSource, 0, 0, 0, 0, self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT, $this->get_img_width(), $this->get_img_height())) { return FALSE; }
 
 			// on enregistre la miniature en écrasant le fichier existant
-			if (!$imageType($imgAvatar, $avatar, 100))	{ return FALSE; }
+			if (!$imageType($imgAvatar, $avatar))	{ return FALSE; }
 
 			// on détruit les images stockées en ressource PHP
 			imagedestroy($imgAvatar);
@@ -310,13 +325,23 @@ class Image {
 				$donnees[$key] = $this->$method($value);
 			}
 		}
-		return $donnees;
+		if ($fromSQL) {$this->set_fromSQL(FALSE); }
+		return $this;
 	}
 
 
 
 	//------------------------------------------------------------
 	// Méthodes
+
+	/**
+	 * LISTE DES METHODES
+	 * ******************
+	 * -> display view 		: NIL
+	 * -> setfrom_FILE		: hydrate l'instance image selon les données reçues par $_FILE
+	 * -> renameFromId		: modifie le nom de l'image sur le serveur et daans l'instance à partir d'un id (int)
+	 * -> hashImgId			: hash un id pour créer un nom d'image unique
+	 */
 
 	//==============================
 	/**
@@ -409,7 +434,40 @@ class Image {
 	}
 
 
-	//------------------------------------------------------------
-	// Méthodes magiques
+	//==============================
+	// supprime l'image du serveur
+	// $image = instance image
+	// $type = type image spécifique à supprimer (ex : source)
+	public function delete(string $type = null)
+	{
+		// on récupère les url de tous les types d'images
+		$filenames = array(
+			'source'	=> $this->get_source(),
+			'billet'	=> $this->get_billet(),
+			'vignette'	=> $this->get_vignette(),
+			'avatar'	=> $this->get_avatar());
 
-}
+		// suppression de tous les fichiers de cette image
+		foreach ($filenames as $key => $value)
+		{
+			if (!is_null($value)) // l'url du fichier ne doit pas être nulle !!
+			{
+				$filename = str_replace(APP['url-website'], SITE_ROOT, $value);
+				// on supprime le fichier seulement si $type est nul ou si $type = la valeur souchaitée
+				if (is_null($type) OR $type == $key)
+				{
+					if (file_exists($filename))
+					{
+						$method = 'set_' . $key;
+						if (unlink($filename) AND method_exists($this, $method))
+						{
+							$this->$method(''); // on change les attributs à NULL
+						}
+					}
+				}
+			}
+		}
+		return $this;
+	}
+
+} // Fin classe Image /// /// /// /// /// /// /// /// /// ///

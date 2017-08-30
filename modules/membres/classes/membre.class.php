@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 15
+ * File Last Update : 2017 08 29
  *
  * File Description :
  * -> gestion des attributs du membre connecté
@@ -34,6 +34,7 @@ class Membre {
 	protected $_type;
 	protected $_avatar_id;				// id de l'avatar
 	protected $_avatar;					// url de l'avatar
+	protected $_admin;					// BOOL qui indique si le membre est un admin
 
 	const PSEUDO_MIN_LENGHT 	= 4;
 	const PSEUDO_MAX_LENGHT 	= 100;
@@ -72,6 +73,7 @@ class Membre {
 	public function get_type() 					{ return $this->_type; 				}
 	public function get_avatar_id() 			{ return $this->_avatar_id; 		}
 	public function get_avatar() 				{ return $this->_avatar; 			}
+	public function is_admin()					{ return $this->_admin;				}
 
 
 
@@ -224,6 +226,7 @@ class Membre {
 		if(isset($id) AND $id > 0)
 		{
 			$this->_type_id = $id;
+			$this->set_admin($id);
 			return TRUE;
 		}
 		return FALSE;
@@ -265,6 +268,24 @@ class Membre {
 			$this->set_avatar_id(1);
 		}
 		return TRUE;
+	}
+
+
+	public function set_admin($type) {
+		if (!is_int($type) OR $type <= 0)
+		{
+			return FALSE;
+		}
+		if ($type == 1)
+		{
+			$this->_admin = TRUE;
+			return TRUE;
+		}
+		else
+		{
+			$this->_admin = FALSE;
+			return TRUE;
+		}
 	}
 
 

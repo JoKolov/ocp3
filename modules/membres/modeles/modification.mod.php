@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de la page compte
  *
- * File Last Update : 2017 08 17
+ * File Last Update : 2017 08 29
  *
  * File Description :
  * -> contrôle les données du formulaire de modification
@@ -141,23 +141,43 @@ function check_avatar()
 			// on créer un avatar
 			if ($image->set_avatar())
 			{
+				// on peut supprimer l'image source
+				$image->delete('source');
+
+				// on créer le manager qui appelera la base donnée de l'image
 				$imageMgr = new ImageMgr;
+
+				// on met à jour la description de l'image
+				$image->set_description('Avatar de ' . $membre->get_pseudo());
 
 				// si le membre possède déjà un avatar personnel,
 				// on ne sauvegarde pas la nouvelle image dans la BDD
 				// car la nouvelle a écrasé l'ancienne sur le serveur
-				if ($membre->get_avatar_id() > 1)
+				$avatar_id = $membre->get_avatar_id();
+				if ($avatar_id > 1)
 				{
-					unset($image);
-					return TRUE;
+					// on récupère les données de l'avatar AVANT UPDATE pour supprimer le fichier du serveur si le nom est différent
+					$imageOld = $imageMgr->select(array('id' => $avatar_id));
+					if ($imageOld->get_avatar() <> $image->get_avatar())
+					{
+						$imageOld->delete();
+					}
+					unset($imageOld);
+
+					// on UPDATE le fichier dans la BDD (en cas de changement de type notamment, ex : jpeg devient png)
+					$image->set_id($avatar_id);
+					if ($imageMgr->update($image))
+					{
+						$membre->set_avatar($image->get_avatar());
+						$_SESSION['membre'] = $membre;
+						return TRUE;
+					}
+					return FALSE;
 				}
 				// Si le membre n'avait pas d'avatar personnalisé
 				// on enregistre l'image dans la BDD
 				else
 				{
-					// on met à jour la description de l'image
-					$image->set_description('Avatar de ' . $membre->get_pseudo());
-
 					// on tente une insertion dans la base de données
 					if ($imageMgr->insert($image))
 					{
@@ -168,8 +188,8 @@ function check_avatar()
 						{
 							// mise à jour de l'objet membre
 							unset($image);
-							$membre->set_avatar_id($reqAvatar['id']);
-							$membre->set_avatar($reqAvatar['avatar']);
+							$membre->set_avatar_id($reqAvatar->get_id());
+							$membre->set_avatar($reqAvatar->get_avatar());
 							$_SESSION['membre'] = $membre;
 							return TRUE;
 						}

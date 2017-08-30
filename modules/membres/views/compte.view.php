@@ -66,6 +66,30 @@ $formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts d
 				}
 				?>
 			</div>
+
+			<!-- RESERVE AUX ADMIN -->
+			<?php 
+				if ($membre->is_admin() === TRUE)
+				{
+			?>
+				<div class="col-xs-12">
+					<h3>Billets</h3>
+					<div class="btn-group" role="group">
+						<a href="?module=billets&page=edition" type="button" class="btn btn-default" aria-label="Nouveau"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Nouveau</a>
+						<a href="?module=billets&page=brouillon" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillon (x)</a>
+						<a href="?module=billets&page=corbeille" type="button" class="btn btn-default" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (x)</a>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<p>Liste des billets</p>
+						</div>
+					</div>
+				</div>
+			<?php 
+				}
+			?>
+			<!-- # ADMIN # -->
+
 		</div>
 	</div>
 </section>
