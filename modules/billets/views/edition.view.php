@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Vue de l'inscription
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> affiche le formulaire d'édition d'un nouveau billet
@@ -27,6 +27,14 @@ $var = $_SESSION['view_var'];
 if (isset($_GET['id']))
 {
 	$var['value']['id'] = $_GET['id'];
+	$billetMgr = new BilletMgr;
+	$billet = $billetMgr->select($_GET['id']);
+	if ($billet)
+	{
+		$_SESSION['billet']['edition']['titre'] 	= $billet->get_titre();
+		$_SESSION['billet']['edition']['contenu'] 	= $billet->get_contenu();
+		$_SESSION['billet']['edition']['extrait'] 	= $billet->get_extrait();
+	}
 }
 else
 {

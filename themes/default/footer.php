@@ -17,7 +17,7 @@ if (!defined('EXECUTION')) exit;
 <footer>
   <div id="page-content" class="container">
   	<div class="row">
-
+		<?= $hello; ?>
   	</div>
   </div>
 </footer>

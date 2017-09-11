@@ -17,6 +17,5 @@ if (!defined('EXECUTION')) exit;
 
 function modele_edition()
 {
-	$_SESSION['varbug'] = $_SESSION['membre'];
-	admin_only();
+	
 }

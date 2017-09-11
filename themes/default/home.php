@@ -5,20 +5,20 @@ if (!defined('EXECUTION')) exit;
  * @author  <joffreynicoloff@gmail.com>
  * 
  * THEME : Default
- * FILE/ROLE : Error404
+ * FILE/ROLE : Home page
  *
  * File Last Update : 2017 09 07
  *
  * File Description :
- * -> contenu de l'erreur 404
+ * -> page d'accueil
  */
 ?>
 <section>
 	<div>
 		<div class="jumbotron">
-		  <h1>Oups !</h1>
-		  <p>on t'as dirigé vers une mauvaise adresse :/</p>
-		  <p><a class="btn btn-primary btn-lg" href="index.php" role="button">Retour à l'accueil</a></p>
+		  <h1>Bienvenue,</h1>
+		  <p>vous êtes sur la page d'accueil. <br />
+		  Elle contiendra bientôt la liste de chapitres disponibles de mon nouveau livre.</p>
 		</div>
 	</div>
 </section>

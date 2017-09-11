@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Classe Membre
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> gestion des attributs des billets
@@ -134,9 +134,14 @@ class Billet {
 	{
 		if (is_string($text) AND $text <> '')
 		{
-			// Champs géré par tinyMCE lors de l'édition
-			// tinyMCE protège contre l'injection de script
-			$this->_contenu = htmlspecialchars($text);
+			// Champs géré par tinyMCE
+			// protection contre les scripts
+			$forbidden_tags = array('<script>', '</script>', '<?php', '<?=', '?>');
+			foreach ($forbidden_tags as $value) {
+				$text = str_replace($value, htmlspecialchars($value), $text);
+			}
+
+			$this->_contenu = $text;
 			return TRUE;
 		}
 
@@ -255,7 +260,18 @@ class Billet {
 	 */
 
 	public function setFull(array $donnees) {
-
+		foreach ($donnees as $key => $value)
+		{
+			$method = 'set_' . $key;
+			if (method_exists($this, $method))
+			{
+				if (!$this->$method($value))
+				{
+					$donnees[$key] = FALSE;
+				}
+			}
+		}
+		return $donnees;
 	}
 
 

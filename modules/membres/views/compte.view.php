@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de la page compte membre
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> affiche le tableau de bord du compte utilisateur
@@ -15,20 +15,6 @@ if (!defined('EXECUTION')) exit;
  * -> outils et services disponibles
  */
 
-//------------------------------------------------------------
-// HTML
-/** Champs du compte membre à afficher
- * PSEUDO 												20%
- * NOM 													20%
- * PRENOM 												20%
- * EMAIL
- * PASSWORD
- * DATE_BIRTH 											20%
- * TYPE_ID (type de compte : ex : administrateur)
- * AVATAR_ID (afficher l'avatar et son url) 			20%
- */
-
-//------------------------------------------------------------
 // Protocoles de sécurités
 user_connected_only();
 
@@ -39,6 +25,20 @@ user_connected_only();
 $membre = $_SESSION['membre']; // on récupère l'objet membre contenu dans la variable $_SESSION
 $formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts de l'objet dans un tableau
 
+//-----
+// CODE A DEPLACER
+$billetMgr = new BilletMgr;
+$billets = $billetMgr->select_multi();
+$billets_vue = '';
+foreach ($billets as $value) {
+	$billets_vue .= '<p><a href="?module=billets&page=billet&id=' . $value->get_id() . '">' . $value->get_titre() . '</a> [ ' . '<a href="?module=billets&page=edition&id=' . $value->get_id() . '">' . 'éditer' . '</a> ][ ' . $value->get_statut() . ' ]</p>';
+}
+if ($billets_vue == '') { $billets_vue = '<p>Aucun billet</p>'; }
+$nb_brouillons = $billetMgr->count('', "statut = '" . Billet::STATUT['sauvegarder'] . "'");
+$nb_publies = $billetMgr->count('', "statut = '" . Billet::STATUT['publier'] . "'");
+$nb_supprimes = $billetMgr->count('', "statut = '" . Billet::STATUT['supprimer'] . "'");
+
+//-----
 
 
 //------------------------------------------------------------
@@ -76,12 +76,13 @@ $formValue = $membre->getPublicAttributs(); // on récupère tous les attibuts d
 					<h3>Billets</h3>
 					<div class="btn-group" role="group">
 						<a href="?module=billets&page=edition" type="button" class="btn btn-default" aria-label="Nouveau"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Nouveau</a>
-						<a href="?module=billets&page=brouillon" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillon (x)</a>
-						<a href="?module=billets&page=corbeille" type="button" class="btn btn-default" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (x)</a>
+						<a href="?module=billets&page=brouillons" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillon (<?= $nb_brouillons; ?>)</a>
+						<a href="?module=billets&page=publications" type="button" class="btn btn-default" aria-label="Publie"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Publié (<?= $nb_publies; ?>)</a>
+						<a href="?module=billets&page=corbeille" type="button" class="btn btn-default" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (<?= $nb_supprimes; ?>)</a>
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<p>Liste des billets</p>
+							<?= $billets_vue; ?>
 						</div>
 					</div>
 				</div>

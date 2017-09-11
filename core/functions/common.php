@@ -36,13 +36,13 @@ function gene_autoload(string $dossier, $class)
 function autoload_modules($class)
 {
 	$dir = SITE_ROOT . '/modules';
-	$scan = scandir($dir); // scan du dossier des modules
+	$modules = scandir($dir); // scan du dossier des modules
 
-	foreach ($scan as $key => $dossier)
+	foreach ($modules as $module)
 	{
-		if (!preg_match("#\.#", $dossier)) // si c'est bien un dossier (et pas un fichier)
+		if (!preg_match("#\.#", $module)) // si c'est bien un dossier (et pas un fichier)
 		{
-			gene_autoload('modules/' . $dossier . '/classes/', $class);
+			gene_autoload('modules/' . $module . '/classes/', $class);
 		}
 	}
 }
