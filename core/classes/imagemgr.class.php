@@ -127,6 +127,10 @@ class ImageMgr {
 	public function select(array $critere)
 	{
 		foreach ($critere as $key => $value) {
+			if (is_string($value))
+			{
+				$value = '"' . $value . '"';
+			}
 			if (!isset($condition))
 			{
 				$condition = $key . ' = ' . $value;
@@ -143,7 +147,7 @@ class ImageMgr {
 
 		$req = SQLmgr::getPDO()->prepare($sql);
 		$rep = $req->execute();
-
+		
 		if ($rep)
 		{
 			// on renvoi un tableau avec toutes les données de l'image en question

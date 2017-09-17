@@ -7,87 +7,164 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de l'inscription
  *
- * File Last Update : 2017 08 15
+ * File Last Update : 2017 09 13
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire d'inscription
- * -> *************
- * -> VERIFIER QUE LE MEMBRE N'EXISTE PAS !!!!!
- * -> *************
  * -> insère les données dans la base de données si elles sont OK
  * -> sinon, renvoi vers le formulaire d'inscription avec les erreurs
- *
- *
- * Utilisation des classes suivantes :
- * Membre
- * MembreMgr
  */
 
+Class InscriptionController {
 
-//------------------------------------------------------------
-// COMMUNICATION AVEC CONTROLEUR
-// renvoi une url
-function modele_inscription()
-{
-	$formInscription = array(
-	'login'		=>	'',
-	'email'		=> 	'',
-	'password'	=> 	''
-	);
+	//============================================================
+	// Attributs
+	// -- NIL --
 
-	// récupération des champs dans la variable session
-	foreach ($formInscription as $key => $value) {
-		if (isset($_POST[$key])) { $_SESSION[$key] = $_POST[$key]; }
-	}
 
-	// controle des données du formulaire
-	// Controle des champs envoyés
-	$controlChamps = control_post($formInscription, $_POST); // vérifie que les champs obligatoires ont bien été envoyés
+	//============================================================
+	// Constructeur et méthodes magiques
+	// -- NIL --
+	
 
-	if ($controlChamps === TRUE) // les champs sont complétés
+	//============================================================
+	// Getteurs
+	private function getErrorsTable()
 	{
-
-		// définition des paramètres par défaut d'un noveau membre
-		$formInscription['pseudo'] = $_POST['login'];
-		unset($_formInscription['login']);
-		$formInscription['email'] = $_POST['email'];
-		$formInscription['password'] = $_POST['password'];
-		$formInscription['type_id'] = 2; 	// compte abonné
-		$formInscription['avatar_id'] = 1; 	// avatar par défaut
-		$formInscription['avatar'] = '';
-
-		// test d'insertion des données du nouveau membre
-		$membre = new Membre(); // création d'un objet membre
-		$verifDonnees = $membre->setFull($formInscription); /*// tentative d'hydratation de l'objet : en cas d'échec, $membre devient un array contenant les erreurs ou FALSE*/
-		if ($verifDonnees === TRUE) // tous les champs sont validés par la classe membre
-		{
-			if (MembreMgr::insert_membre($membre) === TRUE) //on effetue l'insertion dans la BDD
-			{
-				// on récupère toutes les données de la BDD
-				$membre = MembreMgr::login_check(array(
-					'pseudo'	=> $membre->get_pseudo(),
-					'password'	=> $_POST['password']));
-				// on sauvegarde le membre dans la session
-				$_SESSION['membre'] = $membre;
-				$_SESSION['pseudo'] = $membre->get_pseudo();
-				return url_format('membres','','compte'); // on peut se connecter au compte
-			}
-			else // si l'insertion a échoué
-			{
-				$erreurs['error'] = 'sql';
-			}
-		}
-		else // certains champs sont incorects
-		{
-			$erreurs['error'] = &$verifDonnees['error'];
-		}
+		return [
+			'error'			=> 	"Echec inscription !",
+			'pseudo'		=>	"Pseudo non valide : au moins 4 caractères alphanumeriques sans espace (- et _ tolérés)",
+			'email' 		=>	"Adresse email non valide :(",
+			'password'		=>	"Password non valide : au moins 8 caractères dont au moins 1 chiffre ;)",
+			'sql'			=>	"Pseudo ou email déjà enregistré :("
+		];
 	}
-	else // il manque des champs (noms des champs contenus dans $controlChamps)
+
+
+	//============================================================
+	// Setteurs
+	// -- NIL --
+
+
+	//============================================================
+	// Methodes
+
+	//------------------------------------------------------------
+	public function actionView($request)
 	{
-		$erreurs['error'] = &$controlChamps;
+		return [
+			'file'		=> $request->getViewFilename(),
+			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		];
 	}
 
 
-	// En cas d'erreurs, on renvoi vers la page d'inscription avec les erreurs
-	return url_format('membres','','inscription', $erreurs);
-}
+	//------------------------------------------------------------
+	public function actionSubmit($request)
+	{
+		// récupération des données
+		$post = $request->getPost(['pseudo', 'email', 'password']);
+		
+		// vérification des données du formulaire grâce au modele
+		$inscription = $this->inscriptionUsingModel($post);
+
+		// l'inscription a échoué, des erreurs sont remontées
+		if (array_key_exists('error', $inscription))
+		{
+			$url = url_format('membres', '', 'inscription', $inscription);
+			
+			// on créer les messages d'erreurs
+			$errorsFound = explode('-', $inscription['error']); // tableau contenant les erreurs séparées par un -
+			$viewErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
+
+			// digression
+			// A ce stade on pourrait même renvoyer les données qui sont bonnes pour les remettre dans les champs du formulaire
+			/*foreach ($post as $fieldName => $fieldValue)
+			{
+				if (!in_array($fieldName, $errorsFound))
+				{
+					$correctFields[$fieldName] = $fieldValue;
+				}
+			}*/
+			// fin digression ---
+
+			return [
+				'url'		=> $url, 
+				'errors' 	=> $viewErrors,
+			];
+		}
+
+		// L'inscription est validée
+		$membre = $inscription['membre'];
+		$request->setSessionVar(array(
+			'pseudo' 	=> $membre->get_pseudo(),
+			'membre'	=> $membre
+			)
+		);
+		
+		$url = url_format('membres','','compte');
+		
+		return [
+			'url'		=> $url,
+			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		];
+	}
+
+
+	//------------------------------------------------------------
+	private function inscriptionUsingModel($post)
+	{
+		///  1  ///
+		// Tous les champs obligatoires sont-ils renseignés ?
+		$missingFields = formMissingRequiredFields([
+			'pseudo'	=>	TRUE,
+			'email'		=> 	TRUE,
+			'password'	=> 	TRUE
+		], $post);
+
+		// Il manque un ou des champs obligatoires
+		if (!is_null($missingFields))
+		{
+			return ['error' => $missingFields];
+		}
+
+
+		///  2  ///
+		// Les données renseignées sont-elles acceptables ?
+		$membre = new Membre;
+		$membre = $membre->checkInscription([
+			'pseudo'	=> $post['pseudo'],
+			'email'		=> $post['email'],
+			'password'	=> $post['password']
+		]);
+
+		// Des données onr été refusées
+		if (!is_object($membre))
+		{
+			return ['error' => $membre];
+		}
+
+
+		///  3  ///
+		// Est-ce que le pseudo ou l'email n'existent pas déjà dans la BDD ?
+		$enregistrementMembre = MembreMgr::insert_membre($membre);
+
+		// Le membre existe déjà
+		if (!$enregistrementMembre)
+		{
+			return ['error' => 'sql'];
+		}
+
+
+		///  4  ///
+		// On récupère une instance de membre
+		$membre = MembreMgr::login_check([
+			'pseudo'	=> $membre->get_pseudo(),
+			'password'	=> $post['password']
+		]);
+
+		return ['membre' => $membre];	
+	}
+
+
+} // end of class InscriptionController

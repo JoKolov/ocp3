@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 09 11
+ * File Last Update : 2017 09 17
  *
  * File Description :
  * -> charge la session
@@ -19,7 +19,7 @@
 //------------------------------------------------------------
 // Initialisation des constantes
 define('EXECUTION', TRUE); // limiter les accès aux fichiers à l'appli
-define('SITE_ROOT', __DIR__);
+define('SITE_ROOT', __DIR__ . '/');
 
 
 //------------------------------------------------------------
@@ -37,8 +37,9 @@ $request = new Request($_SESSION, $_GET, $_POST, $_FILES);
 
 //------------------------------------------------------------
 // Initialisation du processus MVC
-$view = $request->runController();
-$viewReponse = $request->displayView($view);
+$response = $request->runController();
+$viewResponse = $request->displayViewOrRedirect($response);
+$request->cleanSessionVar(array('flash', 'view_var'));
 
 
 //------------------------------------------------------------

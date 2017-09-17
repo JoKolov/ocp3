@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Classe MembreMgr (Membre Manager)
  *
- * File Last Update : 2017 08 08
+ * File Last Update : 2017 09 15
  *
  * File Description :
  * -> gestion des requêtes SQL entre la BDD et la classe Membre
@@ -23,9 +23,12 @@ class MembreMgr {
 	const T_MEMBRES = 'ocp3_Membres';
 	const T_MEMBRES_TYPES 	= 'ocp3_Membres_types';
 
+	const TABLE_MEMBRES = 'ocp3_Membres';
+
 	// mapping de la table
 	private $_map; 	// tableau contenant les colonnes de la table
 					// $key = titre colonne // $value = type donnée,*max lenght* (si existe)
+	private $_lastId;	// dernier id de la table Membres
 
 
 	//------------------------------------------------------------
@@ -33,13 +36,15 @@ class MembreMgr {
 	
 	public function __construct() {
 		$this->set_map();
+		$this->setLastId();
 	}
 
 
 
 	//------------------------------------------------------------
 	// Getteurs
-	public function get_map()	{ return $this->_map; }
+	public function getMap()	{ return $this->_map; }
+	public function getLastId()	{ return $this->_lastId; }
 
 
 	//------------------------------------------------------------
@@ -67,6 +72,34 @@ class MembreMgr {
 	}
 
 
+	/**
+	 * récupère le dernier id de la table
+	 */
+	private static function setLastId(int $id = null)
+	{
+
+		// on va chercher une valeur d'id
+		if (is_null($id))
+		{
+			$sql = 'SELECT MAX(id) FROM ' . self::TABLE_MEMBRES;
+			$req = SQLmgr::prepare($sql);
+			$req->execute();
+			$id = $req->fetch(PDO::FETCH_ASSOC);
+			$id = (int) $id['MAX(id)'];
+		}
+		
+		// on enregistre la valeur de l'id
+		if (is_int($id) AND $id > 0)
+		{
+			self::$_lastId = $id;
+		}
+		else
+		{
+			self::$_lastId = 0;
+		}
+	}
+
+
 	//------------------------------------------------------------
 	// Méthodes
 
@@ -79,11 +112,13 @@ class MembreMgr {
 	public static function insert_membre(Membre $membre)
 	{
 		$sql = 	'INSERT INTO ' . self::T_MEMBRES . '(pseudo, email, password, date_create, type_id, avatar_id) 
-				VALUES(:pseudo, :email, :password, NOW(), 2, 1)';
+				VALUES(:pseudo, :email, :password, NOW(), :type_id, :avatar_id)';
 		$values = array(
 			':pseudo'	=> $membre->get_pseudo(),
 			':email'	=> $membre->get_email(),
-			':password'	=> $membre->get_password()
+			':password'	=> $membre->get_password(),
+			':type_id'	=> $membre->get_type_id(),
+			':avatar_id' => $membre->get_avatar_id()
 			);
 
 		try {
@@ -187,6 +222,40 @@ class MembreMgr {
 	//-------------------------
 	// Update des données du membre
 	public static function update_membre(Membre $membre)
+	{
+		$sql = 'UPDATE ' . self::T_MEMBRES . ' 
+				SET pseudo = :pseudo, 
+					nom = :nom, 
+					prenom = :prenom, 
+					email = :email, 
+					password = :password, 
+					date_birth = :date_birth, 
+					avatar_id = :avatar_id 
+				WHERE id = :id';
+		
+		$req = SQLmgr::prepare($sql);
+		
+		$donnees = array(	':pseudo'		=>	$membre->get_pseudo(),
+							':nom'			=>	$membre->get_nom(),
+							':prenom'		=>	$membre->get_prenom(),
+							':email'		=>	$membre->get_email(),
+							':password'		=>	$membre->get_password(),
+							':date_birth'	=>	$membre->get_date_birth(),
+							':avatar_id'	=>	$membre->get_avatar_id(),
+							':id'			=>	$membre->get_id());
+		
+		if ($req->execute($donnees) !== FALSE)
+		{
+			return TRUE; // la requête a bien été effectuée
+		}
+
+		return FALSE; // la requête n'a pas fonctionnee
+	}
+
+
+	//-------------------------
+	// Update des données du membre
+	public function select(int $id)
 	{
 		$sql = 'UPDATE ' . self::T_MEMBRES . ' 
 				SET pseudo = :pseudo, 

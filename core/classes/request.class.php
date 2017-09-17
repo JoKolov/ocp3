@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : Class
  * FILE/ROLE : Request
  *
- * File Last Update : 2017 09 11
+ * File Last Update : 2017 09 13
  *
  * File Description :
  * -> gestion des appels des éléments du MVC
@@ -35,18 +35,19 @@ class Request {
 	
 
 	// constantes
-	const DIR_MODULES 			= SITE_ROOT . '/modules/';
+	const DIR_MODULES 			= SITE_ROOT . 'modules/';
 	const DIR_CONTROLLERS 		= 'controllers/';				// dossier des controlleurs d'un module
-	const DIR_VIEWS 			= 'views/';					// dossier des vues d'un module
-	const DIR_CONFIG			= 'config/';				// dossier des constantes d'un module
+	const DIR_VIEWS 			= 'views/';						// dossier des vues d'un module
+	const DIR_CONFIG			= 'config/';					// dossier des constantes d'un module
 	const FILE_EXT_CONTROLLER 	= '.controller.php';
 	const FILE_EXT_VIEW 		= '.view.php';
 	const FILE_EXT_CONFIG 		= '.cfg.php';
 	const GET_MODULE 			= 'module';
-	const GET_CONTROLLER 		= 'action';
+	const GET_CONTROLLER 		= 'page';
 	const GET_VIEW 				= 'page';
+	const GET_ACTION 			= 'action';
 	const GET_ERROR 			= 'error';
-	const VIEW_404 				= SITE_ROOT . '/modules/erreurs/views/404.view.php';
+	const VIEW_404 				= SITE_ROOT . 'modules/erreurs/views/404.view.php';
 
 
 
@@ -83,12 +84,12 @@ class Request {
 	//------------------------------------------------------------
 	// Getteurs
 	
-	protected function Session()			{ return $this->_session; }
-	protected function Get()				{ return $this->_get; }
-	protected function Post()				{ return $this->_post; }
-	protected function Files()				{ return $this->_files; }
-	protected function Cookie()				{ return $this->_cookie; }
-	protected function Server()				{ return $this->_server; }
+	public function session()			{ return $this->_session; }
+	public function get()				{ return $this->_get; }
+	public function post()				{ return $this->_post; }
+	public function files()				{ return $this->_files; }
+	public function cookie()			{ return $this->_cookie; }
+	public function server()			{ return $this->_server; }
 
 	/**
 	 * Liste des autres getteurs incluant un script :
@@ -140,12 +141,12 @@ class Request {
 	{
 		if (!isset($this->_get[self::GET_MODULE]))
 		{
-			return 'accueil';
+			return 'defaut';
 		}
 
 		if (!in_array($this->_get[self::GET_MODULE], $this->getModuleList()))
 		{
-			return 'erreurs';
+			return 'defaut';
 		}
 
 		return $this->_get[self::GET_MODULE];
@@ -171,7 +172,7 @@ class Request {
 	 */
 	protected function getControllerList()
 	{
-		if (!isset($this->Get()[self::GET_CONTROLLER]))
+		if (!isset($this->get()[self::GET_CONTROLLER]) OR $this->getModuleName() == 'defaut')
 		{
 			return array('');
 		}
@@ -193,19 +194,19 @@ class Request {
 	protected function getControllerName()
 	{
 		// aucun controleur appelé
-		if (!isset($this->Get()[self::GET_CONTROLLER]) OR $this->Get()[self::GET_CONTROLLER] == '')
+		if (!isset($this->get()[self::GET_CONTROLLER]) OR $this->get()[self::GET_CONTROLLER] == '')
 		{
-			return;
+			return 'home';
 		}
 
 		// le controleur n'existe pas
-		if (!in_array($this->Get()[self::GET_CONTROLLER], $this->getControllerList()))
+		if (!in_array($this->get()[self::GET_CONTROLLER], $this->getControllerList()))
 		{
-			return;
+			return '404';
 		}
 
 		// le controleur existe
-		return $this->Get()[self::GET_CONTROLLER];
+		return $this->get()[self::GET_CONTROLLER];
 	}
 
 
@@ -237,7 +238,7 @@ class Request {
 	 */
 	protected function getViewList()
 	{
-		if (!isset($this->Get()[self::GET_VIEW]))
+		if (!isset($this->Get()[self::GET_VIEW]) OR $this->getModuleName() == 'defaut')
 		{
 			return array('');
 		}
@@ -260,7 +261,7 @@ class Request {
 		// aucune vue appelée
 		if (!isset($this->Get()[self::GET_VIEW]) OR $this->Get()[self::GET_VIEW] == '')
 		{
-			return 'accueil';
+			return 'home';
 		}
 
 		// la vue n'existe pas
@@ -281,9 +282,44 @@ class Request {
 	 * @return string : chemin du fichier de la vue active
 	 * 
 	 */	
-	protected function getViewFilename()
+	public function getViewFilename()
 	{
 		return $this->getModuleDir() . self::DIR_VIEWS . $this->getViewName() . self::FILE_EXT_VIEW;
+	}
+
+
+	// ====================
+	/**
+	 * getActionName récupère le type d'action demandée pour la réponse
+	 * 
+	 * @return string : nom de l'action
+	 * 
+	 */	
+	public function getActionName()
+	{
+		$actionsValides = ['submit'];
+
+		// Aucune action n'est appelée => on affiche la vue sans action spécifique
+		if (!isset($this->get()[self::GET_ACTION]) OR !in_array($this->get()[self::GET_ACTION], $actionsValides))
+			{
+				return 'view';
+			}
+
+		// L'action n'existe pas
+		return $this->get()[self::GET_ACTION];
+	}
+
+
+	// ====================
+	/**
+	 * getMembre récupère l'instance membre de l'ustilisateur connecté
+	 * 
+	 * @return string : nom de l'action
+	 * 
+	 */	
+	public function getMembre()
+	{
+		return $this->session()['membre'];
 	}
 
 
@@ -313,9 +349,9 @@ class Request {
 	 */
 	public function setSession(array $session = null)
 	{
-		if (!is_null($post))
+		if (!is_null($session))
 		{
-			$this->_post = $post;
+			$this->_session = $session;
 		}
 	}
 
@@ -405,6 +441,8 @@ class Request {
 	 * runController 		: @return mixed : url ou chemin d'un fichier de vue
 	 * displayView 			: affiche le code HTML de la page demandée ou effectue une redirection
 	 * reqModuleconfig		: récupère les fichiers de configuration du module actif
+	 *
+	 * getPost				: @return array : les éléments POST demandés
 	 * 
 	 */
 
@@ -417,32 +455,42 @@ class Request {
 	{
 
 		$module = $this->getModuleName();
-		$controller = $this->getControllerName();
+		$controllerName = $this->getControllerName();
 
-		// chargement des constantes du module
-		$this->reqModuleConfig();
+		$this->chargementConstantesModule();
 
-		// Renvoi vers la page d'accueil
-		if ($module == 'accueil')
+		// Page d'accueil ou erreur 404
+		if ($module == 'defaut')
 		{
-			return '';
+			return [
+				'file'	=> SITE_ROOT . "themes/default/{$controllerName}.php"
+			];
 		}
 
-		if (is_null($controller))
-		{
-			$viewFilename = $this->getViewFilename();
 
-			if (file_exists($viewFilename))
-			{
-				return $viewFilename;
-			}
-			
-			return self::VIEW_404;
-		}
-		
+		// tous les autres cas
 		require_once ($this->getControllerFilename());
-		$fonctionModele = 'modele_' . $controller;
-		return $fonctionModele();
+		$objectName = ucfirst($controllerName . 'Controller');
+		$controller = new $objectName;
+
+		$actionMethod = 'action' . ucfirst($this->getActionName());
+
+		// Aucune méthode n'existe, on lance un affichage brut de la page
+		if (!method_exists($controller, $actionMethod))
+		{
+			return [
+				'file'	=> $this->getViewFilename()
+			];
+		}
+
+		$view = $controller->$actionMethod($this);
+
+		if (isset($this->session()['flash']))
+		{
+			$view['errors'] = $this->session()['flash'];
+		}
+
+		return $view;
 	}
 
 
@@ -450,41 +498,41 @@ class Request {
 	/**
 	 * displayView affiche le code HTML de la page demandée ou effectue une redirection
 	 */
-	public function displayView($view = null)
+	public function displayViewOrRedirect($view = null)
 	{
-
-		// si $view = null => on affiche aucun module
-		if (is_null($view))
+		if (!array_key_exists('url', $view) AND !array_key_exists('file', $view))
 		{
-			return;
+			throw new Exception("Une erreur improbable est survenue :(", 1);
 		}
 
-		// si $view = fichier => require
-		if (!is_file($view) AND $view <> '')
+		if (isset($view['url']))
 		{
-			header('Location: ' . $view);
+			$this->setSessionVar(array('flash' => $view['errors']));
+			header('Location: ' . $view['url']); die;
 		}
 
-		require_once(SITE_ROOT . '/themes/default/header.php');
+		require_once(SITE_ROOT . 'themes/default/header.php');
 
 		// affichage nav
-		require_once(SITE_ROOT . '/themes/default/nav.php');
+		require_once(SITE_ROOT . 'themes/default/nav.php');
 
 		// affichage view
-		if ($view <> '') { require_once($view); }
+		$var['error'] = errorFormatHTML($view['errors']);
+		$var['value'] = $view['values'];
+		if ($view['file'] <> '') { require_once($view['file']); }
 
 		// affichage footer
 		$hello = '<div class="text-center"><p><h5>FOOTER<br />----------</h5></div>';
-		require_once(SITE_ROOT . '/themes/default/footer.php');
+		require_once(SITE_ROOT . 'themes/default/footer.php');
 
 		return 'affiché';
 	}
 
 
 	/**
-	 * reqModuleConfig récupère les fichiers de configuration du module actif
+	 * chargementConstantesModule récupère les fichiers de configuration du module actif
 	 */
-	public function reqModuleConfig()
+	public function chargementConstantesModule()
 	{
 		$configDir = $this->getModuleDir() . self::DIR_CONFIG;
 
@@ -504,6 +552,171 @@ class Request {
 	}
 
 
+	/**
+	 * getPost() récupère les données POST demandées
+	 * @param  string|array|null $postReq clés des données POST souhaitées
+	 * @return array 	: données POST réclamées
+	 */
+	public function getPost($postReq = null)
+	{
+		if (is_null($postReq))
+		{
+			return $this->post();
+		}
+
+		if (!is_array($postReq))
+		{
+			$postReq = array($postReq);
+		}
+
+		foreach ($postReq as $postKey)
+		{
+			if (array_key_exists($postKey, $this->post()))
+			{
+				$post[$postKey] = $this->post()[$postKey];
+			}
+			else
+			{
+				$post[$postKey] = null;
+			}
+		}
+
+		return $post;
+	}
+
+
+	/**
+	 * getFiles() récupère les données FILES demandées
+	 * @param  string|array|null $filesReq clés des données FILES souhaitées
+	 * @return array 	: données FILES réclamées
+	 */
+	public function getFiles($filesReq = null)
+	{
+		if (is_null($filesReq))
+		{
+			return $this->files();
+		}
+
+		if (!is_array($filesReq))
+		{
+			$filesReq = array($filesReq);
+		}
+
+		foreach ($filesReq as $filesKey)
+		{
+			if (array_key_exists($filesKey, $this->files()))
+			{
+				$files[$filesKey] = $this->files()[$filesKey];
+			}
+			else
+			{
+				$files[$filesKey] = null;
+			}
+		}
+
+		return $files;
+	}
+
+
+	/**
+	 * getTable() récupère les données de la table demandées
+	 * @param  string $table : nom de la table demandée (ex : post)
+	 * @param  string|array|null $tableReq clés des données TABLE souhaitées
+	 * @return array 	: tableau des données TABLE réclamées
+	 */
+	public function getTable(string $table, $tableReq = null)
+	{
+		if (!in_array($table, ['session', 'post', 'files', 'cookie', 'server']))
+		{
+			throw new Exception("{$table} n'existe pas dans Request", 1);
+		}
+
+		if (is_null($tableReq))
+		{
+			return $this->$table();
+		}
+
+		if (!is_array($tableReq))
+		{
+			$tableReq = array($tableReq);
+		}
+
+		foreach ($tableReq as $tableKey)
+		{
+			if (array_key_exists($tableKey, $this->$table()))
+			{
+				$table[$tableKey] = $this->$table()[$tableKey];
+			}
+			else
+			{
+				$table[$tableKey] = null;
+			}
+		}
+
+		return $table;
+	}
+
+
+	/**
+	 * setSessionVar créer de nouvelles variables dans la SESSION
+	 * @param array $var [description]
+	 * @return  array : $_SESSION à jour
+	 */
+	public function setSessionVar(array $var)
+	{
+		foreach ($var as $key => $value)
+		{
+			$this->_session[$key] = $value;
+		}
+
+		$_SESSION = $this->session();
+		return $this->session();
+	}
+
+
+	/**
+	 * cleanSessionVar supprime des variables dans la SESSION
+	 * @param array $var [description]
+	 * @return  array : $_SESSION à jour
+	 */
+	public function cleanSessionVar($var = null)
+	{
+
+		if (is_null($var))
+		{
+			$this->_session = array();
+		}
+		elseif (is_string($var))
+		{
+			unset($this->_session[$var]);
+
+		}
+
+		elseif (is_array($var))
+		{
+			foreach ($var as $sessionKey)
+			{
+				unset($this->_session[$sessionKey]);
+			}
+		}
+
+		$_SESSION = $this->session();
+		return $this->session();
+	}
+
+
+
+
+
+
+
+
+
+
+
+	//////////
+	///> Contrôle des données de la classe
+	//////////
 	public function getMVC()
 	{
 		debug_var($this->getModuleName());

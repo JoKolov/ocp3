@@ -7,91 +7,126 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Controlleur connexion
  *
- * File Last Update : 2017 09 07
+ * File Last Update : 2017 09 13
  *
  * File Description :
  * -> vérifie l'intégrité des données transmises par le formulaire de connexion
  * -> vérifie l'existence du membre dans la base de données
  * -> on renvoi une erreur si l'athentification échoue
- *
- *
- * Utilisation des classes suivantes :
- * Membre
- * MembreMgr
  */
 
-// CONSTANTES
-// champs obligatoires du formulaire de connexion
-define('LOG_FORM', array(
-	'pseudo'	=> '',
-	'password'	=> ''));
+Class ConnexionController {
+
+	//============================================================
+	// Attributs
+	// -- NIL --
 
 
+	//============================================================
+	// Constructeur et méthodes magiques
+	// -- NIL --
+	
 
-//------------------------------------------------------------
-// COMMUNICATION AVEC CONTROLEUR
-function modele_connexion()
-{
-	$statut_model = connexion_action();
-	if ($statut_model === TRUE)
+	//============================================================
+	// Getteurs
+	
+	private function getErrorsTable()
 	{
-		// $_SESSION['membre'] = instance Membre hydratée
-		// renvoyer vers mon compte
-		return url_format('membres','','compte');
+		return [
+			'error'			=> 	"Echec connexion !",
+			'pseudo'		=>	"Entrez votre pseudo ;)",
+			'password'		=>	"Entrez votre password ;)",
+			'notfound'		=>	"Mauvais login / mot de passe :("
+		];
 	}
-	else
+
+
+	//============================================================
+	// Setteurs
+	// -- NIL --
+
+
+	//============================================================
+	// Methodes
+
+	public function actionView($request)
 	{
-		// $statut_model = string avec les erreurs
-		// renvoyer vers le formulaire
-		return url_format('membres','','connexion',$statut_model);
+		return [
+			'file'		=> $request->getViewFilename(),
+			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		];
 	}
-}
 
-
-
-
-
-/**
- * [model_connexion description]
- * @return [Membre/array] [Renvoi une instance de Membre si tout est OK, sinon renvoi un tableau avec les erreurs]
- */
-function connexion_action()
-{
-
-//------------------------------------------------------------
-// CONTROLE DES DONNEES DU FORMULAIRE
-	$control_post = control_post(LOG_FORM, $_POST); // contrôle les données de $_POST
-
-	if($control_post === TRUE)
+	public function actionSubmit($request)
 	{
-		// le $_POST contient toutes les données obligatoire
-		// on peut faire une recherche dans la base de données
+		// récupération des données postées par l'utilisateur
+		$post = $request->getPost(['pseudo', 'password']);
+
+		// vérification des données du formulaire grâce au modèle
+		$connexion = $this->connexionUsingModel($post);
+
+		// La connexion a échoué, des erreurs sont remontées
+		if (array_key_exists('error', $connexion))
+		{
+			$url = url_format('membres', '', 'connexion', $connexion);
+			
+			// on créer les messages d'erreurs
+			$errorsFound = explode('-', $connexion['error']); // tableau contenant les erreurs séparées par un -
+			$viewErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
+
+			return [
+				'url'		=> $url, 
+				'errors' 	=> $viewErrors
+			];
+		}
+
+		// La connexion est validée
+		$membre = $connexion['membre'];
+		$request->setSessionVar(array(
+			'pseudo' 	=> $membre->get_pseudo(),
+			'membre'	=> $membre
+			)
+		);
 		
-		//------------------------------------------------------------
-		// RECHERCHE DANS LA BASE DE DONNEES
-		$membre = MembreMgr::login_check($_POST);
-		if (is_object($membre))
-		{
-			$_SESSION['membre'] = $membre;
-			$_SESSION['pseudo'] = $membre->get_pseudo();
-			return TRUE; // tout est OK, on renvoi l'instance de Membre
-		}
-		else
-		{
-			$erreur['error'] = 'notfound';
-			return $erreur;
-		}
+		$url = url_format('membres','','compte');
+		
+		return [
+			'url'		=> $url,
+			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		];
 	}
-	else
+
+
+
+	private function connexionUsingModel($post)
 	{
-		// il manque des données obligatoires dans le $_POST du formualaire
-		// on récupère la liste des champs non rempli
-		$erreur['error'] = $control_post;
-		return $erreur;
+
+		///  1  ///
+		// Tous les champs obligatoires sont-ils renseignés ?
+		$missingFields = formMissingRequiredFields([
+			'pseudo'	=>	TRUE,
+			'password'	=>	TRUE
+		], $post);
+
+		// Il manque un ou des champs obligatoires
+		if (!is_null($missingFields))
+		{
+			return ['error' => $missingFields];
+		}
+
+		///  2  ///
+		// Les données renseignées sont-elles acceptables ?
+		$membre = MembreMgr::login_check($post);
+
+		// Les données sont refusées
+		if (!is_object($membre))
+		{
+			return ['error' => 'notfound'];
+		}
+
+		// La connexion est accepté => pas d'erreur
+		return ['membre' => $membre];
 	}
 
 
-//------------------------------------------------------------
-// RETOUR
-
-}
+} // end of class ConnexionController
