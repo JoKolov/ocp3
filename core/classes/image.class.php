@@ -264,7 +264,11 @@ class Image {
 
 		// on créer la miniature vide
 		$imgAvatar = imagecreatetruecolor(self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT);
+		imagealphablending($imgAvatar, false);
+		imagesavealpha($imgAvatar, true);
+		
 		$imgSource = $imagecreatefromType($avatar);
+		imagealphablending($imgSource, true);
 
 		// les dimensions sont supérieures aux dimensions requises, on réduit l'image
 		if ($this->get_img_width() > self::AVATAR_MAX_WIDTH OR $this->get_img_height() > self::AVATAR_MAX_HEIGHT)

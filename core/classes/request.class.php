@@ -624,28 +624,28 @@ class Request {
 	 * @param  string|array|null $tableReq clés des données TABLE souhaitées
 	 * @return array 	: tableau des données TABLE réclamées
 	 */
-	public function getTable(string $table, $tableReq = null)
+	public function getGlobalVar(string $tableName, $specificElement = null)
 	{
-		if (!in_array($table, ['session', 'post', 'files', 'cookie', 'server']))
+		if (!in_array($tableName, ['session', 'post', 'files', 'cookie', 'server']))
 		{
-			throw new Exception("{$table} n'existe pas dans Request", 1);
+			throw new Exception("{$tableName} n'existe pas dans Request", 1);
 		}
 
-		if (is_null($tableReq))
+		if (is_null($specificElement))
 		{
-			return $this->$table();
+			return $this->$tableName();
 		}
 
-		if (!is_array($tableReq))
+		if (!is_array($specificElement))
 		{
-			$tableReq = array($tableReq);
+			$specificElement = array($specificElement);
 		}
 
-		foreach ($tableReq as $tableKey)
+		foreach ($specificElement as $tableKey)
 		{
-			if (array_key_exists($tableKey, $this->$table()))
+			if (array_key_exists($tableKey, $this->$tableName()))
 			{
-				$table[$tableKey] = $this->$table()[$tableKey];
+				$table[$tableKey] = $this->$tableName()[$tableKey];
 			}
 			else
 			{

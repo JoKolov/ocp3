@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Modèle de la page compte
  *
- * File Last Update : 2017 08 29
+ * File Last Update : 2017 09 19
  *
  * File Description :
  * -> contrôle les données du formulaire de modification
@@ -15,7 +15,7 @@ if (!defined('EXECUTION')) exit;
  * -> sinon renvoi un tableau d'erreurs et redirige vers la page de modification
  */
 
-Class ModificationController {
+class ModificationController {
 
 	//============================================================
 	// Attributs
@@ -69,11 +69,22 @@ Class ModificationController {
 	{
 		user_connected_only();
 
-		$membre =  $request->getMembre('session', 'membre');
+		$membre = $request->getMembre();
+
+		$action = ['displayView' => $request->getViewFilename()];
+		$response = new Response($action, null, ['membre' => $membre]);
+
 
 		return [
 			'file'		=> $request->getViewFilename(),
-			'values'	=> $this->getModificationViewValues($membre),
+			'values'	=> [
+				'pseudo'		=>	$membre->get_pseudo(),
+				'nom'			=>	$membre->get_nom(),
+				'prenom'		=>	$membre->get_prenom(),
+				'date_birth'	=>	$membre->get_date_birth(),
+				'email'			=>	$membre->get_email(),
+				'avatar'		=>	$membre->get_avatar()
+			],
 			'errors'	=> setViewErrorValues($this->getErrorsTable())
 		];
 	}
@@ -87,23 +98,30 @@ Class ModificationController {
 		// 1) on récupère les données postées par l'utilisateur
 		$post 	=  $request->getPost(['pseudo', 'nom', 'prenom', 'date_birth', 'email', 'password', 'passwordconf']);
 		$files 	=  $request->getFiles(['avatar']);
-		$membre =  $request->getMembre('session', 'membre');
+		$membre =  $request->getMembre();
 
 		// 2) vérification des données du formulaire grâce au modèle
-		$modification = $this->modificationUsingModel($post, $files, $membre);
+		$modification = $this->controleDonneesFormulaire($post, $files, $membre);
 
 		// La modification a échoué, des erreurs sont remontées
 		if (array_key_exists('error', $modification))
 		{
-			$url = url_format('membres', '', 'modification', $modification);
+			$url = url_format('membres', '', 'modification');
 			
 			// on créer les messages d'erreurs
 			$errorsFound = explode('-', $modification['error']); // tableau contenant les erreurs séparées par un -
-			$viewErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
+			$sessionErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
+
+			$action = ['redirect' => Response::urlFormat('membres','modification')];
+			$flash = new FlashValues(['errors' => $sessionErrors]);
+
+			$response = new Response($action, [
+				'flash' => $flash
+			]);
 
 			return [
 				'url'		=> $url, 
-				'errors' 	=> $viewErrors
+				'errors' 	=> $sessionErrors
 			];
 		}
 
@@ -117,6 +135,13 @@ Class ModificationController {
 		
 		$url = url_format('membres','','modification',['success' => '1']);
 		
+		$flash = new FlashValues(['errors' => setViewErrorValues($this->getErrorsTable()),
+			'success' => "Modifications enregistrées :)"]);
+
+		$action = ['redirect' => url_format('membres','','modification')];
+
+		$response = new Response($action, null, ['flash' => $flash]);
+
 		return [
 			'url'		=> $url,
 			'errors'	=> setViewErrorValues($this->getErrorsTable())
@@ -125,7 +150,7 @@ Class ModificationController {
 
 
 	//------------------------------------------------------------
-	private function modificationUsingModel(array $post, array $files, Membre $membre)
+	private function controleDonneesFormulaire(array $post, array $files, Membre $membre)
 	{
 		///  1  ///
 		// Tous les champs obligatoires sont-ils renseignés ?
@@ -155,7 +180,7 @@ Class ModificationController {
 		}
 
 		// les 2 champs sont complétés mais ne sont pas identiques
-		if ($passwordFieldsMissing <> 2 AND $post['password'] <> $post['passwordconf'])
+		if ($passwordFieldsMissing != 2 AND $post['password'] != $post['passwordconf'])
 		{
 			return ['error' => 'password.diff'];
 		}
@@ -165,7 +190,7 @@ Class ModificationController {
 		// Check de l'avatar
 		$filesImage = $files['avatar'];
 
-		if ($filesImage['name'] <> '')
+		if ($filesImage['name'] != '')
 		{
 			$avatar = $this->checkAvatar($filesImage, $membre);
 
@@ -190,18 +215,10 @@ Class ModificationController {
 			'nom'			=> $post['nom'],
 			'prenom'		=> $post['prenom'],
 			'date_birth'	=> $post['date_birth'],
-			'email'			=> $post['email'],
-			'password'		=> $post['password']
+			'email'			=> $post['email']
 		];
 
-		// On retire les valeurs nulles ou vide du tableau des valeurs postées
-		foreach($formPostValues as $fieldName => $fieldValue)
-		{
-			if (is_null($fieldValue) OR $fieldValue == '')
-			{
-				unset($formPostValues[$fieldName]);
-			}
-		}
+		if ($post['password'] != '') { $formPostValues['password'] = $post['password']; }
 
 		$membre = $membre->checkModification($formPostValues);
 
@@ -253,8 +270,6 @@ Class ModificationController {
 		{
 			return ['error' => 'avatar.format'];
 		}
-
-
 
 		// on peut supprimer l'image source
 		$image->delete('source');
@@ -314,20 +329,6 @@ Class ModificationController {
 			'url' 	=> $reqAvatar->get_avatar(),
 			'id'	=> $reqAvatar->get_id()
 		];		
-	}
-
-
-
-	private function getModificationViewValues(Membre $membre)
-	{
-		return [
-			'pseudo'		=>	$membre->get_pseudo(),
-			'nom'			=>	$membre->get_nom(),
-			'prenom'		=>	$membre->get_prenom(),
-			'date_birth'	=>	$membre->get_date_birth(),
-			'email'			=>	$membre->get_email(),
-			'avatar'		=>	$membre->get_avatar()
-		];
 	}
 
 

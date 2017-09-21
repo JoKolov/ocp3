@@ -14,59 +14,124 @@ if (!defined('EXECUTION')) exit;
  * -> permet d'afficher la vue
  */
 
-Class Response {
+class Response {
 
 	//============================================================
 	// Attributs
 	
-	protected $_request;
+	protected $_action;
+	protected $_url;
+	protected $_viewFile;
+	protected $_viewValues;
+	protected $_objects;
 
-	protected $_errorsTable;		// Tableau des erreurs	[$key = nom erreur, $value = texte erreur]
-	protected $_viewFilename;
-	protected $_viewConstant;
-	protected $_viewFlash;
-	protected $_redirectUrl;
-	protected $_responseAction;
+
+	const ACTION_REDIRECT = 'redirect';
+	const ACTION_DISPLAYVIEW = 'displayView';
 
 	//============================================================
 	// Constructeur et méthodes magiques
 
-	public function __construct(Request $request, $responseAction)
+	public function __construct(array $action = null, array $values = null, array $objects = null)
 	{
-		$this->_request = $request;
-		$this->_responseAction = $request->getActionName();
-
+		$this->setAction($action);
+		$this->_viewValues = $values;
+		$this->_objects = $objects;
 	}
 
 	//============================================================
 	// Getteurs
-	protected function getRequest()
-	{
-		return $this->_request;
-	}
 
-	protected function getAction()
+	protected function getAction() 			{ return $this->_action; 	}
+	protected function getObjects()			{ return $this->_objects; 	}
+	protected function getUrl()				{ return $this->_url; 		}
+	protected function getViewFile()		{ return $this->_viewFile; 	}
+	protected function getViewValues()		{ return $this->_viewValues; }
+	protected function getFlashValues()		{ return $this->_flashValues; }
+
+	protected function getObject($objectName)
 	{
-		return $this->_responseAction;
+		if (is_null($objectName) OR !array_key_exists($objectName, $this->getObjects()))
+		{
+			return;
+		}
+
+		return $this->getObjects()[$objectName];
 	}
 
 
 	//============================================================
 	// Setteurs
-	public function setConstantValues(array $viewValues)
+	
+	/**
+	 * setAction enregistre le nom de l'action à accomplir en réponse de la requête
+	 * @param array $action nom de l'action attendu en réponse
+	 */
+	public function setAction(array $action)
 	{
+		$validActions = ['displayView', 'redirect'];
 
+		$actionName = key($action);
+		$urlOrFile = $action[$actionName];
+
+		if (!in_array($actionName, $validActions))
+		{
+			throw new Exception("Response :: setAction >> l'action [$action] n'est pas connue", 1);
+		}
+
+		$this->_action = $actionName;
+
+		switch ($actionName) {
+			case 'redirect':
+				$this->setUrl($urlOrFile);
+				break;
+
+			case 'displayView':
+				$this->setViewFile($urlOrFile);
+				break;
+		}
 	}
+
+	protected function setUrl($url)
+	{
+		$patternUrl = "#^" . APP['url-website'] . "#";
+
+		if (!preg_match($patternUrl, $url))
+		{
+			throw new Exception("Response :: setUrl >> [$url] n'est pas une url valide! : <br /> {$url}", 1);
+		}
+
+		$this->_url = $url;
+	}
+
+	protected function setViewFile($filename)
+	{
+		$patternFile = "#^" . SITE_ROOT . ".+\.php$#";
+
+		if (!preg_match($patternFile, $filename) OR !file_exists($filename))
+		{
+			throw new Exception("Response :: setViewFilename >> $filename n'est pas un fichier valide ! : <br /> {$filename}", 1);
+		}
+
+		$this->_viewFile = $filename;
+	}
+
 
 
 	//============================================================
 	// Methodes
 
-	public function runResponse($responseAction = null)
+
+	/**
+	 * runResponse sélectionne la méthode à utiliser pour lancer la réponse
+	 * @param  string $action nom de l'action de la réponse
+	 * @return [type]         [description]
+	 */
+	public function runResponseAction(string $action = null)
 	{
-		if (!is_null ($responseAction))
+		if (!is_null ($action))
 		{
-			$this->_responseAction = $responseAction;
+			$this->setAction($action);
 		}
 
 		if ($this->getAction() == 'submit')
@@ -80,14 +145,11 @@ Class Response {
 	/**
 	 * displayView affiche le code HTML de la page demandée
 	 */
-	public function displayView($viewFilename, $viewConstant = null)
+	protected function displayView($viewFilename = null)
 	{
-		$var['error'] = errorFormatHTML($view['errors']);
-		$var['value'] = $view['values'];
-
 		// $error = tableau des erreurs de la page => $flash['error']
 		// $value = tableau des donnees de la page => $constant
-		foreach ($this->getViewConstant() as $varViewName => $tableViewValues)
+		foreach ($this->getViewValues() as $varViewName => $tableViewValues)
 		{
 			${$varViewName} = $tableViewValues;
 		}
@@ -102,6 +164,12 @@ Class Response {
 		if (isset($error))
 		{
 			$blocError = $this->setBlocError($error);
+		}
+
+		// récupération des objets nécesaires pour la vue
+		foreach ($this->getObjects() as $objetName => $objet)
+		{
+			${$objetName} = $objet;
 		}
 
 		// début du code HTML
@@ -122,10 +190,16 @@ Class Response {
 	/**
 	 * redirect effectue une redirection
 	 */
-	public function redirect($url = null, $viewFlash = null)
+	protected function redirect($url = null)
 	{
-		$this->getRequest()->setSessionVar(['flash' => $flash)]);
+		$this->getRequest()->setSessionVar(['flash' => $flash]);
 
+
+		// enregistrement du flash s'il existe
+		
+
+
+		// redirection
 		header('Location: ' . $url); die;
 	}
 
@@ -173,6 +247,29 @@ Class Response {
 
 		return $blocError;
 	}
+
+
+
+
+	//------------------------------------------------------------
+	//fonction de formatage de l'URL de redirection
+	public function urlFormat(string $module, string $page ='', string $action = '', array $param = [])
+	{
+		$url = '?module=' . $module;
+
+		if($page <> '') 	{ $url .= '&page=' . $page; }
+		if($action <> '') 	{ $url .= '&action=' . $action; }
+
+		if(isset($param))
+		{
+			foreach ($param as $key => $value) {
+				$url .= '&' . $key . '=' . $value;
+			}
+		}
+
+		return APP['website-url'] . $url;
+	}
+
 
 
 //------------------------------------------------------------
@@ -224,33 +321,15 @@ public function errorFormatHTML($error)
 
 
 
-//------------------------------------------------------------
-//fonction de formatage de l'URL de redirection
-public function url_format(string $module, string $action = '', string $page ='', array $param = [])
-{
-	$url = '?module=' . $module;
 
-	if($action <> '') 	{ $url .= '&action=' . $action; }
-	if($page <> '') 	{ $url .= '&page=' . $page; }
 
-	if(isset($param))
+
+	//------------------------------------------------------------
+	// formatage dans les balises alert boostrap
+	public function errorFormatForm($text)
 	{
-		foreach ($param as $key => $value) {
-			$url .= '&' . $key . '=' . $value;
-		}
+		return '<div class="alert alert-danger" role="alert"><strong>' . $text . '</strong></div>';
 	}
-
-	return $url;
-}
-
-
-
-//------------------------------------------------------------
-// formatage dans les balises alert boostrap
-public function error_format_form($text)
-{
-	return '<div class="alert alert-danger" role="alert"><strong>' . $text . '</strong></div>';
-}
 
 
 } // end of class Response

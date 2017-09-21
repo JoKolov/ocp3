@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : fontions
  * FILE/ROLE : Common (fonctions communes)
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 09 20
  *
  * File Description :
  * -> contient des fonctions basiques communes à l'appli
@@ -101,7 +101,7 @@ function url_format(string $module, string $action = '', string $page ='', array
 		}
 	}
 
-	return $url;
+	return APP['url-website'] . $url;
 }
 
 
@@ -363,8 +363,12 @@ function errorFormatHTML($error)
 
 //------------------------------------------------------------
 // DEBUG -> var_dump dans le code
-function debug_var($var)
+function debug_var($var, $com = null)
 {
+	if (!is_null($com))
+	{
+		echo $com . '<br />';
+	}
 	echo '<pre>';
 	echo var_dump($var);
 	echo '</pre>';

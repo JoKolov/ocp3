@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 17
+ * File Last Update : 2017 09 20
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre
@@ -36,7 +36,7 @@ if (!defined('EXECUTION')) exit;
 			}
 			else
 			{
-				echo $var['error']['success'];
+				echo $var['error']['error'];
 			}
 			?>
 		</div>
