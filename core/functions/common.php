@@ -244,6 +244,29 @@ function formMissingRequiredFields(array $formReqFields, array $formUserFields)
 
 
 //------------------------------------------------------------
+// Cherche un élément manquant dans un formulaire
+/**
+ * [missingRequiredFields description]
+ * @param  array  $formReqFields  [description]
+ * @param  array  $formUserFields [description]
+ * @return [type]                 [description]
+ */
+function missingRequiredFields(array $formReqFields, array $formUserFields)
+{
+	foreach($formReqFields as $field => $required)
+	{
+		if ($required AND !is_null($formUserFields[$field]) AND $formUserFields[$field] != '')
+		{
+			unset($formReqFields[$field]);
+		}
+	}
+
+	return $formReqFields;
+}
+
+
+
+//------------------------------------------------------------
 // Création du tableau des variables pour une vue spécifique
 /**
  * setViewVar() créer les variables d'une vue

@@ -34,18 +34,17 @@ class ModificationController {
 		return [
 			'error'				=>	"Echec modification !",
 			'pseudo.req'		=>	"Pseudo obligatoire ;)",
-			'pseudo'			=>	"Au moins 4 caractères alphanumériques sans espace (- et _ tolérés)",
+			'pseudo'			=>	"Pseudo : Au moins 4 caractères alphanumériques sans espace (- et _ tolérés)",
 			'email.req'			=>	"Adresse email obligatoire ;)",
-			'email'				=>	"L'adresse email doit être du type nom@domaine.fr",
-			'avatar'			=>	"Fichiers autorisés : .jpg, .jpeg, .png, .gif :: 1Mo max",
-			'nom'				=>	"Lettres, espaces, ' et - acceptés",
-			'prenom'			=>	"Lettres, espaces, ' et - acceptés",
-			'date_birth'		=>	"La date de naissance doit être valide ",
-			'password'			=>	"Au moins 8 caractères dont au moins 1 chiffre ;)",
+			'email'				=>	"Email : L'adresse email doit être du type nom@domaine.fr",
+			'avatar'			=>	"Avatar : Fichiers autorisés : .jpg, .jpeg, .png, .gif :: 1Mo max",
+			'nom'				=>	"Nom : Lettres, espaces, ' et - acceptés",
+			'prenom'			=>	"Prénom : Lettres, espaces, ' et - acceptés",
+			'date_birth'		=>	"Date de naissance : La date doit être valide ",
+			'password'			=>	"Mot de passe : Au moins 8 caractères dont au moins 1 chiffre ;)",
 			'password.req'		=>	"Vous devez entrez 2 fois votre nouveau mot de passe",
 			'passwordconf.req'	=>	"Vous devez entrez 2 fois votre nouveau mot de passe",
 			'password.diff'		=>	"Les 2 passwords doivent être identiques ;),",
-			'success'			=>	"Modifications enregistrées :)",
 			'avatar.upload'		=> 	"Erreur lors de l'upload de l'avatar",
 			'avatar.source'		=> 	"Aucun fichier trouvé pour l'avatar",
 			'avatar.format'		=> 	"Fichiers autorisés pour l'avatar : .jpg, .jpeg, .png, .gif :: 1Mo max",
@@ -72,21 +71,14 @@ class ModificationController {
 		$membre = $request->getMembre();
 
 		$action = ['displayView' => $request->getViewFilename()];
-		$response = new Response($action, null, ['membre' => $membre]);
-
-
-		return [
-			'file'		=> $request->getViewFilename(),
-			'values'	=> [
-				'pseudo'		=>	$membre->get_pseudo(),
-				'nom'			=>	$membre->get_nom(),
-				'prenom'		=>	$membre->get_prenom(),
-				'date_birth'	=>	$membre->get_date_birth(),
-				'email'			=>	$membre->get_email(),
-				'avatar'		=>	$membre->get_avatar()
-			],
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		$objects = [
+			'membre' => $membre,
+			'values' => new ViewValues(['errors' => setViewErrorValues($this->getErrorsTable())])
 		];
+
+		$response = new Response($action, $objects);
+
+		return $response;
 	}
 
 
@@ -115,14 +107,9 @@ class ModificationController {
 			$action = ['redirect' => Response::urlFormat('membres','modification')];
 			$flash = new FlashValues(['errors' => $sessionErrors]);
 
-			$response = new Response($action, [
-				'flash' => $flash
-			]);
+			$response = new Response($action, ['flash' => $flash]);
 
-			return [
-				'url'		=> $url, 
-				'errors' 	=> $sessionErrors
-			];
+			return $response;
 		}
 
 		// La modification est validée
@@ -133,19 +120,12 @@ class ModificationController {
 			)
 		);
 		
-		$url = url_format('membres','','modification',['success' => '1']);
-		
-		$flash = new FlashValues(['errors' => setViewErrorValues($this->getErrorsTable()),
-			'success' => "Modifications enregistrées :)"]);
+		$flash = new FlashValues(['success' => "Modifications enregistrées :)"]);
+		$action = ['redirect' => Response::urlFormat('membres','modification')];
 
-		$action = ['redirect' => url_format('membres','','modification')];
+		$response = new Response($action, ['flash' => $flash]);
 
-		$response = new Response($action, null, ['flash' => $flash]);
-
-		return [
-			'url'		=> $url,
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
-		];		
+		return $response;
 	}
 
 

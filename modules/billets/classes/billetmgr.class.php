@@ -199,24 +199,35 @@ class BilletMgr {
 	// $id = id du billet à récupérer
 	public function select(int $id)
 	{
-		if ($id > 0)
+		if ($id <= 0)
 		{
-			$sql = 'SELECT id, titre, contenu, extrait, auteur_id, date_publie, date_modif, image_id, statut 
-					FROM ' . self::TABLE_BILLETS . ' 
-					WHERE id=' . $id;
-
-			$req = SQLmgr::prepare($sql);
-			$rep = $req->execute();
-
-			if ($rep)
-			{
-				$donnees = $req->fetch(PDO::FETCH_ASSOC);
-				$billet = New Billet;
-				$billet->setFull($donnees); // on hydrate l'objet billet avec les données de la BDD
-				return $billet; // on renvoi le billet hydraté
-			}
+			return FALSE;
 		}
-		return FALSE; // billet non trouvé
+
+		$sql = 'SELECT id, 
+			titre, 
+			contenu, 
+			extrait, 
+			auteur_id, 
+			DATE_FORMAT(date_publie, "%d/%m/%Y à %k\h%H") AS date_publie, 
+			DATE_FORMAT(date_modif, "%d/%m/%Y à %k\h%H") AS date_modif, 
+			image_id, 
+			statut 
+				FROM ' . self::TABLE_BILLETS . ' 
+				WHERE id=' . $id;
+
+		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute();
+		$donnees = $req->fetch(PDO::FETCH_ASSOC);
+
+		if (!$rep OR !$donnees)
+		{
+			return FALSE;
+		}
+
+		$billet = New Billet;
+		$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
+		return $billet; // on renvoi le billet hydraté
 	}
 
 
@@ -299,7 +310,7 @@ class BilletMgr {
 			$billets = [];
 			while ($donnees = $req->fetch(PDO::FETCH_ASSOC)) {
 				$billet = New Billet;
-				$billet->setFull($donnees); // on hydrate l'objet billet avec les données de la BDD
+				$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
 				array_push($billets, $billet);
 			}
 

@@ -46,12 +46,7 @@ Class DeconnexionController {
 	 */
 	public function actionView($request)
 	{
-		$request->cleanSessionVar();
-		session_destroy();
-
-		return [
-			'url'		=> url_format('membres','','connexion')
-		];
+		return $this->actionSubmit($request);
 	}
 
 	/**
@@ -61,7 +56,12 @@ Class DeconnexionController {
 	 */
 	public function actionSubmit($request)
 	{
-		$this->actionView($request);
+		$action = ['redirect' => Response::urlFormat('membres','connexion')];
+
+		$request->cleanSessionVar();
+		session_destroy();
+
+		return New Response($action);
 	}
 
 } // end of class DeconnexionController

@@ -19,24 +19,24 @@ if (!defined('EXECUTION')) exit;
 <section>
 	<div class="row">
 		<div class="col-sm-2">
-			<div style="width:100px; height:100px; background-image: url('<?= $var['value']['avatar']; ?>'); background-size: cover; border-radius:5%;" class="">
+			<div style="width:100px; height:100px; background-image: url('<?= $membre->get_avatar(); ?>'); background-size: cover; border-radius:5%;" class="">
 			</div>
 		</div>
 
 		<div class="col-sm-10">
-			<h3 class="text-right">Modifier mon compte : <?= $var['value']['pseudo']; ?></h3>
+			<h3 class="text-right">Modifier mon compte : <?= $membre->get_pseudo();; ?></h3>
 
 			<?php
-			if ($var['error']['success'] <> '') {
+			if (isset($success)) {
 			?>
 				<div class="alert alert-success" role="alert">
-				  <strong><?= $var['error']['success']; ?></strong>
+				  <strong><?= $success; ?></strong>
 				</div>
 			<?php 
 			}
 			else
 			{
-				echo $var['error']['error'];
+				echo $errors['error'];
 			}
 			?>
 		</div>
@@ -52,65 +52,65 @@ if (!defined('EXECUTION')) exit;
 				<input type="file" class="form-control" placeholder="votre image" name="avatar" id="avatar">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['avatar']; ?>
-				<?= $var['error']['avatar.upload']; ?>
-				<?= $var['error']['avatar.source']; ?>
-				<?= $var['error']['avatar.format']; ?>
-				<?= $var['error']['avatar.sqlupdate']; ?>
-				<?= $var['error']['avatar.sqlinsert']; ?>
-				<?= $var['error']['avatar.sql']; ?>
+				<?= $errors['avatar']; ?>
+				<?= $errors['avatar.upload']; ?>
+				<?= $errors['avatar.source']; ?>
+				<?= $errors['avatar.format']; ?>
+				<?= $errors['avatar.sqlupdate']; ?>
+				<?= $errors['avatar.sqlinsert']; ?>
+				<?= $errors['avatar.sql']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label for="pseudo" class="col-sm-2 control-label">Pseudo</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control col-xs-12 col-sm-8" placeholder="mon pseudo" name="pseudo" id="pseudo" value="<?= $var['value']['pseudo']; ?>">
+				<input type="text" class="form-control col-xs-12 col-sm-8" placeholder="mon pseudo" name="pseudo" id="pseudo" value="<?= $membre->get_pseudo(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['pseudo']; ?>
-				<?= $var['error']['pseudo.req']; ?>
-			</div>
-		</div>
-
-		<div class="form-group">
-			<label for="nom" class="col-sm-2 control-label">Nom</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" placeholder="mon nom" name="nom" id="nom" value="<?= $var['value']['nom']; ?>">
-			</div>
-			<div class="col-sm-12">
-				<?= $var['error']['nom']; ?>
+				<?= $errors['pseudo']; ?>
+				<?= $errors['pseudo.req']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label for="prenom" class="col-sm-2 control-label">Prénom</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" placeholder="mon prenom" name="prenom" id="prenom"  value="<?= $var['value']['prenom']; ?>">
+				<input type="text" class="form-control" placeholder="mon prenom" name="prenom" id="prenom"  value="<?= $membre->get_prenom(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['prenom']; ?>
+				<?= $errors['prenom']; ?>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="nom" class="col-sm-2 control-label">Nom</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" placeholder="mon nom" name="nom" id="nom" value="<?= $membre->get_nom(); ?>">
+			</div>
+			<div class="col-sm-12">
+				<?= $errors['nom']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label for="date_birth" class="col-sm-2 control-label">Date de Naissance</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth"  value="<?= $var['value']['pdate_birth']; ?>">
+				<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth"  value="<?= $membre->get_date_birth(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['date_birth']; ?>
+				<?= $errors['date_birth']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
 			<label for="email" class="col-sm-2 control-label">Adresse Email</label>
 			<div class="col-sm-10">
-				<input type="email" class="form-control" placeholder="mon adresse email" name="email" id="email"  value="<?= $var['value']['email']; ?>">
+				<input type="email" class="form-control" placeholder="mon adresse email" name="email" id="email"  value="<?= $membre->get_email(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['email']; ?>
-				<?= $var['error']['email.req']; ?>
+				<?= $errors['email']; ?>
+				<?= $errors['email.req']; ?>
 			</div>
 		</div>
 
@@ -120,8 +120,8 @@ if (!defined('EXECUTION')) exit;
 				<input type="password" class="form-control" placeholder="mon nouveau mot de passe" name="password" id="password">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['password']; ?>
-				<?= $var['error']['password.req']; ?>
+				<?= $errors['password']; ?>
+				<?= $errors['password.req']; ?>
 			</div>
 		</div>
 
@@ -131,8 +131,8 @@ if (!defined('EXECUTION')) exit;
 				<input type="password" class="form-control" placeholder="je confirme mon nouveau mot de passe" name="passwordconf" id="passwordconf">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['passwordconf']; ?>
-				<?= $var['error']['passwordconf.req']; ?>
+				<?= $errors['passwordconf']; ?>
+				<?= $errors['passwordconf.req']; ?>
 			</div>
 		</div>
 

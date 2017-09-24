@@ -21,7 +21,12 @@ if (!defined('EXECUTION')) exit;
 	<div class="row">
 		<div class="col-sm-12">
 			<h3>Connexion</h3>
-			<?=$var['error']['error']; ?>
+			<?php 
+				if (isset($errors['error'])) 
+				{ 
+					echo '<div class="alert alert-danger" role="alert"><strong>' . $errors['error'] . '</strong></div>';
+				} 
+			?>
 		</div>
 	</div>
 

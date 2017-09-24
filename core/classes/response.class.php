@@ -22,7 +22,6 @@ class Response {
 	protected $_action;
 	protected $_url;
 	protected $_viewFile;
-	protected $_viewValues;
 	protected $_objects;
 
 
@@ -32,10 +31,9 @@ class Response {
 	//============================================================
 	// Constructeur et méthodes magiques
 
-	public function __construct(array $action = null, array $values = null, array $objects = null)
+	public function __construct(array $action = null, array $objects = [])
 	{
 		$this->setAction($action);
-		$this->_viewValues = $values;
 		$this->_objects = $objects;
 	}
 
@@ -46,8 +44,6 @@ class Response {
 	protected function getObjects()			{ return $this->_objects; 	}
 	protected function getUrl()				{ return $this->_url; 		}
 	protected function getViewFile()		{ return $this->_viewFile; 	}
-	protected function getViewValues()		{ return $this->_viewValues; }
-	protected function getFlashValues()		{ return $this->_flashValues; }
 
 	protected function getObject($objectName)
 	{
@@ -134,7 +130,7 @@ class Response {
 			$this->setAction($action);
 		}
 
-		if ($this->getAction() == 'submit')
+		if ($this->getAction() == 'redirect')
 		{
 			return $this->redirect();
 		}
@@ -147,29 +143,35 @@ class Response {
 	 */
 	protected function displayView($viewFilename = null)
 	{
-		// $error = tableau des erreurs de la page => $flash['error']
-		// $value = tableau des donnees de la page => $constant
-		foreach ($this->getViewValues() as $varViewName => $tableViewValues)
-		{
-			${$varViewName} = $tableViewValues;
-		}
 
-		// si on a des données en flash display, on les ajoute et/ou on remplace les données en constant display
-		foreach ($this->getViewFlash() as $varViewName => $tableViewValues)
+		if (is_null($viewFilename))
 		{
-			${$varViewName} = $tableViewValues;
-		}
-
-		// traitement spécifiques des variables d'erreur $error
-		if (isset($error))
-		{
-			$blocError = $this->setBlocError($error);
+			$viewFilename = $this->getViewFile();
 		}
 
 		// récupération des objets nécesaires pour la vue
 		foreach ($this->getObjects() as $objetName => $objet)
 		{
 			${$objetName} = $objet;
+		}
+
+		$flash = new FlashValues;
+
+		if (!is_null($flash->getValues()))
+		{
+			foreach ($flash->getValues() as $valueName => $values)
+			{
+				${$valueName} = $values;
+			}
+			// Effacement des éventuels données Flash
+			$flash->removeFromSession();
+		}
+
+		// traitement spécifiques des variables d'erreur $error
+		if (isset($errors) AND is_array($errors))
+		{
+			$blocError = $this->setBlocError($errors);
+			$errors = $this->errorFormatHTML($errors);
 		}
 
 		// début du code HTML
@@ -179,8 +181,8 @@ class Response {
 		// affichage nav
 		require_once (SITE_ROOT . 'themes/default/nav.php');
 
-		// affichage view
-		if ($viewFilename <> '') { require_once ($viewFilename); }
+		// affichage de la page demandée
+		require_once ($viewFilename);
 
 		// affichage footer
 		require_once (SITE_ROOT . 'themes/default/footer.php');
@@ -192,12 +194,18 @@ class Response {
 	 */
 	protected function redirect($url = null)
 	{
-		$this->getRequest()->setSessionVar(['flash' => $flash]);
-
+		if (is_null($url))
+		{
+			$url = $this->getUrl();
+		}
 
 		// enregistrement du flash s'il existe
-		
+		if (array_key_exists('flash', $this->getObjects()))
+		{
+			$flash = $this->getObject('flash');
 
+			$flash->saveInSession();
+		}
 
 		// redirection
 		header('Location: ' . $url); die;
@@ -215,8 +223,8 @@ class Response {
 		}
 
 		$panelDangerOpen 	= '<div class="panel panel-danger">';
-		$panelTitleOpen 	= 	'<div class="panel-heading"><h3 class="panel-title">';
-		$panelTitleClose 	= 	'</h3></div>';
+		$panelTitleOpen 	= 	'<div class="panel-heading"><h3 class="panel-title"><strong>';
+		$panelTitleClose 	= 	'</strong></h3></div>';
 		$panelBodyOpen 		= 	'<div class="panel-body">';
 		$panelBodyClose 	= 	'</div>';	
 		$panelDangerClose 	= '</div>';
@@ -232,7 +240,7 @@ class Response {
 				$panelBody = TRUE;
 			}
 
-			if ($errorName <> 'error' AND $panelBody)
+			elseif ($errorName <> 'error' AND $panelBody)
 			{
 				$blocError .= '<p>' . $errorValue . '</p>';
 			}
@@ -253,7 +261,7 @@ class Response {
 
 	//------------------------------------------------------------
 	//fonction de formatage de l'URL de redirection
-	public function urlFormat(string $module, string $page ='', string $action = '', array $param = [])
+	public static function urlFormat(string $module, string $page ='', string $action = '', array $param = [])
 	{
 		$url = '?module=' . $module;
 
@@ -267,7 +275,36 @@ class Response {
 			}
 		}
 
-		return APP['website-url'] . $url;
+		return APP['url-website'] . $url;
+	}
+
+
+
+	//------------------------------------------------------------
+	// formatage dans les balises alert boostrap
+	public function errorFormatHTML($error)
+	{
+		$openBal = '<div class="alert alert-danger" role="alert"><strong>';
+		$closeBal = '</strong></div>';
+
+		if (is_string($error))
+		{
+			return $openBal . $error . $closeBal;
+		}
+
+		if (is_array($error))
+		{
+			foreach ($error as $errorKey => $errorText)
+			{
+				if ($errorText != '')
+				{
+					$error[$errorKey] = $openBal . $errorText . $closeBal;
+				}
+			}
+			return $error;
+		}
+
+		return '';
 	}
 
 
@@ -289,47 +326,6 @@ public function setViewErrorValues(array $errors, array $errorsToPublish = array
 	}	
 	return $errors;
 }
-
-
-
-//------------------------------------------------------------
-// formatage dans les balises alert boostrap
-public function errorFormatHTML($error)
-{
-	$openBal = '<div class="alert alert-danger" role="alert"><strong>';
-	$closeBal = '</strong></div>';
-
-	if (is_string($error))
-	{
-		return $openBal . $error . $closeBal;
-	}
-
-	if (is_array($error))
-	{
-		foreach ($error as $errorKey => $errorText)
-		{
-			if ($errorText <> '')
-			{
-				$error[$errorKey] = $openBal . $errorText . $closeBal;
-			}
-		}
-		return $error;
-	}
-
-	return '';
-}
-
-
-
-
-
-
-	//------------------------------------------------------------
-	// formatage dans les balises alert boostrap
-	public function errorFormatForm($text)
-	{
-		return '<div class="alert alert-danger" role="alert"><strong>' . $text . '</strong></div>';
-	}
 
 
 } // end of class Response

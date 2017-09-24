@@ -45,25 +45,27 @@ Class CompteController {
 	{
 		user_connected_only();
 
-		$membre =  $request->getMembre();
+		$action = ['displayView' => $request->getViewFilename()];
 
-		// affichage des attributs du profil du membre
-		$userView = '';
+		// récupération de l'affichage des attributs du profil du membre
+		$membre =  $request->getMembre();
+		$userViewProfile = '';
 		foreach ($membre->getPublicAttributs() as $attributName => $attributValue)
 		{
-			$userView .= '<p>' . ucfirst($attributName) . ' : ' . $attributValue . '</p>';
+			$userViewProfile .= '<p>' . ucfirst($attributName) . ' : ' . $attributValue . '</p>';
 		}
 
 		// AFFICHAGE ABONNES
 		if (!$membre->is_admin())
 		{
-			return [
-				'file'		=> $request->getViewFilename(),
-				'values'	=> [
-					'user-profile' 	=> $userView,
-					'user-avatar'	=> $membre->get_avatar()
-				]
-			];		
+			$objects = [
+				'membre' => $membre,
+				'values' => new ViewValues(['userProfile' => $userViewProfile])
+			];
+
+			$response = new Response($action, $objects);
+
+			return $response;
 		}
 
 		// AFFICHAGE RESERVE AUX ADMINS
@@ -72,28 +74,28 @@ Class CompteController {
 		$billets = $billetMgr->select_multi();
 		$billetsListe = '';
 		foreach ($billets as $value) {
-			$billetsListe .= '<p><a href="?module=billets&page=billet&id=' . $value->get_id() . '">' . $value->get_titre() . '</a> [ ' . '<a href="?module=billets&page=edition&id=' . $value->get_id() . '">' . 'éditer' . '</a> ][ ' . $value->get_statut() . ' ]</p>';
+			$billetsListe .= '<p><a href="?module=billets&page=lecture&id=' . $value->get_id() . '">' . $value->get_titre() . '</a> [ ' . '<a href="?module=billets&page=edition&id=' . $value->get_id() . '">' . 'éditer' . '</a> ][ ' . $value->get_statut() . ' ]</p>';
 		}
 		if ($billetsListe == '') { $billetsListe = '<p>Aucun billet</p>'; }
 		$billetsNbBrouillon = $billetMgr->count('', "statut = '" . Billet::STATUT['sauvegarder'] . "'");
 		$billetsNbPublication = $billetMgr->count('', "statut = '" . Billet::STATUT['publier'] . "'");
 		$billetsNbSuppression = $billetMgr->count('', "statut = '" . Billet::STATUT['supprimer'] . "'");
 
-		$billetView = [
+		$billetsSum = [
 			'liste'		=>	$billetsListe,
 			'brouillon'	=>	$billetsNbBrouillon,
 			'publie'	=>	$billetsNbPublication,
 			'corbeille'	=>	$billetsNbSuppression
 		];
 
-		return [
-			'file'		=> $request->getViewFilename(),
-			'values'	=> [
-				'user-profile' 	=> $userView,
-				'user-avatar'	=> $membre->get_avatar(),
-				'billets'	=> $billetView
-			]
+		$objects = [
+			'membre' => $membre,
+			'values' => new ViewValues(['userProfile' => $userViewProfile, 'billetsSum' => $billetsSum])
 		];
+
+		$response = new Response($action, $objects);
+
+		return $response;
 	}
 
 	public function actionSubmit($request)

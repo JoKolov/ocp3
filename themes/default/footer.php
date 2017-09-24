@@ -17,7 +17,9 @@ if (!defined('EXECUTION')) exit;
 <footer>
   <div id="page-content" class="container">
   	<div class="row">
-		<?= $hello; ?>
+  		<div class="text-center footer-content">
+			<h6>Projet 3 - Formation Open Classrooms Chef de Projet Multimédia</h6>
+  		</div>
   	</div>
   </div>
 </footer>

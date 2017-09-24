@@ -28,7 +28,7 @@ class MembreMgr {
 	// mapping de la table
 	private $_map; 	// tableau contenant les colonnes de la table
 					// $key = titre colonne // $value = type donnée,*max lenght* (si existe)
-	private $_lastId;	// dernier id de la table Membres
+	private static $_lastId;	// dernier id de la table Membres
 
 
 	//------------------------------------------------------------
@@ -36,7 +36,7 @@ class MembreMgr {
 	
 	public function __construct() {
 		$this->set_map();
-		$this->setLastId();
+		self::setLastId();
 	}
 
 
@@ -44,7 +44,7 @@ class MembreMgr {
 	//------------------------------------------------------------
 	// Getteurs
 	public function getMap()	{ return $this->_map; }
-	public function getLastId()	{ return $this->_lastId; }
+	public function getLastId()	{ return self::$_lastId; }
 
 
 	//------------------------------------------------------------
@@ -257,33 +257,18 @@ class MembreMgr {
 	// Update des données du membre
 	public function select(int $id)
 	{
-		$sql = 'UPDATE ' . self::T_MEMBRES . ' 
-				SET pseudo = :pseudo, 
-					nom = :nom, 
-					prenom = :prenom, 
-					email = :email, 
-					password = :password, 
-					date_birth = :date_birth, 
-					avatar_id = :avatar_id 
-				WHERE id = :id';
+		$sql = 'SELECT * FROM ' . self::T_MEMBRES . ' WHERE id = :id';
 		
 		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute([':id' => $id]);
+		$donnees = $req->fetch(PDO::FETCH_ASSOC);
 		
-		$donnees = array(	':pseudo'		=>	$membre->get_pseudo(),
-							':nom'			=>	$membre->get_nom(),
-							':prenom'		=>	$membre->get_prenom(),
-							':email'		=>	$membre->get_email(),
-							':password'		=>	$membre->get_password(),
-							':date_birth'	=>	$membre->get_date_birth(),
-							':avatar_id'	=>	$membre->get_avatar_id(),
-							':id'			=>	$membre->get_id());
-		
-		if ($req->execute($donnees) !== FALSE)
+		if (!$rep OR !$donnees)
 		{
-			return TRUE; // la requête a bien été effectuée
+			return FALSE; // la requête n'a pas fonctionnee
 		}
 
-		return FALSE; // la requête n'a pas fonctionnee
+		return new Membre($donnees, FALSE);
 	}
 
 

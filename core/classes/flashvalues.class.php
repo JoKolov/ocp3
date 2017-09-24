@@ -53,7 +53,7 @@ class FlashValues {
 			$flash = $_SESSION[self::SESSION_KEY];
 		}
 
-		$this->_flash = $flash;		
+		$this->_flash = $flash;
 	}
 
 
@@ -66,7 +66,7 @@ class FlashValues {
 	 */
 	public function saveInSession()
 	{
-		$_SESSION[self::SESSION_KEY] = $flash;
+		$_SESSION[self::SESSION_KEY] = $this->_flash;
 	}
 
 	/**
@@ -75,6 +75,7 @@ class FlashValues {
 	 */
 	public function removeFromSession()
 	{
+		$_SESSION[self::SESSION_KEY] = null;
 		unset($_SESSION[self::SESSION_KEY]);
 	}
 

@@ -15,7 +15,7 @@ if (!defined('EXECUTION')) exit;
  * -> on renvoi une erreur si l'athentification échoue
  */
 
-Class ConnexionController {
+class ConnexionController {
 
 	//============================================================
 	// Attributs
@@ -51,10 +51,15 @@ Class ConnexionController {
 
 	public function actionView($request)
 	{
-		return [
-			'file'		=> $request->getViewFilename(),
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
+
+		$action = ['displayView' => $request->getViewFilename()];
+		$objects = [
+			'values' => new ViewValues(['userValues' => $values, 'errors' => setViewErrorValues($this->getErrorsTable())])
 		];
+
+		$response = new Response($action, $objects);
+
+		return $response;
 	}
 
 	public function actionSubmit($request)
@@ -68,16 +73,16 @@ Class ConnexionController {
 		// La connexion a échoué, des erreurs sont remontées
 		if (array_key_exists('error', $connexion))
 		{
-			$url = url_format('membres', '', 'connexion', $connexion);
-			
 			// on créer les messages d'erreurs
 			$errorsFound = explode('-', $connexion['error']); // tableau contenant les erreurs séparées par un -
 			$viewErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
 
-			return [
-				'url'		=> $url, 
-				'errors' 	=> $viewErrors
-			];
+			$action = ['redirect' => Response::urlFormat('membres','connexion')];
+			$flash = new FlashValues(['errors' => $viewErrors]);
+
+			$response = new Response($action, ['flash' => $flash]);
+
+			return $response;
 		}
 
 		// La connexion est validée
@@ -88,12 +93,10 @@ Class ConnexionController {
 			)
 		);
 		
-		$url = url_format('membres','','compte');
-		
-		return [
-			'url'		=> $url,
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
-		];
+		$action = ['redirect' => Response::urlFormat('membres','compte')];
+		$response = new Response($action, ['membre' => $membre]);
+
+		return $response;
 	}
 
 

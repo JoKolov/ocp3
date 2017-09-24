@@ -52,10 +52,14 @@ Class InscriptionController {
 	//------------------------------------------------------------
 	public function actionView($request)
 	{
-		return [
-			'file'		=> $request->getViewFilename(),
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
+		$action = ['displayView' => $request->getViewFilename()];
+		$objects = [
+			'values' => new ViewValues(['errors' => setViewErrorValues($this->getErrorsTable())])
 		];
+
+		$response = new Response($action, $objects);
+
+		return $response;
 	}
 
 
@@ -71,8 +75,6 @@ Class InscriptionController {
 		// l'inscription a échoué, des erreurs sont remontées
 		if (array_key_exists('error', $inscription))
 		{
-			$url = url_format('membres', '', 'inscription', $inscription);
-			
 			// on créer les messages d'erreurs
 			$errorsFound = explode('-', $inscription['error']); // tableau contenant les erreurs séparées par un -
 			$viewErrors = setViewErrorValues($this->getErrorsTable(), $errorsFound);
@@ -88,10 +90,12 @@ Class InscriptionController {
 			}*/
 			// fin digression ---
 
-			return [
-				'url'		=> $url, 
-				'errors' 	=> $viewErrors,
-			];
+			$action = ['redirect' => Response::urlFormat('membres','inscription')];
+			$flash = new FlashValues(['errors' => $viewErrors]);
+
+			$response = new Response($action, ['flash' => $flash]);
+
+			return $response;
 		}
 
 		// L'inscription est validée
@@ -102,12 +106,12 @@ Class InscriptionController {
 			)
 		);
 		
-		$url = url_format('membres','','compte');
-		
-		return [
-			'url'		=> $url,
-			'errors'	=> setViewErrorValues($this->getErrorsTable())
-		];
+	
+		$action = ['redirect' => Response::urlFormat('membres','compte')];
+
+		$response = new Response($action, ['membre' => $membre]);
+
+		return $response;
 	}
 
 

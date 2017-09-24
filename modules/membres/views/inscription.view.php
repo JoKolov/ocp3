@@ -24,8 +24,8 @@ if (!defined('EXECUTION')) exit;
 	<div class="row">
 		<div class="col-sm-12">
 			<h3>Inscription</h3>
-			<?= $var['error']['error']; ?>
-			<?= $var['error']['sql']; ?>
+			<?= $errors['error']; ?>
+			<?= $errors['sql']; ?>
 		</div>
 	</div>
 
@@ -37,7 +37,7 @@ if (!defined('EXECUTION')) exit;
 				<input type="text" class="form-control" placeholder="au moins 4 caractères alphanumeriques sans espace, - et _ tolérés" name="pseudo" id="pseudo" value="">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['pseudo']; ?>
+				<?= $errors['pseudo']; ?>
 			</div>
 		</div>
 	
@@ -47,7 +47,7 @@ if (!defined('EXECUTION')) exit;
 				<input type="email" class="form-control" placeholder="monemail@mondomaine.fr" name="email" id="email" value="">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['email']; ?>
+				<?= $errors['email']; ?>
 			</div>
 		</div>
 
@@ -57,7 +57,7 @@ if (!defined('EXECUTION')) exit;
 				<input type="password" class="form-control" placeholder="au moins 8 caractères dont au moins 1 chiffre" name="password" id="password">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['password']; ?>
+				<?= $errors['password']; ?>
 			</div>
 		</div>
 

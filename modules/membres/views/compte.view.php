@@ -24,33 +24,33 @@ if (!defined('EXECUTION')) exit;
 		<div class="col-sm-3">
 			<h3>Services</h3>
 			<?php
-				include('modules/membres/views/nav.view.php');
+				include(SITE_ROOT . 'modules/membres/views/nav.view.php');
 			?>
 		</div>
 
 		<div class="col-sm-9">
 			<h3>Profil</h3>
-			<div class="compte-avatar col-sm-6" style="background-image: url('<?= $var['value']['user-avatar']; ?>');"></div>
+			<div class="compte-avatar col-sm-6" style="background-image: url('<?= $membre->get_avatar(); ?>');"></div>
 			<div class="col-sm-6">
-				<?= $var['value']['user-profile']; ?>
+				<?= $values->getValues('userProfile'); ?>
 			</div>
 
 			<!-- RESERVE AUX ADMIN -->
 			<?php 
-				if (array_key_exists('billets', $var['value']))
+				if ($membre->is_admin())
 				{
 			?>
 				<div class="col-xs-12">
 					<h3>Billets</h3>
 					<div class="btn-group" role="group">
 						<a href="?module=billets&page=edition" type="button" class="btn btn-default" aria-label="Nouveau"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Nouveau</a>
-						<a href="?module=billets&page=brouillons" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillon (<?= $var['value']['billets']['brouillon']; ?>)</a>
-						<a href="?module=billets&page=publications" type="button" class="btn btn-default" aria-label="Publie"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Publié (<?= $var['value']['billets']['publie']; ?>)</a>
-						<a href="?module=billets&page=corbeille" type="button" class="btn btn-default" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (<?= $var['value']['billets']['corbeille']; ?>)</a>
+						<a href="?module=billets&page=brouillons" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillon (<?= $values->getValues('billetsSum')['brouillon']; ?>)</a>
+						<a href="?module=billets&page=publications" type="button" class="btn btn-default" aria-label="Publie"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Publié (<?= $values->getValues('billetsSum')['publie']; ?>)</a>
+						<a href="?module=billets&page=corbeille" type="button" class="btn btn-default" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (<?= $values->getValues('billetsSum')['corbeille']; ?>)</a>
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<?= $var['value']['billets']['liste']; ?>
+							<?= $values->getValues('billetsSum')['liste']; ?>
 						</div>
 					</div>
 				</div>

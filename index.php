@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 09 17
+ * File Last Update : 2017 09 21
  *
  * File Description :
  * -> charge la session
@@ -37,14 +37,9 @@ $request = new Request($_SESSION, $_GET, $_POST, $_FILES);
 
 //------------------------------------------------------------
 // Initialisation du processus MVC
+//debug_var($_SESSION, "index.php :: 40 >> \$_SESSION");
 $response = $request->runController();
-$viewResponse = $request->displayViewOrRedirect($response);
-$request->cleanSessionVar(array('flash', 'view_var'));
-
-
-//------------------------------------------------------------
-// Suppression de la variable d'affichage des données des vues
+$response->runResponseAction();
 unset($_SESSION['view_var']);
-
 
 ?>

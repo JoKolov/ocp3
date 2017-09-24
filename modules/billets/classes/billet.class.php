@@ -31,12 +31,6 @@ class Billet {
 	protected $_image_id;		// BDD : image_id (image à la une)
 	protected $_statut;			// BDD : statut (brouillon, publié, supprimé)
 
-	// spécifiques à la classe
-	protected $_auteur;			// instance Membre de l'auteur (lié à $_auteur_id)
-	protected $_image; 			// instance Image de l'image à la une (lié à $_image_id)
-	protected $_titre_temp;
-	protected $_contenu_temp;
-	protected $_extrait_temp;
 
 	// constantes de la classe
 	const TITRE_MAX_LENGHT 	= 255;
@@ -69,10 +63,6 @@ class Billet {
 	public function get_image_id()		{ return $this->_image_id; 		}
 	public function get_statut()		{ return $this->_statut; 		}
 
-	// spécifiques à la classe
-	public function get_auteur()		{ return $this->_auteur; 		}
-	public function get_image()			{ return $this->_image; 		}
-
 
 
 	//------------------------------------------------------------
@@ -88,10 +78,6 @@ class Billet {
 	public function set_date_modif($date)			{ return $this->setteur_date_modif($date); 		}
 	public function set_image_id($id)				{ return $this->setteur_image_id($id); 			}
 	public function set_statut($statut)				{ return $this->setteur_statut($statut); 		}
-
-	// spécifiques à la classe
-	public function set_auteur()					{ return $this->setteur_auteur(); 				}
-	public function set_image()						{ return $this->setteur_image(); 				}
 
 
 	//====================
@@ -174,6 +160,7 @@ class Billet {
 	//====================
 	protected function setteur_auteur_id($id)
 	{
+		$id = (int) $id;
 		if (is_int($id) AND $id > 0)
 		{
 			$this->_auteur_id = $id;
@@ -190,7 +177,8 @@ class Billet {
 	//====================
 	protected function setteur_date_publie($date)
 	{
-		return FALSE;
+		$this->_date_publie = $date;
+		return TRUE;
 	}
 
 
@@ -199,7 +187,8 @@ class Billet {
 	//====================
 	protected function setteur_date_modif($date)
 	{
-		return FALSE;
+		$this->_date_modif = $date;
+		return TRUE;
 	}
 
 
@@ -208,6 +197,14 @@ class Billet {
 	//====================
 	protected function setteur_image_id($id)
 	{
+		$id = (int) $id;
+		if (is_int($id) AND $id > 0)
+		{
+			$this->_image_id = $id;
+			return TRUE;
+		}
+
+		// Erreur
 		return FALSE;
 	}
 
@@ -232,46 +229,33 @@ class Billet {
 	}
 
 
-	//====================
-	// SET AUTEUR
-	//====================
-	protected function setteur_auteur()
-	{
-		return FALSE;
-	}
-
-
-	//====================
-	// SET IMAGE
-	//====================
-	protected function setteur_image()
-	{
-		return FALSE;
-	}
-
-
-
 	//------------------------------------------------------------
 	// Hydratation
 	/**
-	 * [setFull permet d'hydrater l'objet en appelant les méthodes selon les clés du tableau en argument]
+	 * [ setValues permet d'hydrater l'objet en appelant les méthodes selon les clés du tableau en argument]
 	 * @param array $donnees [tableau contenant des $key associées à des $value]
 	 * @return   	TRUE si toutes les données ont été setté correctement, FALSE si aucune donnée n'a été envoyée, string contenant le nom des données non settés
 	 */
 
-	public function setFull(array $donnees) {
+	public function setValues(array $donnees) {
 		foreach ($donnees as $key => $value)
 		{
 			$method = 'set_' . $key;
 			if (method_exists($this, $method))
 			{
-				if (!$this->$method($value))
+				if ($this->$method($value))
 				{
-					$donnees[$key] = FALSE;
+					unset($donnees[$key]);
 				}
 			}
 		}
-		return $donnees;
+
+		if (in_array(FALSE, $donnees))
+		{
+			return $donnees;
+		}
+
+		return $this;
 	}
 
 

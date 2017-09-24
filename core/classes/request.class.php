@@ -457,14 +457,10 @@ class Request {
 		$module = $this->getModuleName();
 		$controllerName = $this->getControllerName();
 
-		$this->chargementConstantesModule();
-
 		// Page d'accueil ou erreur 404
-		if ($module == 'defaut')
+		if ($module == 'defaut' OR in_array($controllerName, ['home', '404']))
 		{
-			return [
-				'file'	=> SITE_ROOT . "themes/default/{$controllerName}.php"
-			];
+			return new Response(['displayView' => SITE_ROOT . "themes/default/{$controllerName}.php"]);
 		}
 
 
@@ -478,19 +474,12 @@ class Request {
 		// Aucune méthode n'existe, on lance un affichage brut de la page
 		if (!method_exists($controller, $actionMethod))
 		{
-			return [
-				'file'	=> $this->getViewFilename()
-			];
+			return new Response(['displayView' => $this->getViewFilename()]);
 		}
 
-		$view = $controller->$actionMethod($this);
+		$response = $controller->$actionMethod($this);
 
-		if (isset($this->session()['flash']))
-		{
-			$view['errors'] = $this->session()['flash'];
-		}
-
-		return $view;
+		return $response;
 	}
 
 
@@ -626,7 +615,7 @@ class Request {
 	 */
 	public function getGlobalVar(string $tableName, $specificElement = null)
 	{
-		if (!in_array($tableName, ['session', 'post', 'files', 'cookie', 'server']))
+		if (!in_array($tableName, ['session', 'get', 'post', 'files', 'cookie', 'server']))
 		{
 			throw new Exception("{$tableName} n'existe pas dans Request", 1);
 		}
@@ -703,30 +692,6 @@ class Request {
 		$_SESSION = $this->session();
 		return $this->session();
 	}
-
-
-
-
-
-
-
-
-
-
-
-	//////////
-	///> Contrôle des données de la classe
-	//////////
-	public function getMVC()
-	{
-		debug_var($this->getModuleName());
-		debug_var($this->getControllerName());
-		debug_var($this->getControllerFilename());
-		debug_var($this->getViewName());
-		debug_var($this->getViewFilename());
-	}
-
-
-
-}
+	
+} // End of class Request
 ?>

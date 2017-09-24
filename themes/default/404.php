@@ -18,7 +18,7 @@ if (!defined('EXECUTION')) exit;
 		<div class="jumbotron">
 		  <h1>Oups !</h1>
 		  <p>on t'as dirigé vers une mauvaise adresse :/</p>
-		  <p><a class="btn btn-primary btn-lg" href="index.php" role="button">Retour à l'accueil</a></p>
+		  <p><a class="btn btn-primary btn-lg" href="index.php" role="button">Direction l'accueil <i class="fa fa-angle-double-right" aria-hidden="true"></i></a></p>
 		</div>
 	</div>
 </section>
