@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Modèle de la page enregistrer (un billet)
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> contrôle les données envoyées par le formulaire
@@ -69,49 +69,49 @@ function action_enregistrer()
 			// toutes les données sont valides
 			if ($erreurs['error'] == '')
 			{
-				// on doit vérifier 2 choses :
-				// 1) est-ce un nouveau billet ou une modif d'un billet existant ?
-				// ==> INSERT ou UPDATE
-				// 2) doit-il être publié ou simplement enregistré en brouillon ?
-				// ==> $billet->set_statut();
-				// on pourra ainsi mettre à jour l'objet Billet avant l'insertion en BDD
-				
-				// 1) $billet->get_id();
-				// 2) $_POST['publier'] ou $_POST['sauvegarder']
-
 				// Hydratation du billet
 				// -> auteur_id
-				// -> date_publie
-				// -> date_modif
 				// -> image_id
 				// -> statut
 				
+				// ==========
+				// ID du Billet
 				// on vérifie s'il s'agit d'un billet existant
+				// si c'est le cas, on intègre l'id du billet dans l'instance $billet
+				// et on récupère prévoit le renvoi de l'id en méthode _GET
 				if (isset($_POST['id']) AND $billet->set_id($_POST['id']))
 				{
 					$get['id'] = $_POST['id'];
 				}
 
-
+				// ==========
+				// AUTEUR du Billet
 				$membre = $_SESSION['membre'];
 				$billet->set_auteur_id($membre->get_id());
 
+				// ==========
+				// IMAGE du Billet
+// +++++ TBD +++++
+
+				// ==========
+				// STATUT du billet
 				if (isset($_POST['publier']))	{ $billet->set_statut(Billet::STATUT['publier']); }
 				else 							{ $billet->set_statut(Billet::STATUT['sauvegarder']); }
 
-
 				$billetMgr = new BilletMgr;
+
 				// INSERT SQL
 				// ==========>
 				if (is_null($billet->get_id()))
 				{
 					if (!$billetMgr->insert($billet))
 					{
-						$get['error'] .= 'sql';
+						$get['error'] .= 'insert_';
 						return $get;
 					}
 					else
 					{
+						// on récupère l'id du billet inséré
 						$get['id'] = $billetMgr->get_last_billets_id();
 					}
 				}
@@ -120,11 +120,14 @@ function action_enregistrer()
 				// ==========>
 				else
 				{
-
+					if (!$billetMgr->update($billet))
+					{
+						$get['error'] .= 'update_';
+						return $get;
+					}
 				}
 
-
-				
+				// Insertion confirmée
 				unset($get['error']);
 				$get['success'] = TRUE;
 				return $get;	

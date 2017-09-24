@@ -7,36 +7,12 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de l'inscription
  *
- * File Last Update : 2017 08 24
+ * File Last Update : 2017 09 13
  *
  * File Description :
  * -> affiche le formulaire d'inscription
  * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
  */
-
-//------------------------------------------------------------
-// Génération des valeurs à afficher
-set_view_var();
-$var = $_SESSION['view_var'];
-
-
-
-
-//------------------------------------------------------------
-// Récupération des données valides du formulaire rempli la fois précédente
-// Affichera ces données dans les champs correspondants
-$ePOST = array('login' => '', 'email' => '');
-
-function verifPOST($ePOST)
-{
-	foreach ($ePOST as $key => $value) {
-		if(isset($_SESSION[$key])) { $ePOST[$key] = &$_SESSION[$key]; }
-	}
-	return $ePOST;
-}
-
-$ePOST = verifPOST($ePOST);
-
 
 //------------------------------------------------------------
 // HTML
@@ -48,47 +24,40 @@ $ePOST = verifPOST($ePOST);
 	<div class="row">
 		<div class="col-sm-12">
 			<h3>Inscription</h3>
-			<?php
-				/**
-				 * Affichage des erreurs
-				 */
-				if (isset($var['error']))
-				{
-				 	echo $var['error']['error'];
-				}
-			?>
+			<?= $errors['error']; ?>
+			<?= $errors['sql']; ?>
 		</div>
 	</div>
 
-	<form method="post" action="?module=membres&action=inscription" class="form-horizontal">
+	<form method="post" action="?module=membres&page=inscription&action=submit" class="form-horizontal">
 	
 		<div class="form-group">
-			<label for="pseudo" class="col-sm-2 control-label"><?= $var['label']['pseudo']; ?></label>
+			<label for="pseudo" class="col-sm-2 control-label">Pseudo</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" placeholder="<?= $var['placeholder']['pseudo']; ?>" name="login" id="login" value="<?php echo $ePOST['login']; ?>">
+				<input type="text" class="form-control" placeholder="au moins 4 caractères alphanumeriques sans espace, - et _ tolérés" name="pseudo" id="pseudo" value="">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['login']; ?>
+				<?= $errors['pseudo']; ?>
 			</div>
 		</div>
 	
 		<div class="form-group">
-			<label for="email" class="col-sm-2 control-label"><?= $var['label']['email']; ?></label>
+			<label for="email" class="col-sm-2 control-label">Adresse Email</label>
 			<div class="col-sm-10">
-				<input type="email" class="form-control" placeholder="<?= $var['placeholder']['email']; ?>" name="email" id="email" value="<?php echo $ePOST['email']; ?>">
+				<input type="email" class="form-control" placeholder="monemail@mondomaine.fr" name="email" id="email" value="">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['email']; ?>
+				<?= $errors['email']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="password" class="col-sm-2 control-label"><?= $var['label']['password']; ?></label>
+			<label for="password" class="col-sm-2 control-label">Mot de passe</label>
 			<div class="col-sm-10">
-				<input type="password" class="form-control" placeholder="<?= $var['placeholder']['password']; ?>" name="password" id="password">
+				<input type="password" class="form-control" placeholder="au moins 8 caractères dont au moins 1 chiffre" name="password" id="password">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['password']; ?>
+				<?= $errors['password']; ?>
 			</div>
 		</div>
 

@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Controller
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 09 11
  *
  * File Description :
  * -> vérifie l'intégrité des fichiers du module
@@ -26,8 +26,8 @@ session_start();
 //------------------------------------------------------------
 // constantes du fichier
 define ('MODULE_MEMBRES', 'membres');	// nom du module
-require ('modules/membres/config/constantes.cfg.php');
 
+require ('modules/membres/config/constantes.cfg.php');
 
 
 //------------------------------------------------------------

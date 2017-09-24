@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : fontions
  * FILE/ROLE : Common (fonctions communes)
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 09 20
  *
  * File Description :
  * -> contient des fonctions basiques communes à l'appli
@@ -22,7 +22,7 @@ if (!defined('EXECUTION')) exit;
  */
 function gene_autoload(string $dossier, $class)
 {
-	$file = SITE_ROOT . '/' . $dossier . strtolower($class) . '.class.php';
+	$file = $dossier . strtolower($class) . '.class.php';
 	if(file_exists($file)) { require($file); }
 }
 
@@ -35,14 +35,14 @@ function gene_autoload(string $dossier, $class)
  */
 function autoload_modules($class)
 {
-	$dir = SITE_ROOT . '/modules';
-	$scan = scandir($dir); // scan du dossier des modules
+	$dir = SITE_ROOT . 'modules/';
+	$modules = scandir($dir); // scan du dossier des modules
 
-	foreach ($scan as $key => $dossier)
+	foreach ($modules as $module)
 	{
-		if (!preg_match("#\.#", $dossier)) // si c'est bien un dossier (et pas un fichier)
+		if (!preg_match("#\.#", $module)) // si c'est bien un dossier (et pas un fichier)
 		{
-			gene_autoload('modules/' . $dossier . '/classes/', $class);
+			gene_autoload($dir . $module . '/classes/', $class);
 		}
 	}
 }
@@ -70,11 +70,11 @@ function get_hash($text) {
 function control_post(array $array, array $post) {
 	
 	// contrôle de $post
-	foreach ($array as $key => $value) {
-		if(!isset($post[$key]) OR $post[$key] == '')
+	foreach ($array as $arrayKey => $arrayValue) {
+		if(!isset($post[$arrayKey]) OR $post[$arrayKey] == '')
 		{
-			if(!isset($erreur)) { $erreur = $key; }
-			else /************/	{ $erreur .= $key; }
+			if(!isset($erreur)) { $erreur = $arrayKey; }
+			else /************/	{ $erreur .= $arrayKey; }
 		}
 	}
 
@@ -97,12 +97,11 @@ function url_format(string $module, string $action = '', string $page ='', array
 	if(isset($param))
 	{
 		foreach ($param as $key => $value) {
-			debug_var($param[$key]);
 			$url .= '&' . $key . '=' . $value;
 		}
 	}
 
-	return $url;
+	return APP['url-website'] . $url;
 }
 
 
@@ -204,10 +203,195 @@ function set_view_var($module = null, $page = null, $get = null)
 
 
 
+
+
+/////   DESSOUS = A PARTIR DU 11 SEPT 2017   \\\\\
+//------------------------------------------------------------
+// Cherche un élément manquant dans un formulaire
+/**
+ * [formMissingRequiredFields description]
+ * @param  array  $formReqFields  [description]
+ * @param  array  $formUserFields [description]
+ * @return [type]                 [description]
+ */
+function formMissingRequiredFields(array $formReqFields, array $formUserFields)
+{
+	$missingFields = '';
+	
+	foreach($formReqFields as $field => $required)
+	{
+		if ($required AND (is_null($formUserFields[$field]) OR $formUserFields[$field] == ''))
+		{
+			if ($missingFields == '')
+			{
+				$missingFields .= $field;
+			}
+			else
+			{
+				$missingFields .= '-' . $field;
+			}
+		}
+	}
+
+	if ($missingFields == '')
+	{
+		return;
+	}
+
+	return $missingFields;
+}
+
+
+
+//------------------------------------------------------------
+// Cherche un élément manquant dans un formulaire
+/**
+ * [missingRequiredFields description]
+ * @param  array  $formReqFields  [description]
+ * @param  array  $formUserFields [description]
+ * @return [type]                 [description]
+ */
+function missingRequiredFields(array $formReqFields, array $formUserFields)
+{
+	foreach($formReqFields as $field => $required)
+	{
+		if ($required AND !is_null($formUserFields[$field]) AND $formUserFields[$field] != '')
+		{
+			unset($formReqFields[$field]);
+		}
+	}
+
+	return $formReqFields;
+}
+
+
+
+//------------------------------------------------------------
+// Création du tableau des variables pour une vue spécifique
+/**
+ * setViewVar() créer les variables d'une vue
+ * @param [type] $module [description]
+ * @param [type] $page   [description]
+ * @param [type] $get    [description]
+ */
+function setViewVar($module, $page, $get)
+{
+	// setteur
+	if (is_null($module) AND isset($_GET['module']))	{ $module = &$_GET['module']; }
+	if (is_null($page) AND isset($_GET['page']))		{ $page = &$_GET['page']; }
+	if (is_null($get) AND isset($_GET))					{ $get = $_GET; }
+
+	// invlidité de la fonction
+	if (is_null($module) OR is_null($page))
+		{ return FALSE; }
+
+	// on retire de la var $_GET toutes les lignes inutiles
+	foreach (MVC_GET as $value) {
+		if (isset($get[$value])) { unset($get[$value]); }
+	}
+
+	// on travaille avec une constante qui existe !
+	// exemple : MEMBRES_CONNEXION
+	$tableConst = strtoupper($module) . "_" . strtoupper($page);
+	if (defined($tableConst)) 
+	{
+		// on récupère le tableau des constantes
+		$tableConst = constant($tableConst);
+
+		$view = [];
+
+		// on parcours le tableau de constantes 
+		// pour trouver les créer les variables qui nous interessent
+		foreach ($tableConst as $key => $value) {
+			// on extrait le type et la clé de la clé du tableau des constantes
+			// exemple : $tableConst[$key = 'label.pseudo']
+			// on extrait : $type = label et $cle = pseudo
+			list($type, $cle) = explode('.', $key);
+			// Si le type contient _GET, on sait qu'il est dépandant d'une valeur $_GET
+			if (preg_match("#^_GET#", $type))
+			{
+				$type = str_replace('_GET', '', $type);
+				if (!isset($get[$type]) OR !preg_match("#" . $cle . "#", $get[$type]) AND $cle <> $type)
+				{
+					$value = '';
+				}
+			}
+			if ($type == 'error' AND $value <> '')
+			{ $value = error_format_form($value); }
+
+			$view[$type][$cle] = $value;
+		}
+		$_SESSION['view_var'] = $view;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+
+
+//------------------------------------------------------------
+// Création du tableau des variables pour une vue spécifique
+function setViewErrorValues(array $errors, array $errorsToPublish = array())
+{
+	if (empty($errorsToPublish) AND array_key_exists('error', $errors))
+	{
+		$errors['error'] = '';
+	}
+	foreach ($errors as $errorKey => $errorMsg)
+	{
+		if ($errorKey <> 'error' AND !in_array($errorKey, $errorsToPublish))
+		{
+			$errors[$errorKey] = '';
+		}
+	}	
+	return $errors;
+}
+
+
+
+//------------------------------------------------------------
+// formatage dans les balises alert boostrap
+function errorFormatHTML($error)
+{
+	$openBal = '<div class="alert alert-danger" role="alert"><strong>';
+	$closeBal = '</strong></div>';
+
+	if (is_string($error))
+	{
+		return $openBal . $error . $closeBal;
+	}
+
+	if (is_array($error))
+	{
+		foreach ($error as $errorKey => $errorText)
+		{
+			if ($errorText <> '')
+			{
+				$error[$errorKey] = $openBal . $errorText . $closeBal;
+			}
+		}
+		return $error;
+	}
+
+	return '';
+
+	
+}
+
+
+
+
+
+
 //------------------------------------------------------------
 // DEBUG -> var_dump dans le code
-function debug_var($var)
+function debug_var($var, $com = null)
 {
+	if (!is_null($com))
+	{
+		echo $com . '<br />';
+	}
 	echo '<pre>';
 	echo var_dump($var);
 	echo '</pre>';

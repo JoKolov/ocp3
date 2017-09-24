@@ -7,10 +7,15 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Billet Manager
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> gestion des images dans la BDD
+ *
+ * ---
+ * Classes nécessaires :
+ * SQLmgr
+ * Billet
  */
 
 class BilletMgr {
@@ -26,15 +31,15 @@ class BilletMgr {
 	const LIST_BILLETS_INSERT 		= '(titre, contenu, extrait, auteur_id, date_publie, date_modif, image_id, statut)';
 
 	// mapping de la table
-	private $_map; 	// tableau contenant les colonnes de la table
-					// $key = titre colonne // $value = type donnée,*max lenght* (si existe)
+	private static $_map; 	// tableau contenant les colonnes de la table
+							// $key = titre colonne // $value = type donnée,*max lenght* (si existe)
 
 
 	//------------------------------------------------------------
 	// Constructeur
 	
 	public function __construct() {
-		$this->set_map();
+		self::set_map();
 		self::set_last_billets_id();
 	}
 
@@ -61,27 +66,29 @@ class BilletMgr {
 	//------------------------------------------------------------
 	// Setteurs
 
-	public function set_map()									{ return $this->setteur_map(); 					}
+	private static function set_map()							{ return self::setteur_map(); 					}
 	private static function set_last_billets_id($id = null)		{ return self::setteur_last_billets_id($id); 	}
 
 	/**
 	 * set_map récupère les noms des colonnes de la table membres
 	 */
-	public function setteur_map()
+	private static function setteur_map()
 	{
-		$sql = 'SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
-				FROM INFORMATION_SCHEMA.COLUMNS 
-				WHERE TABLE_NAME = "' . self::TABLE_BILLETS . '" AND TABLE_SCHEMA = "' . self::DB_NAME . '" 
-				ORDER BY ORDINAL_POSITION';
-		$req = SQLmgr::prepare($sql);
-		if($req->execute() !== FALSE) {
-			while($mapping = $req->fetch())
-			{
-				$this->_map[$mapping["COLUMN_NAME"]] = $mapping["DATA_TYPE"] . ',' . $mapping['CHARACTER_MAXIMUM_LENGTH'];
+		if (!isset(self::$_map))
+		{
+			$sql = 'SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH 
+					FROM INFORMATION_SCHEMA.COLUMNS 
+					WHERE TABLE_NAME = "' . self::TABLE_BILLETS . '" AND TABLE_SCHEMA = "' . self::DB_NAME . '" 
+					ORDER BY ORDINAL_POSITION';
+			$req = SQLmgr::prepare($sql);
+			if($req->execute() !== FALSE) {
+				while($mapping = $req->fetch())
+				{
+					self::$_map[$mapping["COLUMN_NAME"]] = $mapping["DATA_TYPE"] . ',' . $mapping['CHARACTER_MAXIMUM_LENGTH'];
+				}
 			}
-			return $this->_map;
 		}
-		return FALSE;
+		return self::$_map;
 	}
 
 
@@ -160,21 +167,25 @@ class BilletMgr {
 	// Modifier un billet
 	public function update(Billet $billet)
 	{
-		$sql = 'UPDATE ' . self::TABLE_IMAGES . ' 
-				SET source = :source, 
-					billet = :billet, 
-					vignette = :vignette, 
-					avatar = :avatar, 
-					description = :description 
+		$sql = 'UPDATE ' . self::TABLE_BILLETS . ' 
+				SET titre 		= :titre, 
+					contenu 	= :contenu, 
+					extrait 	= :extrait, 
+					auteur_id 	= :auteur_id, 
+					date_modif 	= NOW(), 
+					image_id 	= :image_id, 
+					statut 		= :statut 
 				WHERE id=:id';
 		
 		$values = array(
-			':source'		=> $image->get_source(),
-			':billet'		=> $image->get_billet(),
-			':vignette'		=> $image->get_vignette(),
-			':avatar'		=> $image->get_avatar(),
-			':description'	=> $image->get_description(),
-			':id'			=> $image->get_id());
+			':titre'		=> $billet->get_titre(),
+			':contenu'		=> $billet->get_contenu(),
+			':extrait'		=> $billet->get_extrait(),
+			':auteur_id'	=> $billet->get_auteur_id(),
+			':image_id'		=> 0,
+			':statut'		=> $billet->get_statut(),
+			':id'			=> $billet->get_id()
+			);
 
 		$req = SQLmgr::prepare($sql);
 
@@ -185,36 +196,38 @@ class BilletMgr {
 
 	//-------------------------
 	// Récupérer un billet
-	// $critere = array($key = colonne, $value = valeur recherchée)
-	public function select(array $critere)
+	// $id = id du billet à récupérer
+	public function select(int $id)
 	{
-		foreach ($critere as $key => $value) {
-			if (!isset($condition))
-			{
-				$condition = $key . ' = ' . $value;
-			} 
-			else
-			{
-				$condition .= ' AND ' . $key . ' = ' . $value;
-			}
+		if ($id <= 0)
+		{
+			return FALSE;
 		}
 
-		$sql = 'SELECT id, source, billet, vignette, avatar, description 
+		$sql = 'SELECT id, 
+			titre, 
+			contenu, 
+			extrait, 
+			auteur_id, 
+			DATE_FORMAT(date_publie, "%d/%m/%Y à %k\h%H") AS date_publie, 
+			DATE_FORMAT(date_modif, "%d/%m/%Y à %k\h%H") AS date_modif, 
+			image_id, 
+			statut 
 				FROM ' . self::TABLE_BILLETS . ' 
-				WHERE ' . $condition;
+				WHERE id=' . $id;
 
 		$req = SQLmgr::prepare($sql);
 		$rep = $req->execute();
+		$donnees = $req->fetch(PDO::FETCH_ASSOC);
 
-		if ($rep)
+		if (!$rep OR !$donnees)
 		{
-			// on renvoi un tableau avec toutes les données de l'image en question
-			$donnees = $req->fetch(PDO::FETCH_ASSOC);
-			$image = New Image;
-			$image->setFull($donnees, TRUE); // on hydrate l'objet image avec les données de la BDD (TRUE indique à la fonction que les données proviennent de la BDD)
-			return $image;
+			return FALSE;
 		}
-		return FALSE; // image non trouvée
+
+		$billet = New Billet;
+		$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
+		return $billet; // on renvoi le billet hydraté
 	}
 
 
@@ -223,9 +236,9 @@ class BilletMgr {
 	// $id = id du billet à supprimer
 	public function delete(int $id)
 	{
-		if ($id > 1)
+		if ($id > 0)
 		{
-			$sql = 'DELETE FROM ' . self::TABLE_IMAGES . '
+			$sql = 'DELETE FROM ' . self::TABLE_BILLETS . '
 					WHERE id =' . $id;
 
 			$req = SQLmgr::prepare($sql);
@@ -233,5 +246,109 @@ class BilletMgr {
 			return $req->execute();
 		}
 		return FALSE;
+	}
+
+
+
+	//-------------------------
+	// Récupérer plusieurs billets
+	// $where 	: array('colonne' => 'valeur')
+	// $limit 	: array(int - nombre de résultats max => int - à partir de quelle valeur commencer)
+	// $sortby 	: array('colonne' => 'ordre ASC/DESC')
+	public function select_multi(array $where = null, array $limit = null, array $orderby = null)
+	{
+
+		// préparation des paramètres conditionnels de la requête
+		// WHERE
+		$sql_where = '';
+		if (!is_null($where))
+		{
+			foreach ($where as $key => $value) {
+				if ($sql_where == '')
+				{
+					$sql_where = ' WHERE ' . $key . ' = ' . $value;
+				}
+				else
+				{
+					$sql_where .= ' AND ' . $key . ' = ' . $value;
+				}
+			}
+		}
+		
+		// LIMIT ET OFFSET
+		$sql_limit = '';
+		if (!is_null($limit))
+		{ 
+			$sql_limit = ' LIMIT ' . $limit[0] . ' OFFSET ' . $limit[1] - 1;
+		}
+		
+		// ORDER BY
+		$sql_orderby = '';
+		if (!is_null($orderby))
+		{ 
+			foreach ($orderby as $key => $value) {
+				if ($sql_orderby == '')
+				{
+					$sql_orderby = ' ORDER BY ' . $key . ' ' . $value;
+				}
+				else
+				{
+					$sql_orderby .= ', ' . $key . ' ' . $value;
+				}
+			}
+		}		
+
+
+		$sql = 'SELECT id, titre, contenu, extrait, auteur_id, date_publie, date_modif, image_id, statut 
+				FROM ' . self::TABLE_BILLETS . $sql_where . $sql_orderby . $sql_limit;
+
+		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute();
+
+		if ($rep)
+		{
+			$billets = [];
+			while ($donnees = $req->fetch(PDO::FETCH_ASSOC)) {
+				$billet = New Billet;
+				$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
+				array_push($billets, $billet);
+			}
+
+			return $billets; // on renvoi le billet hydraté
+		}
+		else
+		{
+			return FALSE; // erreur dans la requête
+		}
+	}
+
+
+	//-------------------------
+	// Compter le nombre de billets selon une condition
+	// $colonne = (string) nom de la colonne sur laquelle se fait le comptage
+	// $where = (string) condition WHERE (ex : statut = Brouillon)
+	public function count(string $colonne = '*', string $where = '')
+	{
+		if ($colonne <> '*' AND !array_key_exists($colonne, self::$_map))
+		{ $colonne = '*'; }
+
+		if ($where <> '') { $where = ' WHERE ' . $where; }
+
+		$sql = 'SELECT COUNT(' . $colonne . ') FROM ' . self::TABLE_BILLETS . $where;
+
+		$req = SQLmgr::prepare($sql);
+
+		$repSQL = $req->execute();
+
+		if ($repSQL)
+		{
+			$tableNbRecherche = $req->fetch();
+
+			return $tableNbRecherche[0];
+		}
+		else
+		{
+			return -1;
+		}
 	}
 }

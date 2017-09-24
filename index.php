@@ -6,7 +6,7 @@
  * INDEX.PHP
  * FILE/ROLE : fichier parent
  *
- * File Last Update : 2017 08 24
+ * File Last Update : 2017 09 21
  *
  * File Description :
  * -> charge la session
@@ -16,22 +16,10 @@
  * -> renvoi la vue appropriée
  */
 
-
-
-/**
- * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- * MEMO
- * -> Créer une fonction pour charger les fichiers CORE
- * -> Créer le contrôle des contrôleurs
- * -> Gérer l'affichage avec plus de précision
- * <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
- */
-
-
 //------------------------------------------------------------
 // Initialisation des constantes
 define('EXECUTION', TRUE); // limiter les accès aux fichiers à l'appli
-define('SITE_ROOT', __DIR__);
+define('SITE_ROOT', __DIR__ . '/');
 
 
 //------------------------------------------------------------
@@ -42,21 +30,16 @@ else { echo "Erreur !: echec de l'initialisation <br /> Fichier init.php introuv
 
 
 //------------------------------------------------------------
-// Appel du contrôleur approprié
-get_controller();
-
+// Initialisation du processus MVC
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+$request = new Request($_SESSION, $_GET, $_POST, $_FILES);
 
 
 //------------------------------------------------------------
-// Appel de la vue appropriée
-if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); } // activation de la session si elle ne l'ai pas déjà
-get_view();
-
-
-debug_var($_SESSION['debug']);
-unset($_SESSION['debug']);
-//------------------------------------------------------------
-// Suppression de la variable d'affichage des données des vues
+// Initialisation du processus MVC
+//debug_var($_SESSION, "index.php :: 40 >> \$_SESSION");
+$response = $request->runController();
+$response->runResponseAction();
 unset($_SESSION['view_var']);
 
 ?>

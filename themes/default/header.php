@@ -85,7 +85,7 @@ else
               } else {
             ?>
             <li role="presentation" <?php echo $active['compte']; ?>><a href="?module=membres&page=compte" title="Consulter son compte"><i class="fa fa-address-card user-compte-icon user-icon" aria-hidden="true"></i> Mon compte</a></li>
-            <li role="presentation" <?php echo $active['deconnexion']; ?>><a href="?module=membres&action=deconnexion" title="Se déconnecter"><i class="fa fa-user-times user-deconnexion-icon" aria-hidden="true"></i></a></li>
+            <li role="presentation" <?php echo $active['deconnexion']; ?>><a href="?module=membres&page=deconnexion" title="Se déconnecter"><i class="fa fa-user-times user-deconnexion-icon" aria-hidden="true"></i></a></li>
             <?php
               }
             ?>

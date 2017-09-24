@@ -7,34 +7,12 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Membres
  * FILE/ROLE : Vue de la page modification du compte utilisateur
  *
- * File Last Update : 2017 08 17
+ * File Last Update : 2017 09 20
  *
  * File Description :
  * -> affiche le formulaire de tous les champs du membre
  * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
  */
-
-//------------------------------------------------------------
-// Protocoles de sécurités
-user_connected_only();
-
-
-
-//------------------------------------------------------------
-// code à mettre dans le contrôleur
-$membre = $_SESSION['membre']; // on récupère l'objet membre contenu dans la variable $_SESSION
-$formValue = $membre->getAttributs(); // on récupère tous les attibuts de l'objet dans un tableau
-foreach ($formValue as $key => $value) {
-	if($value <> '') { $formValue[$key] = ' value="' . $value . '"'; } // on formate en code HTML
-}
-
-
-//------------------------------------------------------------
-// Génération des valeurs à afficher
-set_view_var();
-$var = $_SESSION['view_var'];
-
-
 //------------------------------------------------------------
 // HTML
 ?>
@@ -46,111 +24,121 @@ $var = $_SESSION['view_var'];
 		</div>
 
 		<div class="col-sm-10">
-			<h3 class="text-right">Modifier mon compte : <?php echo $_SESSION['pseudo']; ?></h3>
+			<h3 class="text-right">Modifier mon compte : <?= $membre->get_pseudo();; ?></h3>
 
 			<?php
-			if ($var['success']['1'] <> '') {
+			if (isset($success)) {
 			?>
 				<div class="alert alert-success" role="alert">
-				  <strong><?= $var['success']['1']; ?></strong>
+				  <strong><?= $success; ?></strong>
 				</div>
 			<?php 
 			}
-			elseif (isset($var['error'])) {
-				
-				echo $var['error']['error'];
-
-			}	
+			else
+			{
+				echo $errors['error'];
+			}
 			?>
 		</div>
 	</div>	
 	
 
 
-	<form method="post" action="?module=membres&action=modification" enctype="multipart/form-data" class="form-horizontal">
+	<form method="post" action="?module=membres&page=modification&action=submit" enctype="multipart/form-data" class="form-horizontal">
 		<div class="form-group">
-			<label for="image" class="col-sm-2 control-label"><?= $var['label']['avatar']; ?></label>
+			<label for="avatar" class="col-sm-2 control-label">Avatar</label>
 			<div class="col-sm-10">
 				<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
-				<input type="file" class="form-control" placeholder="votre image" name="image" id="image">
+				<input type="file" class="form-control" placeholder="votre image" name="avatar" id="avatar">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['avatar']; ?>
+				<?= $errors['avatar']; ?>
+				<?= $errors['avatar.upload']; ?>
+				<?= $errors['avatar.source']; ?>
+				<?= $errors['avatar.format']; ?>
+				<?= $errors['avatar.sqlupdate']; ?>
+				<?= $errors['avatar.sqlinsert']; ?>
+				<?= $errors['avatar.sql']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="pseudo" class="col-sm-2 control-label"><?= $var['label']['pseudo']; ?></label>
+			<label for="pseudo" class="col-sm-2 control-label">Pseudo</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control col-xs-12 col-sm-8" placeholder="pseudo" name="pseudo" id="pseudo" <?= $formValue['pseudo']; ?>>
+				<input type="text" class="form-control col-xs-12 col-sm-8" placeholder="mon pseudo" name="pseudo" id="pseudo" value="<?= $membre->get_pseudo(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['pseudo']; ?>
+				<?= $errors['pseudo']; ?>
+				<?= $errors['pseudo.req']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="nom" class="col-sm-2 control-label"><?= $var['label']['nom']; ?></label>
+			<label for="prenom" class="col-sm-2 control-label">Prénom</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" placeholder="nom" name="nom" id="nom" <?= $formValue['nom']; ?>>
+				<input type="text" class="form-control" placeholder="mon prenom" name="prenom" id="prenom"  value="<?= $membre->get_prenom(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['nom']; ?>
+				<?= $errors['prenom']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="prenom" class="col-sm-2 control-label"><?= $var['label']['prenom']; ?></label>
+			<label for="nom" class="col-sm-2 control-label">Nom</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" placeholder="prenom" name="prenom" id="prenom" <?= $formValue['prenom']; ?>>
+				<input type="text" class="form-control" placeholder="mon nom" name="nom" id="nom" value="<?= $membre->get_nom(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['prenom']; ?>
+				<?= $errors['nom']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="date_birth" class="col-sm-2 control-label"><?= $var['label']['date_birth']; ?></label>
+			<label for="date_birth" class="col-sm-2 control-label">Date de Naissance</label>
 			<div class="col-sm-10">
-				<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth" <?= $formValue['date_birth']; ?>>
+				<input type="date" class="form-control" placeholder="" name="date_birth" id="date_birth"  value="<?= $membre->get_date_birth(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['date_birth']; ?>
+				<?= $errors['date_birth']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="email" class="col-sm-2 control-label"><?= $var['label']['email']; ?></label>
+			<label for="email" class="col-sm-2 control-label">Adresse Email</label>
 			<div class="col-sm-10">
-				<input type="email" class="form-control" placeholder="adresse email" name="email" id="email" <?= $formValue['email']; ?>>
+				<input type="email" class="form-control" placeholder="mon adresse email" name="email" id="email"  value="<?= $membre->get_email(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['email']; ?>
+				<?= $errors['email']; ?>
+				<?= $errors['email.req']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="password" class="col-sm-2 control-label"><?= $var['label']['password']; ?></label>
+			<label for="password" class="col-sm-2 control-label">Mot de passe</label>
 			<div class="col-sm-10">
-				<input type="password" class="form-control" placeholder="mot de passe" name="password" id="password">
+				<input type="password" class="form-control" placeholder="mon nouveau mot de passe" name="password" id="password">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['password']; ?>
+				<?= $errors['password']; ?>
+				<?= $errors['password.req']; ?>
 			</div>
 		</div>
 
 		<div class="form-group">
-			<label for="password-conf" class="col-sm-2 control-label"><?= $var['label']['password-conf']; ?></label>
+			<label for="passwordconf" class="col-sm-2 control-label">Confirmation du Mot de passe</label>
 			<div class="col-sm-10">
-				<input type="password" class="form-control" placeholder="mot de passe" name="password-conf" id="password-conf">
+				<input type="password" class="form-control" placeholder="je confirme mon nouveau mot de passe" name="passwordconf" id="passwordconf">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['password-conf']; ?>
+				<?= $errors['passwordconf']; ?>
+				<?= $errors['passwordconf.req']; ?>
 			</div>
 		</div>
 
 		<div class="text-center">
 			<button type="submit" class="btn btn-primary btn-block">Modifier</button>
+			<a href="index.php?module=membres&page=compte" class="btn btn-default btn-block">Retour au compte <i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
 		</div>
 	</form>
 </section>

@@ -18,7 +18,7 @@ $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https'?'https'
 define ('APP',array(
 	'url-protocol'	=> $protocol,
 	'url-server'	=> $_SERVER['SERVER_NAME'],
-	'url-website'	=> $protocol . '://' . $_SERVER['SERVER_NAME'],
+	'url-website'	=> $protocol . '://' . $_SERVER['SERVER_NAME'] . "/",
 	'url-dir'		=> 'ocp-three',
 	'file-404'		=> 'themes/default/error404.php'));
 

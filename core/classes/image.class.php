@@ -39,10 +39,10 @@ class Image {
 	protected $_filename;		// nom du fichier incluant le type
 
 	// constantes
-	const CHEMIN_SOURCE 		= 	'/upload/images/';
-	const CHEMIN_BILLET 		= 	'/upload/billets/';
-	const CHEMIN_VIGNETTE 		= 	'/upload/vignettes/';
-	const CHEMIN_AVATAR 		= 	'/upload/avatars/';
+	const CHEMIN_SOURCE 		= 	'upload/images/';
+	const CHEMIN_BILLET 		= 	'upload/billets/';
+	const CHEMIN_VIGNETTE 		= 	'upload/vignettes/';
+	const CHEMIN_AVATAR 		= 	'upload/avatars/';
 	const DIR_SOURCE 			= 	SITE_ROOT . self::CHEMIN_SOURCE;
 	const DIR_BILLET 			= 	SITE_ROOT . self::CHEMIN_BILLET;
 	const DIR_VIGNETTE 			= 	SITE_ROOT . self::CHEMIN_VIGNETTE;
@@ -264,7 +264,11 @@ class Image {
 
 		// on créer la miniature vide
 		$imgAvatar = imagecreatetruecolor(self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT);
+		imagealphablending($imgAvatar, false);
+		imagesavealpha($imgAvatar, true);
+		
 		$imgSource = $imagecreatefromType($avatar);
+		imagealphablending($imgSource, true);
 
 		// les dimensions sont supérieures aux dimensions requises, on réduit l'image
 		if ($this->get_img_width() > self::AVATAR_MAX_WIDTH OR $this->get_img_height() > self::AVATAR_MAX_HEIGHT)
@@ -362,9 +366,6 @@ class Image {
 			'size'	=> $this->set_size($file['size']),		// vérification de la taille (size) en ko
 			'type'	=>	$this->set_type($file['name'])		// vérification du type
 			);
-
-		
-		
 
 		foreach ($verif as $key => $value)
 		{
@@ -468,6 +469,99 @@ class Image {
 			}
 		}
 		return $this;
+	}
+
+
+
+
+	//==============================
+	// vérifie l'image envoyée par l'utilisateur pour changer son avatar
+	// $image = instance image
+	// $type = type image spécifique à supprimer (ex : source)
+	public function changeAvatar(array $filesImage, Membre $membre)
+	{
+		if ($filesImage['error'] <> 0)
+		{
+			return ['error' => 'changeAvatar'];
+		}
+
+
+		if (isset($filesImage) AND $filesImage['error'] == 0)
+		{
+			// on créer une image à partir de l'image uploadée
+			$image = new Image;
+
+			// on vérifie que le fichier envoyé entre dans les critères
+			// si c'est ok, le fichier temporaire est copié dans le dossier images
+			if ($image->setfrom_FILE($filesImage))
+			{
+				// on met à jour le nom de l'image dans le dossier
+				$image->renameFromId($membre->get_id());
+
+				// on créer un avatar
+				if ($image->set_avatar())
+				{
+					// on peut supprimer l'image source
+					$image->delete('source');
+
+					// on créer le manager qui appelera la base donnée de l'image
+					$imageMgr = new ImageMgr;
+
+					// on met à jour la description de l'image
+					$image->set_description('Avatar de ' . $membre->get_pseudo());
+
+					// si le membre possède déjà un avatar personnel,
+					// on ne sauvegarde pas la nouvelle image dans la BDD
+					// car la nouvelle a écrasé l'ancienne sur le serveur
+					$avatar_id = $membre->get_avatar_id();
+					if ($avatar_id > 1)
+					{
+						// on récupère les données de l'avatar AVANT UPDATE pour supprimer le fichier du serveur si le nom est différent
+						$imageOld = $imageMgr->select(array('id' => $avatar_id));
+						if ($imageOld->get_avatar() <> $image->get_avatar())
+						{
+							$imageOld->delete();
+						}
+						unset($imageOld);
+
+						// on UPDATE le fichier dans la BDD (en cas de changement de type notamment, ex : jpeg devient png)
+						$image->set_id($avatar_id);
+						if ($imageMgr->update($image))
+						{
+							$membre->set_avatar($image->get_avatar());
+							$_SESSION['membre'] = $membre;
+							return TRUE;
+						}
+						return FALSE;
+					}
+					// Si le membre n'avait pas d'avatar personnalisé
+					// on enregistre l'image dans la BDD
+					else
+					{
+						// on tente une insertion dans la base de données
+						if ($imageMgr->insert($image))
+						{
+							// on recherche immédiatement l'image enregistrée pour récupérer l'id
+							// et mettre à jour l'instance membre
+							$reqAvatar = $imageMgr->select(array('avatar' => $image->get_avatar()));
+							if ($reqAvatar !== FALSE)
+							{
+								// mise à jour de l'objet membre
+								unset($image);
+								$membre->set_avatar_id($reqAvatar->get_id());
+								$membre->set_avatar($reqAvatar->get_avatar());
+								$_SESSION['membre'] = $membre;
+								return TRUE;
+							}
+						}
+					}
+				}
+			}
+			$erreur['error'] = 'avatar';
+			return $erreur;
+		}
+
+		return TRUE;
 	}
 
 } // Fin classe Image /// /// /// /// /// /// /// /// /// ///

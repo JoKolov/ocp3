@@ -7,38 +7,15 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Vue de l'inscription
  *
- * File Last Update : 2017 08 30
+ * File Last Update : 2017 08 31
  *
  * File Description :
  * -> affiche le formulaire d'édition d'un nouveau billet
  * -> affiche les éventuelles erreurs si une information $_GET['error'] existe
  */
-
-//------------------------------------------------------------
-// Protocoles de sécurités
-user_connected_only();
-admin_only();
-
-
-//------------------------------------------------------------
-// Génération des valeurs à afficher
-set_view_var();
-$var = $_SESSION['view_var'];
-if (isset($_GET['id']))
-{
-	$var['value']['id'] = $_GET['id'];
-}
-else
-{
-	$var['value']['id'] = "";
-}
-
-
-
 //------------------------------------------------------------
 // HTML
 ?>
-
 
 <section>
 
@@ -50,11 +27,11 @@ else
 				/**
 				 * Affichage de la confirmation d'enregistrement
 				 */
-				if ($var['success']['1'] <> '')
+				if (isset($success))
 				{
 			?>
 				<div class="alert alert-success" role="alert">
-				  <strong><?= $var['success']['1']; ?></strong>
+				  <strong><?= $success; ?></strong>
 				</div>
 			<?php 
 				}
@@ -62,48 +39,60 @@ else
 				/**
 				 * Affichage des erreurs
 				 */
-				if (isset($var['error']))
+				if (isset($errors))
 				{
-				 	echo $var['error']['error'];
+				 	echo $errors['error'];
+				 	echo $errors['sql'];
 				}
 			?>
 		</div>
 	</div>
 
-	<form method="post" action="?module=billets&action=enregistrer">
+	<form method="post" action="?module=billets&page=edition&action=submit">
 	
 		<div class="form-group">
-			<label for="titre" class="col-sm-12 control-label"><?= $var['label']['titre']; ?></label>
+			<label for="titre" class="col-sm-12 control-label">Titre</label>
 			<div class="col-sm-12">
-				<input type="text" class="form-control" placeholder="<?= $var['placeholder']['titre']; ?>" name="titre" id="titre" value="<?= $_SESSION['billet']['edition']['titre']; ?>">
+				<input type="text" class="form-control" placeholder="titre du billet" name="titre" id="titre" value="<?= $billet->get_titre(); ?>">
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['titre']; ?>
-			</div>
-		</div>
-		<p>&nbsp;</p>
-		<div class="form-group">
-			<label for="contenu" class="col-sm-12 control-label"><?= $var['label']['contenu']; ?></label>
-			<div class="col-sm-12"><?= $var['error']['contenu']; ?></div>
-			<div class="col-sm-12">
-				<textarea class="form-control" rows="20" placeholder="<?= $var['placeholder']['contenu']; ?>" name="contenu" id="contenu"><?= $_SESSION['billet']['edition']['contenu']; ?></textarea>
-			</div>
-			<div class="col-sm-12">
+				<?= $errors['titre']; ?>
 			</div>
 		</div>
 		<p>&nbsp;</p>
 		<div class="form-group">
-			<label for="extrait" class="col-sm-12 control-label"><?= $var['label']['extrait']; ?></label>
+			<label for="contenu" class="col-sm-12 control-label">Texte</label>
+			<div class="col-sm-12"><?= $errors['contenu']; ?></div>
 			<div class="col-sm-12">
-				<textarea class="form-control" rows="3" placeholder="<?= $var['placeholder']['extrait']; ?>" name="extrait" id="extrait"><?= $_SESSION['billet']['edition']['extrait']; ?></textarea>
+				<textarea class="form-control" rows="20" placeholder="contenu du billet" name="contenu" id="contenu"><?= $billet->get_contenu(); ?></textarea>
 			</div>
 			<div class="col-sm-12">
-				<?= $var['error']['extrait']; ?>
+			</div>
+		</div>
+		<p>&nbsp;</p>
+		<div class="form-group">
+			<label for="extrait" class="col-sm-12 control-label">Extrait</label>
+			<div class="col-sm-12">
+				<textarea class="form-control" rows="3" placeholder="court extrait du billet ou court résumé attractif" name="extrait" id="extrait"><?= $billet->get_extrait(); ?></textarea>
+			</div>
+			<div class="col-sm-12">
+				<?= $errors['extrait']; ?>
+			</div>
+		</div>
+		<p>&nbsp;</p>
+		<div class="form-group">
+			<label for="image" class="col-sm-2 control-label">Image</label>
+			<div class="col-sm-10">
+				<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
+				<input type="file" class="form-control" placeholder="votre image" name="image" id="image">
+			</div>
+			<div class="col-sm-12">
+				<?= $errors['image']; ?>
 			</div>
 		</div>
 		<p>&nbsp;</p>
 		<div class="btn-group col-xs-12" role="group" id="billet-menu-edit-nonactive">
-			<input type="hidden" name="id" value="<?= $var['value']['id'] ?>" />
+			<input type="hidden" name="id" value="<?= $billet->get_id(); ?>" />
 			<button type="submit" class="btn btn-primary col-xs-6" name="sauvegarder" value="sauvegarder">Sauvegarder</button>
 			<button type="submit" class="btn btn-warning col-xs-6" name="publier" value="publier"><strong>Publier</strong></button>
 		</div>

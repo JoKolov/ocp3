@@ -31,7 +31,6 @@ if(isset($_GET['page']))
 {
 	$active[$_GET['page']] = 'active';
 }
-$membre = $_SESSION['membre'];
 
 
 //------------------------------------------------------------
@@ -43,7 +42,7 @@ $membre = $_SESSION['membre'];
   
   <!-- RESERVE AUX ADMINS -->
   <?php
-  	if ($membre->get_type_id() == 1) // type_id = 1 correspond à un admin
+  	if ($membre->is_admin())
   	{ 
   ?>
   		<li role="presentation" class="<?php echo $active['billets']; ?>"><a href="?module=billets&page=admin" role="button" class="btn btn-default">Mes Billets</a></li>

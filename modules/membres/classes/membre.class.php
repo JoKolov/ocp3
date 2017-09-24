@@ -36,6 +36,8 @@ class Membre {
 	protected $_avatar;					// url de l'avatar
 	protected $_admin;					// BOOL qui indique si le membre est un admin
 
+	protected $_hashThePassword;		// BOOL pour indiquer si la password doit être haché ou non
+
 	const PSEUDO_MIN_LENGHT 	= 4;
 	const PSEUDO_MAX_LENGHT 	= 100;
 	const NOM_MAX_LENGHT 		= 100;
@@ -44,14 +46,24 @@ class Membre {
 	const PASSWORD_MIN_LENGHT	= 8; 
 	const PASSWORD_MAX_LENGHT 	= 255;
 	const AVATAR_PAR_DEFAUT 	= APP['url-website'] . '/upload/avatars/default.png';
+	const AVATAR_ID_DEFAUT 		= 1; // avatar par défaut
+	const COMPTE_ABONNE_ID 		= 2; // compte abonné par défaut
 
 
 
 	//------------------------------------------------------------
 	// Constructeur
 	public function __construct(array $donnees = [], bool $hash = TRUE) {
+		// attributs par défaut
+		$this->set_type_id(self::COMPTE_ABONNE_ID); // compte abonné
+		$this->set_avatar_id(self::AVATAR_ID_DEFAUT); // avatar par défaut
+		$this->_hashThePassword = $hash;
+
 		// on hydrate l'objet avec les données envoyées
-		$this->setFull($donnees, $hash);
+		if (!empty($donnees))
+		{
+			$this->setFull($donnees, $hash);
+		}
 	}
 
 
@@ -74,6 +86,16 @@ class Membre {
 	public function get_avatar_id() 			{ return $this->_avatar_id; 		}
 	public function get_avatar() 				{ return $this->_avatar; 			}
 	public function is_admin()					{ return $this->_admin;				}
+
+	protected function IMustHashThePassword()
+	{ 
+		if (!$this->_hashThePassword)
+		{
+			$this->_hashThePassword = TRUE;
+			return FALSE;
+		}
+		return TRUE;
+	}
 
 
 
@@ -116,7 +138,7 @@ class Membre {
 	}
 
 	public function set_nom($nom) {
-		$erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
+		// $erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
 
 		if ($this->setNomPrenom($nom, self::NOM_MAX_LENGHT) === TRUE)
 		{
@@ -124,11 +146,11 @@ class Membre {
 			return TRUE;
 		}
 
-		return $erreur; // on retourne le nom de la fonction si l'insertion a échouée
+		return FALSE; // on retourne le nom de la fonction si l'insertion a échouée
 	}
 
 	public function set_prenom($prenom) {
-		$erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
+		// $erreur = str_replace('set_', '', __FUNCTION__); // nom de la fonction sans le set_
 
 		if ($this->setNomPrenom($prenom, self::PRENOM_MAX_LENGHT) === TRUE)
 		{
@@ -136,7 +158,7 @@ class Membre {
 			return TRUE;
 		}
 
-		return $erreur; // on retourne le nom de la fonction si l'insertion a échouée
+		return FALSE; // on retourne le nom de la fonction si l'insertion a échouée
 	}
 
 	/**
@@ -164,9 +186,9 @@ class Membre {
 		return FALSE;
 	}
 
-	public function set_password($password, bool $hash = TRUE) {
+	public function set_password($password) {
 
-		if (!$hash) // si pas de hashage, c'est le password est déjà hashé et donc déjà vérifié
+		if (!$this->IMustHashThePassword()) // si pas de hashage, c'est que le password est déjà hashé et donc déjà vérifié
 		{ 
 			$this->_password = $password;
 			return TRUE;
@@ -298,26 +320,26 @@ class Membre {
 	 * @return   	TRUE si toutes les données ont été setté correctement, FALSE si aucune donnée n'a été envoyée, string contenant le nom des données non settés
 	 */
 
-	public function setFull(array $donnees, bool $hash = TRUE) {
-		if (isset($donnees))
+	public function setFull(array $donnees, bool $hash = TRUE) 
+	{
+
+		$checkValues = [];
+		foreach ($donnees as $attributName => $attributValue) 
 		{
-			$validation['error'] = '';
-			foreach ($donnees as $key => $value) {
-				$method = 'set_' . $key;
-				if (method_exists($this, $method))
-				{
-					// particularité password
-					if ($key == 'password')
-					{ $setter = $this->$method($value, $hash); }
-					else
-					{ $setter = $this->$method($value); }
-					if ($setter !== TRUE) { $validation['error'] .= $key; }
-				}
+			$method = 'set_' . $attributName;
+			if (method_exists($this, $method))
+			{
+				$checkValues[$attributName] = $this->$method($attributValue);
 			}
-		} 
-		if (!isset($validation)) 			{ return FALSE; }
-		elseif ($validation['error'] <> '')	{ return $validation; }
-		else /****************************/	{ return TRUE; }
+		}
+
+		if (in_array(FALSE, $checkValues, TRUE))
+		{
+			// renvoi un string contenant les champs erronés séparés par un "-"
+			return implode('-', array_keys($checkValues, FALSE, TRUE));
+		}
+
+		return TRUE;
 	}
 
 
@@ -401,8 +423,49 @@ class Membre {
 		return FALSE;
 	}
 
-	//------------------------------------------------------------
-	// Méthodes magiques
+	// contrôle de l'inscription
+	public function checkInscription(array $donnees)
+	{
+		// Au minimum un membre doit avoir :
+		// 1 pseudo
+		// 1 email
+		// 1 password
+		// 1 type de compte (défini par défaut lors de la construction)
+		// 1 avatar (défini par défaut lors de la construction)
+		
+		$checkValues = [
+			'pseudo'	=> $this->set_pseudo($donnees['pseudo']),
+			'email'		=> $this->set_email($donnees['email']),
+			'password'	=> $this->set_password($donnees['password']),
+		];
+
+		if (in_array(FALSE, $checkValues, TRUE))
+		{
+			// renvoi un string contenant les champs erronés séparés par un "-"
+			return implode('-', array_keys($checkValues, FALSE, TRUE));
+		}
+
+		return $this;
+	}
+
+	// contrôle de l'inscription
+	public function checkModification(array $donnees)
+	{
+		foreach ($donnees as $fieldName => $fieldValue) {
+			$method = 'set_' . $fieldName;
+			$checkValues[$fieldName] = $this->$method($donnees[$fieldName]);
+		}
+
+		if (in_array(FALSE, $checkValues, TRUE))
+		{
+			// renvoi un string contenant les champs erronés séparés par un "-"
+			return implode('-', array_keys($checkValues, FALSE, TRUE));
+		}
+
+		return $this;
+	}
 
 
-}
+
+
+} // end of class Membre
