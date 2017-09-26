@@ -214,18 +214,15 @@ class Billet {
 	//====================
 	protected function setteur_statut($statut)
 	{
-		foreach (self::STATUT as $key => $value)
+		
+		if (!in_array($statut, self::STATUT))
 		{
-			if (is_string($statut) AND $statut == $value)
-			{
-				$this->_statut = $statut;
-				return TRUE;
-			}
+			$this->_statut = self::STATUT['sauvegarder']; // dans le doute on sauvegarde
+			return FALSE;			
 		}
 
-		// Erreur
-		$this->_statut = self::STATUT['sauvegarder']; // dans le doute on sauvegarde
-		return FALSE;
+		$this->_statut = $statut;
+		return TRUE;
 	}
 
 

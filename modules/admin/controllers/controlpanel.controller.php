@@ -4,17 +4,18 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Billets
- * FILE/ROLE : Contrôleur Lecture
+ * MODULE : Admin
+ * FILE/ROLE : Panneau de contrôle
  *
- * File Last Update : 2017 09 22
+ * File Last Update : 2017 09 24
  *
  * File Description :
- * -> compile les données du formulaire à afficher
+ * -> effectue l'action demandée par la requête
+ * -> compile les données pour la vue
  *
  */
 
-class LectureController {
+class ControlPanelController {
 
 	//============================================================
 	// Attributs
@@ -46,33 +47,21 @@ class LectureController {
 	 */
 	public function actionView($request)
 	{
-		$billetId = $request->get()['id'];
+		user_connected_only();
+		admin_only();
 
-		// Est-ce que le billet existe ?
-		if (is_null($billetId))
-		{
-			$response = new Response(['redirect' => Response::urlFormat('defaut', '404')]);
-			return $response;
-		}
 
+		//--- récupération des billets
 		$billetMgr = new BilletMgr;
-		$billet = $billetMgr->select($billetId);
+		$billets = $billetMgr->select_multi(['statut' => 'Brouillon'], [2, 0], ['last_date' => 'DESC']);
 
-		if (!$billet)
-		{
-			$response = new Response(['redirect' => Response::urlFormat('defaut', '404')]);
-			return $response;			
-		}
-
-		$membreMgr = new MembreMgr;
-		$auteur = $membreMgr->select($billet->get_auteur_id());
-
+	
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
-			'membre' => $request->getMembre(),
-			'billet' => $billet,
-			'auteur' => $auteur
+			'membre' 		=> $request->getMembre(),
+			'billets'		=> $billets
 		];
+
 
 		$response = new Response($action, $objects);
 
@@ -92,4 +81,4 @@ class LectureController {
 	}
 
 
-} // end of class LectureController
+} // end of class ControlPanelController

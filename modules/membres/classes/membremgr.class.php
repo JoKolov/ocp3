@@ -45,6 +45,7 @@ class MembreMgr {
 	// Getteurs
 	public function getMap()	{ return $this->_map; }
 	public function getLastId()	{ return self::$_lastId; }
+	public function getNbAbonnes() { return self::countNbAbonnes(); }
 
 
 	//------------------------------------------------------------
@@ -254,7 +255,7 @@ class MembreMgr {
 
 
 	//-------------------------
-	// Update des données du membre
+	// Récupère un membre
 	public function select(int $id)
 	{
 		$sql = 'SELECT * FROM ' . self::T_MEMBRES . ' WHERE id = :id';
@@ -273,5 +274,31 @@ class MembreMgr {
 
 
 	//-------------------------
+	// Récupère plusieurs membres
+	public function selectList(array $where = null, array $limit = null, array $orderby = null)
+	{
+		$sql = 'SELECT * FROM ' . self::T_MEMBRES . ' WHERE id = :id';
+		
+		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute([':id' => $id]);
+		$donnees = $req->fetchAll(PDO::FETCH_ASSOC);
+		
+		if (!$rep OR !$donnees)
+		{
+			return FALSE; // la requête n'a pas fonctionnee
+		}
 
+		return new Membre($donnees, FALSE);
+	}
+
+
+	//-------------------------
+	// Récupère le nombre total d'abonnés
+	public static function countNbAbonnes()
+	{
+		$sql = "SELECT COUNT(*) FROM " . self::T_MEMBRES . " WHERE type_id = '" . Membre::COMPTE_ABONNE_ID . "'";
+		$req = SQLmgr::prepare($sql);
+		$req->execute();
+		return $req->fetch()[0];
+	}
 }

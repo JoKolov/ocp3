@@ -90,6 +90,7 @@ Class CompteController {
 
 		$objects = [
 			'membre' => $membre,
+			'error' => "mon message",
 			'values' => new ViewValues(['userProfile' => $userViewProfile, 'billetsSum' => $billetsSum])
 		];
 

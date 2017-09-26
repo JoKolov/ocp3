@@ -24,8 +24,8 @@ define('SITE_ROOT', __DIR__ . '/');
 
 //------------------------------------------------------------
 // Initialisation des fichiers
-$initFile = 'core/init.php';
-if (file_exists($initFile)) { require('core/init.php'); }
+$initFile = SITE_ROOT . 'core/init.php';
+if (file_exists($initFile)) { require_once ($initFile); }
 else { echo "Erreur !: echec de l'initialisation <br /> Fichier init.php introuvable <br />"; die; }
 
 

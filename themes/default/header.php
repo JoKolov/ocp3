@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * THEME : Default
  * FILE/ROLE : Header
  *
- * File Last Update : 2017 08 29
+ * File Last Update : 2017 09 24
  *
  * File Description :
  * -> Header HTML
@@ -23,6 +23,7 @@ $active['home'] = '';
 $active['deconnexion'] = '';
 $active['connexion'] = '';
 $active['inscription'] = '';
+$active['controlpanel'] = '';
 
 if(isset($_GET['page']))
 {
@@ -67,17 +68,17 @@ else
     <!-- NAV MEMBRE -->
     <div id="nav-user">
       <div class="row">
-        <div class="col-xs-8 col-sm-8">
+        <div class="col-xs-6 col-sm-6">
           <p class="user-nav-text"> 
             <?php
-               if (isset($_SESSION['pseudo'])) { echo 'Bonjour ' . $_SESSION['pseudo']; }
+               if ($membre) { echo $membre->get_pseudo(); }
             ?>  
           </p>
         </div>
-        <div class="col-xs-4 col-sm-4">
+        <div class="col-xs-6 col-sm-6">
           <ul class="nav nav-pills pull-right">
             <?php
-              if (!isset($_SESSION['pseudo'])) {
+              if (!isset($membre)) {
             ?>
             <li role="presentation" <?php echo $active['connexion']; ?>><a href="?module=membres&page=connexion" title="Se connecter"><i class="fa fa-user user-connexion-icon user-icon" aria-hidden="true"></i></a></li>
             <li role="presentation" <?php echo $active['inscription']; ?>><a href="?module=membres&page=inscription" title="S'inscrire"><i class="fa fa-user-plus user-inscription-icon user-icon" aria-hidden="true"></i></a></li>
@@ -85,6 +86,14 @@ else
               } else {
             ?>
             <li role="presentation" <?php echo $active['compte']; ?>><a href="?module=membres&page=compte" title="Consulter son compte"><i class="fa fa-address-card user-compte-icon user-icon" aria-hidden="true"></i> Mon compte</a></li>
+            <?php
+              if ($membre->is_admin()) // panneau d'administration
+              {
+            ?>
+            <li role="presentation" <?php echo $active['controlpanel']; ?>><a href="?module=admin&page=controlpanel" title="Panneau d'administration"><i class="fa fa-pencil-square user-compte-icon user-icon" aria-hidden="true"></i> Administration</a></li>
+            <?php
+              }
+            ?>
             <li role="presentation" <?php echo $active['deconnexion']; ?>><a href="?module=membres&page=deconnexion" title="Se déconnecter"><i class="fa fa-user-times user-deconnexion-icon" aria-hidden="true"></i></a></li>
             <?php
               }

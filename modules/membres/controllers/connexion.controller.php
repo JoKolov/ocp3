@@ -93,7 +93,15 @@ class ConnexionController {
 			)
 		);
 		
-		$action = ['redirect' => Response::urlFormat('membres','compte')];
+		if ($membre->is_admin())
+		{
+			$action = ['redirect' => Response::urlFormat('admin','controlpanel')];
+		}
+		else
+		{
+			$action = ['redirect' => Response::urlFormat('membres','compte')];
+		}
+		
 		$response = new Response($action, ['membre' => $membre]);
 
 		return $response;

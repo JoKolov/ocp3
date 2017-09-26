@@ -35,7 +35,7 @@ class FlashValues {
 
 	public function getValues($valuesKey = null)
 	{
-		if (is_null($valuesKey) OR !array_key_exists($valuesKey, $this->_flash))
+		if (is_null($valuesKey) OR is_null($this->_flash) OR !array_key_exists($valuesKey, $this->_flash))
 		{
 			return $this->_flash;
 		}

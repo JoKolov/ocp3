@@ -20,7 +20,7 @@ if (!defined('EXECUTION')) exit;
 
 	<h3><?= $billet->get_titre(); ?></h3>
 
-	<h6 class="text-right">Publié le <?= $billet->get_date_publie(); ?>, par <?= $auteur->get_pseudo(); ?></h6>
+	<h6 class="text-right">Publié le <?= $billet->get_date_modif(); ?>, par <?= $auteur->get_pseudo(); ?></h6>
 
 	<div class="panel panel-default">
 		<div class="panel-body"><?= $billet->get_contenu(); ?></div>

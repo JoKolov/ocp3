@@ -314,12 +314,26 @@ class Request {
 	/**
 	 * getMembre récupère l'instance membre de l'ustilisateur connecté
 	 * 
-	 * @return string : nom de l'action
+	 * @return Membre instance membre
 	 * 
 	 */	
 	public function getMembre()
 	{
 		return $this->session()['membre'];
+	}
+
+
+	// ====================
+	/**
+	 * getLastUrl récupère la dernière URL connue si elle existe
+	 * 
+	 * @return string : nom de l'action
+	 * 
+	 */	
+	public function getLastUrl()
+	{
+		$flash = new FlashValues;
+		return $flash->getValues('previousUrl');
 	}
 
 

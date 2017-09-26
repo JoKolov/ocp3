@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Billet Manager
  *
- * File Last Update : 2017 08 31
+ * File Last Update : 2017 09 24
  *
  * File Description :
  * -> gestion des images dans la BDD
@@ -51,6 +51,12 @@ class BilletMgr {
 	public function get_map()				{ return $this->_map; 						}
 	public function get_last_billets_id()	{ return self::$_last_billets_id; 			}
 	public function get_new_billets_id()	{ return $this->getteur_new_billets_id();	}
+
+	public static function getNbBrouillon()		{ return self::countNbBilletWithStatut('Brouillon'); 	}
+	public static function getNbPublication()	{ return self::countNbBilletWithStatut('Publication');	}
+	public static function getNbCorbeille()		{ return self::countNbBilletWithStatut('Corbeille'); 	}
+
+	public function getNbBillets()			{ return self::countNbBillets(); 			}
 
 
 	//----------
@@ -131,7 +137,8 @@ class BilletMgr {
 					contenu, 
 					extrait, 
 					auteur_id, 
-					date_publie, 
+					date_publie,
+					date_modif,  
 					image_id, 
 					statut) 
 				VALUES (
@@ -141,6 +148,7 @@ class BilletMgr {
 					:extrait, 
 					:auteur_id, 
 					NOW(), 
+					NOW(),
 					:image_id, 
 					:statut) ';
 
@@ -266,11 +274,11 @@ class BilletMgr {
 			foreach ($where as $key => $value) {
 				if ($sql_where == '')
 				{
-					$sql_where = ' WHERE ' . $key . ' = ' . $value;
+					$sql_where = " WHERE {$key} = '{$value}'";
 				}
 				else
 				{
-					$sql_where .= ' AND ' . $key . ' = ' . $value;
+					$sql_where .= " AND {$key} = '{$value}'";
 				}
 			}
 		}
@@ -279,9 +287,16 @@ class BilletMgr {
 		$sql_limit = '';
 		if (!is_null($limit))
 		{ 
-			$sql_limit = ' LIMIT ' . $limit[0] . ' OFFSET ' . $limit[1] - 1;
+			$limit[1] = (int) $limit[1];
+			$offset = (int) $limit[1] - 1;
+			if ($offset < 0)
+			{
+				$offset = 0;
+			}
+			$offset *= $limit[0];
+			$sql_limit = ' LIMIT ' . $limit[0] . ' OFFSET ' . $offset;
 		}
-		
+	
 		// ORDER BY
 		$sql_orderby = '';
 		if (!is_null($orderby))
@@ -299,7 +314,17 @@ class BilletMgr {
 		}		
 
 
-		$sql = 'SELECT id, titre, contenu, extrait, auteur_id, date_publie, date_modif, image_id, statut 
+		$sql = 'SELECT 
+					id, 
+					titre, 
+					contenu, 
+					extrait, 
+					auteur_id, 
+					date_modif AS last_date, 
+					DATE_FORMAT(date_publie, "%d/%m/%Y à %k\h%H") AS date_publie, 
+					DATE_FORMAT(date_modif, "%d/%m/%Y à %k\h%H") AS date_modif, 
+					image_id, 
+					statut 
 				FROM ' . self::TABLE_BILLETS . $sql_where . $sql_orderby . $sql_limit;
 
 		$req = SQLmgr::prepare($sql);
@@ -318,7 +343,7 @@ class BilletMgr {
 		}
 		else
 		{
-			return FALSE; // erreur dans la requête
+			return; // erreur dans la requête
 		}
 	}
 
@@ -348,7 +373,34 @@ class BilletMgr {
 		}
 		else
 		{
+			return;
+		}
+	}
+
+
+	//-------------------------
+	// Comptage nombres de billets dans chaque catégories (statut)
+	public static function countNbBilletWithStatut(string $statut)
+	{
+		if (!in_array($statut, Billet::STATUT))
+		{
 			return -1;
 		}
+
+		$sql = "SELECT COUNT(*) FROM " . self::TABLE_BILLETS . " WHERE statut = '{$statut}'";
+		$req = SQLmgr::prepare($sql);
+		$req->execute();
+		return $req->fetch()[0];
+	}
+
+
+	//-------------------------
+	// Comptage nombres de billets dans chaque catégories (statut)
+	public static function countNbBillets()
+	{
+		$sql = "SELECT COUNT(*) FROM " . self::TABLE_BILLETS;
+		$req = SQLmgr::prepare($sql);
+		$req->execute();
+		return $req->fetch()[0];
 	}
 }

@@ -167,6 +167,11 @@ class Response {
 			$flash->removeFromSession();
 		}
 
+		// enregistrement de l'url active
+		$previousUrl = APP['url-website'] . $_SERVER['REQUEST_URI'];
+		$flash = new FlashValues(['previousUrl' => $previousUrl]);
+		$flash->saveInSession();
+
 		// traitement spécifiques des variables d'erreur $error
 		if (isset($errors) AND is_array($errors))
 		{
@@ -182,6 +187,10 @@ class Response {
 		require_once (SITE_ROOT . 'themes/default/nav.php');
 
 		// affichage de la page demandée
+		if (isset($membre) AND $membre->is_admin())
+		{
+			require_once (SITE_ROOT . 'modules/admin/views/nav.view.php');
+		}
 		require_once ($viewFilename);
 
 		// affichage footer
@@ -203,7 +212,6 @@ class Response {
 		if (array_key_exists('flash', $this->getObjects()))
 		{
 			$flash = $this->getObject('flash');
-
 			$flash->saveInSession();
 		}
 
