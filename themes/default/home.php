@@ -23,5 +23,9 @@ if (!defined('EXECUTION')) exit;
 			</h4>
 		</p>
 		<h3 class="text-right"><em>Jean Forteroche</em></h3>
+		<?php if (isset($billet)) : ?>
+			<p>Voir la dernière publication</p>
+			<p><a href="?page=billet&id=<?= $billet->get_id(); ?>"><?= $billet->get_titre(); ?></a></p>
+		<?php endif ?>
 	</div>
 </section>

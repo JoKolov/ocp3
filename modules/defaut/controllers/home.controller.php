@@ -4,17 +4,17 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Billets
- * FILE/ROLE : Supprimer un billet
+ * MODULE : Defaut
+ * FILE/ROLE : Contrôleur d'affichage de la page d'accueil
  *
- * File Last Update : 2017 09 24
+ * File Last Update : 2017 09 26
  *
  * File Description :
- * -> met un billet à la corbeille
+ * -> compile les données du formulaire à afficher
  *
  */
 
-class SupprimerController {
+class HomeController {
 
 	//============================================================
 	// Attributs
@@ -46,12 +46,28 @@ class SupprimerController {
 	 */
 	public function actionView($request)
 	{
-		user_connected_only();
-		admin_only();
+		// préparation de la réponse
+		$response = new Response;
+		$viewFilename = file_exists(APP['theme-dir'] . $request->getViewName() . '.php') ? APP['theme-dir'] . $request->getViewName() . '.php' : $request->getViewFilename();
 
-		return $this->actionSubmit($request);
+		$action = ['displayView' => $viewFilename];
+		$response->setAction($action);
+
+		$objects['membre'] = $request->getMembre();
 
 
+		// récupération du dernier Billet publié
+		$billetMgr = new BilletMgr;
+		$billets = $billetMgr->selectList(1,0,"statut = '" . Billet::STATUT['publier'] . "'", 'date_modif DESC');
+
+		if (!is_null($billets))
+		{
+			$objects['billet'] = $billets[0];		
+		}
+
+
+		$response->setObjects($objects);
+		return $response;
 	}
 
 
@@ -63,29 +79,8 @@ class SupprimerController {
 	 */
 	public function actionSubmit($request)
 	{
-		user_connected_only();
-		admin_only();
-
-		$idBillet = (int) $request->get()['id'];
-
-		$billetMgr = new BilletMgr;
-		$billet = $billetMgr->select($idBillet);
-
-		if (!is_object($billet))
-		{
-			return new Response(['redirect' => $request->getLastUrl()]);
-		}
-
-		$billet->set_statut(Billet::STATUT['supprimer']);
-		$repSQL = $billetMgr->update($billet);
-
-		// Réponse à la requête
-		$action = ['redirect' => $request->getLastUrl()];
-		$flash = new FlashValues(['success' => "Billet [ " . $billet->get_titre() . " ] déplacé dans la corbeille"]);
-		$response = new Response($action, ['flash' => $flash]);
-
-		return $response;	
+		return $this->actionView($request);
 	}
 
 
-} // end of class ControlPanelController
+} // end of class HomeController

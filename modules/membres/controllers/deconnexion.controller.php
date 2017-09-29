@@ -14,7 +14,7 @@ if (!defined('EXECUTION')) exit;
  * -> renvoi vers le formulaire de connexion
  */
 
-Class DeconnexionController {
+class DeconnexionController {
 
 	//============================================================
 	// Attributs

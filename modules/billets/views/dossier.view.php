@@ -17,81 +17,77 @@ if (!defined('EXECUTION')) exit;
 ?>
 <section>
 
-	<h1><i class="fa fa-pencil-square-o" aria-hidden="true"></i> <?= $dossier; ?></h1>
+	<h1><i class="fa fa-book" aria-hidden="true"></i> Gestion des Billets</h1>
 
 	<!-- MENU -->
-		<div class="btn-group" role="group">
-			<a href="?module=billets&page=edition" type="button" class="btn btn-primary" aria-label="Nouveau"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Nouveau</a>
-			<a href="?module=billets&page=dossier&dossier=brouillon" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillons (<?= BilletMgr::getNbBrouillon(); ?>)</a>
-			<a href="?module=billets&page=dossier&dossier=publication" type="button" class="btn btn-default" aria-label="Publie"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Publications (<?= BilletMgr::getNbPublication(); ?>)</a>
-			<a href="?module=billets&page=dossier&dossier=corbeille" type="button" class="btn btn-warning" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (<?= BilletMgr::getNbCorbeille(); ?>)</a>
-		</div>	
+	<div class="btn-group btn-group-justified" role="group">
+		<a href="?module=billets&page=edition" type="button" class="btn btn-primary" aria-label="Nouveau"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Nouveau</a>
+		<a href="?module=billets&page=dossier&dossier=brouillon" type="button" class="btn btn-default" aria-label="Brouillon"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Brouillons (<?= $nbBrouillons; ?>)</a>
+		<a href="?module=billets&page=dossier&dossier=publication" type="button" class="btn btn-default" aria-label="Publie"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>Publications (<?= $nbPublications; ?>)</a>
+		<a href="?module=billets&page=dossier&dossier=corbeille" type="button" class="btn btn-warning" aria-label="Corbeille"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Corbeille (<?= $nbCorbeille; ?>)</a>
+	</div>
 	
-	<?php
-		if (isset($warning))
-		{
-	?>
+	<!-- BLOC INFO -->
+	<?php if (isset($warning)) : ?>
 		<p class="alert alert-warning" role="alert"><strong><?= $warning; ?></strong></p>
-	<?php
-		}
-	?>
-	<?php
-		if (isset($success))
-		{
-	?>
+	<?php endif ?>
+	<?php if (isset($success)):  ?>
 		<p class="alert alert-success" role="alert"><strong><?= $success; ?></strong></p>
-	<?php
-		}
-	?>
+	<?php endif ?>
 
 
 	<!-- LISTE DES BILLETS -->
-	<?php
-	if (empty($billets))
-	{
-	?>
-		<p>Aucun billet dans ce dossier</p>
-	<?php
-	}
-	else
-	{
-	?>
-
-	<div class="table-responsive">
-		<table class="table table-hover">
-			<thead>
-				<tr>
-					<td><strong>Titre</strong></td>
-					<td><strong>Date modif</strong></td>
-					<td><strong>Actions</strong></td>
-				</tr>
-			</thead>
-			<tbody>
-	<?php foreach ($billets as $billet) : ?>
-		<tr>
-			<td><a href="?module=billets&page=edition&id=<?= $billet->get_id(); ?>"><strong><?= $billet->get_titre(); ?></strong></a></td>
-			<td><?= $billet->get_date_modif(); ?></td>
-			<td>
-				<div class="btn-group text-right" role="group" aria-label="billet-<?= $billet->get_id(); ?>">
-					<a href="?module=billets&page=lecture&id=<?= $billet->get_id(); ?>" class="btn btn-default" role="button" alt="voir le billet"><i class="fa fa-eye" aria-hidden="true"></i></a>
-					<a href="?module=billets&page=edition&id=<?= $billet->get_id(); ?>" class="btn btn-default" role="button" alt="éditer le billet"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-					<?php if ($dossier != Billet::STATUT['supprimer']) : ?>
-						<a href="?module=billets&page=supprimer&action=submit&id=<?= $billet->get_id(); ?>" class="btn btn-warning" role="button" alt="supprimer le billet"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
-					<?php else : ?>
-						<a href="?module=billets&page=effacer&action=submit&id=<?= $billet->get_id(); ?>" class="btn btn-danger" role="button" alt="effacer le billet"><i class="fa fa-eraser" aria-hidden="true"></i></a>
-					<?php endif; ?>
-				</div>
-			</td>
-		</tr>
-	<?php endforeach; ?>
-		 	</tbody>
-		</table>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<?php if ($dossier == Billet::STATUT['sauvegarder']) : ?>
+				<h3><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Brouillons</h3>
+			<?php elseif ($dossier == Billet::STATUT['publier']) : ?>
+				<h3><i class="fa fa-eye" aria-hidden="true"></i></i> Billets Publiés</h3>
+			<?php elseif ($dossier == Billet::STATUT['supprimer']) : ?>
+				<h3><i class="fa fa-trash-o" aria-hidden="true"></i> Billets Supprimés</h3>
+		<?php endif; ?>
+		</div>
+		<?php if (empty($billets)) : ?>
+			<div class="panel-body"><p>Aucun billet</p></div>
+		<?php else : ?>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<td><strong>Titre</strong></td>
+							<td><strong>Date modif</strong></td>
+							<td class="text-right"><strong>Actions</strong></td>
+						</tr>
+					</thead>
+					<tbody>
+					<?php foreach ($billets as $billet) : ?>
+						<tr>
+							<td><a href="?module=billets&page=edition&id=<?= $billet->get_id(); ?>"><strong><?= $billet->get_titre(); ?></strong></a></td>
+							<td><?= $billet->get_date_modif(); ?></td>
+							<td>
+								<div class="btn-group pull-right" role="group" aria-label="billet-<?= $billet->get_id(); ?>">
+									<a href="?module=billets&page=lecture&id=<?= $billet->get_id(); ?>" class="btn btn-default" role="button" alt="voir le billet"><i class="fa fa-eye" aria-hidden="true"></i></a>
+									<a href="?module=billets&page=edition&id=<?= $billet->get_id(); ?>" class="btn btn-default" role="button" alt="éditer le billet"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+									<?php if ($dossier != Billet::STATUT['supprimer']) : ?>
+										<a href="?module=billets&page=supprimer&action=submit&id=<?= $billet->get_id(); ?>" class="btn btn-warning" role="button" alt="supprimer le billet"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+									<?php else : ?>
+										<a href="?module=billets&page=effacer&action=submit&id=<?= $billet->get_id(); ?>" class="btn btn-danger" role="button" alt="effacer le billet"><i class="fa fa-eraser" aria-hidden="true"></i></a>
+									<?php endif; ?>
+								</div>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				 	</tbody>
+				</table>
+			</div>					
+		<?php endif; ?>
 	</div>
+
+
 
 
 	<!-- PAGINATION -->
 	<?php 
-	}
 	if (count($pagination) > 1)
 	{
 	?>

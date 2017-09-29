@@ -4,17 +4,17 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Billets
- * FILE/ROLE : Supprimer un billet
+ * MODULE : Commentaire
+ * FILE/ROLE : Répondre à un commentaire
  *
- * File Last Update : 2017 09 24
+ * File Last Update : 2017 09 28
  *
  * File Description :
- * -> met un billet à la corbeille
+ * -> affiche le formulaire d'ajout de commentaire
  *
  */
 
-class SupprimerController {
+class RepondreController {
 
 	//============================================================
 	// Attributs
@@ -46,12 +46,7 @@ class SupprimerController {
 	 */
 	public function actionView($request)
 	{
-		user_connected_only();
-		admin_only();
-
 		return $this->actionSubmit($request);
-
-
 	}
 
 
@@ -63,29 +58,34 @@ class SupprimerController {
 	 */
 	public function actionSubmit($request)
 	{
-		user_connected_only();
-		admin_only();
+		$idCom = $request->get()['id'];
+		$idCom = (int) $idCom;
 
-		$idBillet = (int) $request->get()['id'];
+		$comMgr = new CommentaireMgr;
+		$com = $comMgr->select($idCom);
 
-		$billetMgr = new BilletMgr;
-		$billet = $billetMgr->select($idBillet);
-
-		if (!is_object($billet))
+		// le commentaire à commenter n'existe pas
+		if (!is_object($com))
 		{
-			return new Response(['redirect' => $request->getLastUrl()]);
+			$action = ['redirect' => $request->getLastUrl()];
+			$flash = new FlashValues(['warning' => "une erreur est survenue : impossible de répondre au commentaire n° {$idCom}"]);
+			$objects = [
+				'flash'	=> $flash
+			];
+
+			return new Response($action, $objects);			
 		}
 
-		$billet->set_statut(Billet::STATUT['supprimer']);
-		$repSQL = $billetMgr->update($billet);
+		// le commentaire existe, on peut afficher le formulaire
+		$url = $request->getLastUrl() . "#com$idCom";
+		$action = ['redirect' => $url];
+		$flash = new FlashValues(['comFormId' => $idCom]);
+		$objects = [
+			'flash'	=> $flash
+		];
 
-		// Réponse à la requête
-		$action = ['redirect' => $request->getLastUrl()];
-		$flash = new FlashValues(['success' => "Billet [ " . $billet->get_titre() . " ] déplacé dans la corbeille"]);
-		$response = new Response($action, ['flash' => $flash]);
-
-		return $response;	
+		return new Response($action, $objects);
 	}
 
 
-} // end of class ControlPanelController
+} // end of class RepondreController

@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Admin
  * FILE/ROLE : Panneau de contrôle
  *
- * File Last Update : 2017 09 24
+ * File Last Update : 2017 09 26
  *
  * File Description :
  * -> effectue l'action demandée par la requête
@@ -51,15 +51,30 @@ class ControlPanelController {
 		admin_only();
 
 
-		//--- récupération des billets
+		//--- récupération des infos commentaires
+		$comMgr = new commentaireMgr;
+		$infoCom['nbSignalements'] = $comMgr->getNbSignalements();
+		$infoCom['nbApprobations'] = $comMgr->getNbApprobations();
+		$infoCom['nbCommentaires'] = $comMgr->getNbCom();
+
+		//--- récupération des infos billets
+		$infoBillets['nbBrouillons'] = BilletMgr::getNbBrouillon();
+		$infoBillets['nbPublications'] = BilletMgr::getNbPublication();
+		$infoBillets['nbCorbeille'] = BilletMgr::getNbCorbeille();
+		$infoBillets['nbBillets'] = BilletMgr::countNbBillets();
+
 		$billetMgr = new BilletMgr;
 		$billets = $billetMgr->select_multi(['statut' => 'Brouillon'], [2, 0], ['last_date' => 'DESC']);
 
-	
+		//--- récupérations des infos membres
+		$infoMembres['nbAbonnes'] = MembreMgr::countNbAbonnes();
+
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
 			'membre' 		=> $request->getMembre(),
-			'billets'		=> $billets
+			'infoCom'		=> $infoCom,
+			'infoBillets'	=> $infoBillets,
+			'infoMembres'	=> $infoMembres
 		];
 
 
@@ -77,7 +92,7 @@ class ControlPanelController {
 	 */
 	public function actionSubmit($request)
 	{
-		$this->actionView($request);
+		return $this->actionView($request);
 	}
 
 

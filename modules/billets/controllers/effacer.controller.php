@@ -49,7 +49,7 @@ class EffacerController {
 		user_connected_only();
 		admin_only();
 
-		$this->actionSubmit();
+		return $this->actionSubmit($request);
 
 
 	}

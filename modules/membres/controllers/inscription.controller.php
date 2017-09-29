@@ -15,7 +15,7 @@ if (!defined('EXECUTION')) exit;
  * -> sinon, renvoi vers le formulaire d'inscription avec les erreurs
  */
 
-Class InscriptionController {
+class InscriptionController {
 
 	//============================================================
 	// Attributs

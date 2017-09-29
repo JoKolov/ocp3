@@ -5,9 +5,9 @@ if (!defined('EXECUTION')) exit;
  * @author  <joffreynicoloff@gmail.com>
  * 
  * MODULE : Billets
- * FILE/ROLE : Panneau des billets d'un dossier spécifique
+ * FILE/ROLE : Panneau des commentaires d'un dossier spécifique
  *
- * File Last Update : 2017 09 25
+ * File Last Update : 2017 09 29
  *
  * File Description :
  * -> effectue l'action demandée par la requête
@@ -57,42 +57,59 @@ class DossierController {
 
 
 		// contrôle et manipulation des données de la requête
-		$dossier = ucfirst($dossier);
-		if (!in_array($dossier, Billet::STATUT))
+		$dossiers = ['signalement', 'approuve'];
+		if (!in_array($dossier, $dossiers))
 		{
 			// Erreur : le dossier n'existe pas
 			$action = ['redirect' => $request->getLastUrl()];
 			$flash = new FlashValues(['warning' => "Le dossier [{$dossier}] n'existe pas !"]);
-			$objects = [
-				'membre' 		=> $request->getMembre(),
-				'flash' 		=> $flash
-			];
 
-			$response = new Response($action, $objects);
-			return $response;			
+			$response = new Response($action, ['flash' => $flash]);
+			return $response;
 		}
 
 		if (is_null($offset) OR empty($offset))
 		{
 			$offset = 1;
-		}	
+		}
 
 
 		// configuration de l'affichage
-		$limit = 2; // 10 billets par page
+		$limit = 2; // 10 commentaires par page
 
 
-		// récupération des billets
-		$billetMgr = new BilletMgr;
-		$billets = $billetMgr->select_multi(['statut' => $dossier], [$limit, $offset], ['last_date' => 'DESC']);
-
-
-		//--- pagination des billets
-		$methodReqNbBillet = "getNb{$dossier}";
-		$totalBillets = $billetMgr::$methodReqNbBillet();
-		if ($totalBillets > 0)
+		// récupération des commentaires
+		$comMgr = new CommentaireMgr;
+		if ($dossier == 'signalement')
 		{
-			$nbPages = $totalBillets / $limit;
+			$comList = $comMgr->selectList($limit, $offset, "signalement > '0'", "signalement DESC");
+			$nbCom = $comMgr->getNbSignalements();
+		}
+		else
+		{
+			$comList = $comMgr->selectList($limit, $offset, "approuve = '0'", "date_trie ASC");
+			$nbCom = $comMgr->getNbApprobations();
+		}
+
+		$membreMgr = new MembreMgr;
+		foreach ($comList as $com)
+		{
+			if ($com->get_auteur_id() > 0)
+			{
+				$auteur = $membreMgr->select($com->get_id());
+				$com->setAuteur($auteur->get_pseudo());
+			}
+			else
+			{
+				$com->setAuteur('Anonyme');
+			}
+		}
+		
+
+		//--- pagination des commentaires
+		if ($nbCom > 0)
+		{
+			$nbPages = $nbCom / $limit;
 			$pagination = [];
 
 			for ($page=0; $page <= $nbPages; $page++) { 
@@ -100,21 +117,20 @@ class DossierController {
 			}
 		}
 
-		$nbBrouillons = BilletMgr::getNbBrouillon();
-		$nbPublications = BilletMgr::getNbPublication();
-		$nbCorbeille = BilletMgr::getNbCorbeille();
-
+		// nombre de commentaires signalés et d'approbations en attente
+		$nbReportedCom = $comMgr->getNbSignalements();
+		$nbWaitingCom = $comMgr->getNbApprobations();
 
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
 			'membre' 		=> $request->getMembre(),
-			'billets' 		=> $billets,
+			'comList' 		=> $comList,
 			'pagination'	=> $pagination,
 			'pagiActive'	=> $offset-1,
 			'dossier'		=> $dossier,
-			'nbBrouillons'		=> $nbBrouillons,
-			'nbPublications'	=> $nbPublications,
-			'nbCorbeille'		=> $nbCorbeille
+			'nbCom'			=> $nbCom,
+			'nbReportedCom'		=> $nbReportedCom,
+			'nbWaitingCom'		=> $nbWaitingCom
 		];
 
 		$response = new Response($action, $objects);

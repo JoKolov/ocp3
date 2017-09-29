@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * CORE : Class
  * FILE/ROLE : Request
  *
- * File Last Update : 2017 09 13
+ * File Last Update : 2017 09 26
  *
  * File Description :
  * -> gestion des appels des éléments du MVC
@@ -172,7 +172,7 @@ class Request {
 	 */
 	protected function getControllerList()
 	{
-		if (!isset($this->get()[self::GET_CONTROLLER]) OR $this->getModuleName() == 'defaut')
+		if (!isset($this->get()[self::GET_CONTROLLER]))
 		{
 			return array('');
 		}
@@ -238,7 +238,7 @@ class Request {
 	 */
 	protected function getViewList()
 	{
-		if (!isset($this->Get()[self::GET_VIEW]) OR $this->getModuleName() == 'defaut')
+		if (!isset($this->Get()[self::GET_VIEW]))
 		{
 			return array('');
 		}
@@ -256,7 +256,7 @@ class Request {
 	/**
 	 * @return string : nom de la vue demandée
 	 */
-	protected function getViewName()
+	public function getViewName()
 	{
 		// aucune vue appelée
 		if (!isset($this->Get()[self::GET_VIEW]) OR $this->Get()[self::GET_VIEW] == '')
@@ -472,9 +472,11 @@ class Request {
 		$controllerName = $this->getControllerName();
 
 		// Page d'accueil ou erreur 404
-		if ($module == 'defaut' OR in_array($controllerName, ['home', '404']))
+		if (in_array($controllerName, ['404']))
 		{
-			return new Response(['displayView' => SITE_ROOT . "themes/default/{$controllerName}.php"]);
+			$action = ['displayView' => APP['theme-dir'] . $controllerName . '.php'];
+			$objects = ['membre' => $this->getMembre()];
+			return new Response($action, $objects);
 		}
 
 
@@ -485,73 +487,15 @@ class Request {
 
 		$actionMethod = 'action' . ucfirst($this->getActionName());
 
-		// Aucune méthode n'existe, on lance un affichage brut de la page
+		// Aucune méthode n'existe => Erreur
 		if (!method_exists($controller, $actionMethod))
 		{
-			return new Response(['displayView' => $this->getViewFilename()]);
+			throw new Exception("Request :: 493 >> L'action [{$actionMethod}] n'existe pas dans le controleur [{$controllerName}]", 1);
 		}
 
 		$response = $controller->$actionMethod($this);
 
 		return $response;
-	}
-
-
-
-	/**
-	 * displayView affiche le code HTML de la page demandée ou effectue une redirection
-	 */
-	public function displayViewOrRedirect($view = null)
-	{
-		if (!array_key_exists('url', $view) AND !array_key_exists('file', $view))
-		{
-			throw new Exception("Une erreur improbable est survenue :(", 1);
-		}
-
-		if (isset($view['url']))
-		{
-			$this->setSessionVar(array('flash' => $view['errors']));
-			header('Location: ' . $view['url']); die;
-		}
-
-		require_once(SITE_ROOT . 'themes/default/header.php');
-
-		// affichage nav
-		require_once(SITE_ROOT . 'themes/default/nav.php');
-
-		// affichage view
-		$var['error'] = errorFormatHTML($view['errors']);
-		$var['value'] = $view['values'];
-		if ($view['file'] <> '') { require_once($view['file']); }
-
-		// affichage footer
-		$hello = '<div class="text-center"><p><h5>FOOTER<br />----------</h5></div>';
-		require_once(SITE_ROOT . 'themes/default/footer.php');
-
-		return 'affiché';
-	}
-
-
-	/**
-	 * chargementConstantesModule récupère les fichiers de configuration du module actif
-	 */
-	public function chargementConstantesModule()
-	{
-		$configDir = $this->getModuleDir() . self::DIR_CONFIG;
-
-		if (!file_exists($configDir))
-		{
-			return;
-		}
-
-		$configFiles = scandir($configDir);
-		$patternFileExt = '#' . str_replace('.', '\.', self::FILE_EXT_CONFIG) . '#';
-		$configFiles = preg_grep ($patternFileExt, $configFiles);
-
-		foreach ($configFiles as $file)
-		{
-			require_once ($configDir . $file);
-		}
 	}
 
 

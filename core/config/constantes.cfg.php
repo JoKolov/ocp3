@@ -15,12 +15,14 @@ if (!defined('EXECUTION')) exit;
 
 $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https'?'https':'http';
 
-define ('APP',array(
+define ('APP', [
 	'url-protocol'	=> $protocol,
 	'url-server'	=> $_SERVER['SERVER_NAME'],
 	'url-website'	=> $protocol . '://' . $_SERVER['SERVER_NAME'] . "/",
 	'url-dir'		=> 'ocp-three',
-	'file-404'		=> 'themes/default/error404.php'));
+	'file-404'		=> 'themes/default/error404.php',
+	'theme-dir'		=> SITE_ROOT . 'themes/default/'
+]);
 
 
 // constantes utilisées pour la gestion du MVC dans la variable $_GET  

@@ -4,17 +4,17 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Billets
- * FILE/ROLE : Supprimer un billet
+ * MODULE : Commentaires
+ * FILE/ROLE : Effacer un commentaire
  *
- * File Last Update : 2017 09 24
+ * File Last Update : 2017 09 28
  *
  * File Description :
- * -> met un billet à la corbeille
+ * -> efface le commentaire de la BDD
  *
  */
 
-class SupprimerController {
+class EffacerController {
 
 	//============================================================
 	// Attributs
@@ -66,26 +66,28 @@ class SupprimerController {
 		user_connected_only();
 		admin_only();
 
-		$idBillet = (int) $request->get()['id'];
+		$idCom = (int) $request->get()['id'];
 
-		$billetMgr = new BilletMgr;
-		$billet = $billetMgr->select($idBillet);
+		$comMgr = new commentaireMgr;
+		$com = $comMgr->select($idCom);
+		$comDeleted = $comMgr->delete($idCom);
 
-		if (!is_object($billet))
+		if (!$comDeleted)
 		{
-			return new Response(['redirect' => $request->getLastUrl()]);
+			$flash = new FlashValues(['warning' => "Une erreur est survenue : le commentaire n'a pas été effacé"]);
+		}
+		else
+		{
+			$flash = new FlashValues(['success' => "Commentaire effacé !"]);
 		}
 
-		$billet->set_statut(Billet::STATUT['supprimer']);
-		$repSQL = $billetMgr->update($billet);
 
 		// Réponse à la requête
 		$action = ['redirect' => $request->getLastUrl()];
-		$flash = new FlashValues(['success' => "Billet [ " . $billet->get_titre() . " ] déplacé dans la corbeille"]);
 		$response = new Response($action, ['flash' => $flash]);
 
 		return $response;	
 	}
 
 
-} // end of class ControlPanelController
+} // end of class EffacerController

@@ -33,8 +33,8 @@ class Response {
 
 	public function __construct(array $action = null, array $objects = [])
 	{
-		$this->setAction($action);
-		$this->_objects = $objects;
+		(is_null($action)) ?: $this->setAction($action);
+		$this->setObjects($objects);
 	}
 
 	//============================================================
@@ -112,6 +112,11 @@ class Response {
 		$this->_viewFile = $filename;
 	}
 
+	public function setObjects(array $objects = [])
+	{
+		$this->_objects = $objects;
+	}
+
 
 
 	//============================================================
@@ -168,7 +173,7 @@ class Response {
 		}
 
 		// enregistrement de l'url active
-		$previousUrl = APP['url-website'] . $_SERVER['REQUEST_URI'];
+		$previousUrl = rtrim(APP['url-website'],'/') . $_SERVER['REQUEST_URI'];
 		$flash = new FlashValues(['previousUrl' => $previousUrl]);
 		$flash->saveInSession();
 

@@ -5,16 +5,17 @@ if (!defined('EXECUTION')) exit;
  * @author  <joffreynicoloff@gmail.com>
  * 
  * MODULE : Billets
- * FILE/ROLE : Supprimer un billet
+ * FILE/ROLE : Panneau de contrôle
  *
  * File Last Update : 2017 09 24
  *
  * File Description :
- * -> met un billet à la corbeille
+ * -> effectue l'action demandée par la requête
+ * -> compile les données pour la vue
  *
  */
 
-class SupprimerController {
+class AdminController {
 
 	//============================================================
 	// Attributs
@@ -49,9 +50,34 @@ class SupprimerController {
 		user_connected_only();
 		admin_only();
 
-		return $this->actionSubmit($request);
+		$limit = 3;
+		$offset = 0;
+
+		// on cherche des commentaires à modérer
+		$comMgr = new CommentaireMgr;
+		$listReportedCom = $comMgr->selectList($limit, $offset, "signalement > 0", "signalement DESC");
+		$listWaitingCom = $comMgr->selectList($limit, $offset, "approuve = '0'", "date_trie ASC");
+
+		// nombre de commentaires à modérer
+		$nbReportedCom = $comMgr->getNbSignalements();
+		$nbWaitingCom = $comMgr->getNbApprobations();
 
 
+
+
+		// réponse
+		$action = ['displayView' => $request->getViewFilename()];
+		$objects = [
+			'membre' 			=> $request->getMembre(),
+			'listReportedCom'	=> $listReportedCom,
+			'nbReportedCom'		=> $nbReportedCom,
+			'listWaitingCom'	=> $listWaitingCom,
+			'nbWaitingCom'		=> $nbWaitingCom
+		];
+
+		$response = new Response($action, $objects);
+
+		return $response;
 	}
 
 
@@ -63,29 +89,7 @@ class SupprimerController {
 	 */
 	public function actionSubmit($request)
 	{
-		user_connected_only();
-		admin_only();
-
-		$idBillet = (int) $request->get()['id'];
-
-		$billetMgr = new BilletMgr;
-		$billet = $billetMgr->select($idBillet);
-
-		if (!is_object($billet))
-		{
-			return new Response(['redirect' => $request->getLastUrl()]);
-		}
-
-		$billet->set_statut(Billet::STATUT['supprimer']);
-		$repSQL = $billetMgr->update($billet);
-
-		// Réponse à la requête
-		$action = ['redirect' => $request->getLastUrl()];
-		$flash = new FlashValues(['success' => "Billet [ " . $billet->get_titre() . " ] déplacé dans la corbeille"]);
-		$response = new Response($action, ['flash' => $flash]);
-
-		return $response;	
+		return $this->actionView($request);
 	}
-
 
 } // end of class ControlPanelController

@@ -88,7 +88,7 @@ class LectureController {
 	 */
 	public function actionSubmit($request)
 	{
-		$this->actionView($request);
+		return $this->actionView($request);
 	}
 
 

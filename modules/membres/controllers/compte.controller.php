@@ -16,7 +16,7 @@ if (!defined('EXECUTION')) exit;
  * -> renvoi les erreurs de modification
  */
 
-Class CompteController {
+class CompteController {
 
 	//============================================================
 	// Attributs
@@ -103,14 +103,7 @@ Class CompteController {
 	{
 		user_connected_only();
 
-		$this->actionView($request);
-	}
-
-
-
-	private function viewValuesUsingModel($post)
-	{
-
+		return $this->actionView($request);
 	}
 
 

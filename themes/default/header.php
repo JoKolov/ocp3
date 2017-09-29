@@ -70,9 +70,7 @@ else
       <div class="row">
         <div class="col-xs-6 col-sm-6">
           <p class="user-nav-text"> 
-            <?php
-               if ($membre) { echo $membre->get_pseudo(); }
-            ?>  
+            <?= (isset($membre)) ? $membre->get_pseudo() : ''; ?>  
           </p>
         </div>
         <div class="col-xs-6 col-sm-6">
@@ -86,14 +84,9 @@ else
               } else {
             ?>
             <li role="presentation" <?php echo $active['compte']; ?>><a href="?module=membres&page=compte" title="Consulter son compte"><i class="fa fa-address-card user-compte-icon user-icon" aria-hidden="true"></i> Mon compte</a></li>
-            <?php
-              if ($membre->is_admin()) // panneau d'administration
-              {
-            ?>
-            <li role="presentation" <?php echo $active['controlpanel']; ?>><a href="?module=admin&page=controlpanel" title="Panneau d'administration"><i class="fa fa-pencil-square user-compte-icon user-icon" aria-hidden="true"></i> Administration</a></li>
-            <?php
-              }
-            ?>
+            <?php if ($membre->is_admin()) : // panneau d'administration ?>
+              <li role="presentation" <?php echo $active['controlpanel']; ?>><a href="?module=admin&page=controlpanel" title="Panneau d'administration"><i class="fa fa-pencil-square user-compte-icon user-icon" aria-hidden="true"></i> Administration</a></li>
+            <?php endif ?>
             <li role="presentation" <?php echo $active['deconnexion']; ?>><a href="?module=membres&page=deconnexion" title="Se déconnecter"><i class="fa fa-user-times user-deconnexion-icon" aria-hidden="true"></i></a></li>
             <?php
               }

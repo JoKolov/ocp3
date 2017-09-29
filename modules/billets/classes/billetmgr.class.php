@@ -348,6 +348,78 @@ class BilletMgr {
 	}
 
 
+
+	//-------------------------
+	// Récupérer plusieurs billets
+	// $where 	: array('colonne' => 'valeur')
+	// $limit 	: array(int - nombre de résultats max => int - à partir de quelle valeur commencer)
+	// $sortby 	: array('colonne' => 'ordre ASC/DESC')
+	public function selectList(int $limit = null, int $offset = 0, string $where = null, string $orderby = null)
+	{
+
+		// préparation des paramètres conditionnels de la requête
+		// WHERE
+		$sqlwhere = '';
+		if (!is_null($where))
+		{
+			$sqlwhere = " WHERE {$where}";
+		}
+		
+		// LIMIT ET OFFSET
+		$sqllimit = '';
+		if (!is_null($limit))
+		{ 
+			$offset = $offset - 1;
+			if ($offset < 0)
+			{
+				$offset = 0;
+			}
+			$offset *= $limit;
+			$sqllimit = ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		}
+	
+		// ORDER BY
+		$sqlorderby = '';
+		if (!is_null($orderby))
+		{ 
+			$sqlorderby = " ORDER BY {$orderby}";
+		}	
+
+
+		$sql = 'SELECT 
+					id, 
+					titre, 
+					contenu, 
+					extrait, 
+					auteur_id, 
+					date_modif AS last_date, 
+					DATE_FORMAT(date_publie, "%d/%m/%Y à %k\h%H") AS date_publie, 
+					DATE_FORMAT(date_modif, "%d/%m/%Y à %k\h%H") AS date_modif, 
+					image_id, 
+					statut 
+			FROM ' . self::TABLE_BILLETS . $sqlwhere . $sqlorderby . $sqllimit;
+
+		$req = SQLmgr::prepare($sql);
+		$rep = $req->execute();
+
+		if ($rep)
+		{
+			$billets = [];
+			while ($donnees = $req->fetch(PDO::FETCH_ASSOC)) {
+				$billet = New Billet;
+				$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
+				array_push($billets, $billet);
+			}
+
+			return $billets; // on renvoi la liste des commentaires
+		}
+		else
+		{
+			return; // erreur dans la requête
+		}
+	}
+
+
 	//-------------------------
 	// Compter le nombre de billets selon une condition
 	// $colonne = (string) nom de la colonne sur laquelle se fait le comptage
