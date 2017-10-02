@@ -31,6 +31,7 @@ class Commentaire {
 	protected $_approuve;			// BDD : tinyint > TRUE (1) FALSE (0)
 	protected $_signalement;		// BDD : int > nombre de signalements
 
+	public $_enfants = [];			// tableau d'enfants
 	protected $_auteur;				// récupéré par controleur
 
 

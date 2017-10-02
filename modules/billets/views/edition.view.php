@@ -48,7 +48,7 @@ if (!defined('EXECUTION')) exit;
 		</div>
 	</div>
 
-	<form method="post" action="?module=billets&page=edition&action=submit">
+	<form method="post" action="?module=billets&page=edition&action=submit" enctype="multipart/form-data">
 	
 		<div class="form-group">
 			<label for="titre" class="col-sm-12 control-label">Titre</label>
@@ -80,11 +80,14 @@ if (!defined('EXECUTION')) exit;
 			</div>
 		</div>
 		<p>&nbsp;</p>
+		<?php if ($billet->get_image_id() > 0) : ?>
+			<img src="<?= $billet->get_image(); ?>" class="img-responsive" alt="Responsive image" />
+		<?php endif; ?>
 		<div class="form-group">
-			<label for="image" class="col-sm-2 control-label">Image</label>
+			<label for="imageBillet" class="col-sm-2 control-label">Image</label>
 			<div class="col-sm-10">
-				<input type="hidden" name="MAX_FILE_SIZE" value="1048576" />
-				<input type="file" class="form-control" placeholder="votre image" name="image" id="image">
+				<input type="hidden" name="MAX_FILE_SIZE" value="5242880" />
+				<input type="file" class="form-control" placeholder="votre image" name="imageBillet" id="imageBillet">
 			</div>
 			<div class="col-sm-12">
 				<?= $errors['image']; ?>

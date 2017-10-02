@@ -66,77 +66,40 @@ class BilletController {
 
 		// liste des commentaires
 		$comMgr = new CommentaireMgr;
-		$comList = $comMgr->selectList(null, 0, "billet_id = '" . $billet->get_id() . "' AND approuve = '1'", 'date_trie ASC');
+		$commentaires = $comMgr->selectList(null, 0, "billet_id = '" . $billet->get_id() . "' AND approuve = '1'", 'date_trie DESC');
+		//--> $commentaireManager->recupererParBillet($billet);
 
 		// Trie et ordonnancemant des commentaires
-		$sqlWhere = "billet_id = '" . $billet->get_id() . "' AND approuve = '1' AND com_level = '0'";
-		$comListUn = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie DESC');
-		$comGlobalList = [];
-		foreach ($comListUn as $com)
+		$commentairesPremierNiveau = [];
+		$commentairesParId = [];
+		foreach ($commentaires as $idCom => $com)
 		{
-			array_push($comGlobalList, $com);
-			$nextLevel = $com->get_com_level() + 1;
-			$sqlWhere = "com_id = '" . $com->get_id() . "' AND approuve = '1' AND com_level = '" . $nextLevel . "'";
-			$comListDeux = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie ASC');
-			if (!empty($comListDeux))
+			$commentairesParId[$com->get_id()] = $com;
+		}
+
+		foreach ($commentairesParId as $com)
+		{
+			if ($com->get_com_id() == 0) /// $com->isFirstLevel()
 			{
-				foreach ($comListDeux as $com)
-				{
-					array_push($comGlobalList, $com);
-					$nextLevel = $com->get_com_level() + 1;
-					$sqlWhere = "com_id = '" . $com->get_id() . "' AND approuve = '1' AND com_level = '" . $nextLevel . "'";
-					$comListTrois = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie ASC');
-					if (!empty($comListTrois))
-					{
-						foreach ($comListTrois as $com)
-						{
-							array_push($comGlobalList, $com);
-							$nextLevel = $com->get_com_level() + 1;
-							$sqlWhere = "com_id = '" . $com->get_id() . "' AND approuve = '1' AND com_level = '" . $nextLevel . "'";
-							$comListQuatre = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie ASC');
-							if (!empty($comListQuatre))
-							{
-								foreach ($comListQuatre as $com)
-								{
-									array_push($comGlobalList, $com);
-									$nextLevel = $com->get_com_level() + 1;
-									$sqlWhere = "com_id = '" . $com->get_id() . "' AND approuve = '1' AND com_level = '" . $nextLevel . "'";
-									$comListCinq = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie ASC');
-									if (!empty($comListCinq))
-									{
-										foreach ($comListCinq as $com)
-										{
-											array_push($comGlobalList, $com);
-											$nextLevel = $com->get_com_level() + 1;
-											$sqlWhere = "com_id = '" . $com->get_id() . "' AND approuve = '1' AND com_level = '" . $nextLevel . "'";
-											$comListSix = $comMgr->selectList(null, 0, $sqlWhere, 'date_trie ASC');
-											if (!empty($comListSix))
-											{
-												foreach ($comListSix as $com)
-												{
-													array_push($comGlobalList, $com);										
-												}
-											}					
-										}
-									}
-								}						
-							}
-						}					
-					}				
-				}
+				$commentairesPremierNiveau[] = $com;
+			}
+			else
+			{
+				$commentairesParId[$com->get_com_id()]->_enfants[] = $com;
 			}
 		}
 
+
 		$membreMgr = new MembreMgr;
 
-		foreach($comList as $com)
+		foreach($commentaires as $com)
 		{
 			$auteur = $membreMgr->select( $com->get_auteur_id());
 			$com->setAuteur((is_object($auteur)) ? $auteur->get_pseudo() : 'Anonyme');
 		}
 
 		
-		$auteur = $membreMgr->select($billet->get_auteur_id());	
+		$auteur = $membreMgr->select($billet->get_auteur_id());	//getAuteurBillet
 		$nbComBillet = $comMgr->getNbComBillet($billetId);
 
 		$action = ['displayView' => $request->getViewFilename()];
@@ -144,9 +107,8 @@ class BilletController {
 			'membre' 	=> $request->getMembre(),
 			'billet' 	=> $billet,
 			'auteur' 	=> $auteur,
-			'comList' 	=> $comList,
-			'nbCom' 	=> $nbComBillet,
-			'comGlobalList' => $comGlobalList
+			'nombreCommentaires' 	=> count($commentaires),
+			'commentairesPremierNiveau' => $commentairesPremierNiveau
 		];
 
 		$response = new Response($action, $objects);

@@ -58,7 +58,7 @@ class HomeController {
 
 		// récupération du dernier Billet publié
 		$billetMgr = new BilletMgr;
-		$billets = $billetMgr->selectList(1,0,"statut = '" . Billet::STATUT['publier'] . "'", 'date_modif DESC');
+		$billets = $billetMgr->selectList(1,0,"statut = '" . Billet::STATUT['publier'] . "'", 'last_date DESC');
 
 		if (!is_null($billets))
 		{

@@ -58,6 +58,10 @@ class Image {
 	const IMG_SIZE_MAX 			= 	1048576;
 	const AVATAR_MAX_WIDTH 		= 	200;
 	const AVATAR_MAX_HEIGHT 	= 	200;
+	const BILLET_MAX_WIDTH	 	= 	800;
+	const BILLET_MAX_HEIGHT 	= 	400;
+	const VIGNETTE_MAX_WIDTH	= 	160;
+	const VIGNETTE_MAX_HEIGHT 	= 	80;
 
 
 
@@ -104,7 +108,7 @@ class Image {
 	public function set_billet($url = null)						{ return $this->setteur_billet($url); 				}
 	public function set_vignette($url = null)					{ return $this->setteur_vignette($url); 			}
 	public function set_avatar($url = null)						{ return $this->setteur_avatar($url); 				}
-	public function set_description(string $description)		{ return $this->setteur_description($description); 	}
+	public function set_description(string $description = null)		{ return $this->setteur_description($description); 	}
 	public function set_id(int $id)								{ return $this->setteur_id($id); 					}
 
 
@@ -223,14 +227,16 @@ class Image {
 	//==============================
 	// SET _billet
 	protected function setteur_billet($url = null) {
-		return FALSE;
+		$this->_billet = $url;
+		return TRUE;
 	}
 
 
 	//==============================
 	// SET _vignette
 	protected function setteur_vignette($url = null) {
-		return FALSE;
+		$this->_vignette = $url;
+		return TRUE;
 	}
 
 
@@ -252,36 +258,15 @@ class Image {
 		$avatar = self::DIR_AVATAR . $this->get_filename();
 
 		//copie de l'image source dans le dossier avatar
-		if (!copy($source, $avatar))	{ return FALSE; } // échec de la copie
-
-		// fonctions PHP à appeler
-		// on remplace le type jpg par jpeg car les fonctions "jpg" n'existent pas
-		$type = $this->get_type();
-		if ($type == 'jpg') { $type = 'jpeg'; }
-		//-- creation des noms de fonction PHP
-		$imagecreatefromType = 'imagecreatefrom' . $type; // ex : imagecreatefrompng()
-		$imageType = 'image' . $type;	// ex : imagepng()
-
-		// on créer la miniature vide
-		$imgAvatar = imagecreatetruecolor(self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT);
-		imagealphablending($imgAvatar, false);
-		imagesavealpha($imgAvatar, true);
-		
-		$imgSource = $imagecreatefromType($avatar);
-		imagealphablending($imgSource, true);
-
-		// les dimensions sont supérieures aux dimensions requises, on réduit l'image
-		if ($this->get_img_width() > self::AVATAR_MAX_WIDTH OR $this->get_img_height() > self::AVATAR_MAX_HEIGHT)
+		if (!copy($source, $avatar))
 		{
-			// on créer la miniature
-			if (!imagecopyresampled($imgAvatar, $imgSource, 0, 0, 0, 0, self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT, $this->get_img_width(), $this->get_img_height())) { return FALSE; }
+			return FALSE; // échec de la copie
+		} 
 
-			// on enregistre la miniature en écrasant le fichier existant
-			if (!$imageType($imgAvatar, $avatar))	{ return FALSE; }
-
-			// on détruit les images stockées en ressource PHP
-			imagedestroy($imgAvatar);
-			imagedestroy($imgSource);
+		// redimensionnement
+		if (!$this->resize($avatar, self::AVATAR_MAX_WIDTH, self::AVATAR_MAX_HEIGHT))
+		{
+			return FALSE; // échec redimensionnement
 		}
 
 		// on défini l'attribut
@@ -292,7 +277,8 @@ class Image {
 
 	//==============================
 	// SET _description
-	protected function setteur_description(string $description) {
+	protected function setteur_description(string $description = null) {
+		if (is_null($description)) return TRUE;
 		$this->_description = htmlspecialchars($description);
 		return TRUE;
 	}
@@ -342,7 +328,7 @@ class Image {
 	 * LISTE DES METHODES
 	 * ******************
 	 * -> display view 		: NIL
-	 * -> setfrom_FILE		: hydrate l'instance image selon les données reçues par $_FILE
+	 * -> createFromFiles	: hydrate l'instance image selon les données reçues par $_FILE
 	 * -> renameFromId		: modifie le nom de l'image sur le serveur et daans l'instance à partir d'un id (int)
 	 * -> hashImgId			: hash un id pour créer un nom d'image unique
 	 */
@@ -359,7 +345,7 @@ class Image {
 
 	//==============================
 	// créer une image à partir de la variable $_FILE['...']
-	public function setfrom_FILE($file)
+	public function createFromFiles($file)
 	{
 		$verif = array(
 			'name'	=> $this->set_name($file['name']),		// vérification du nom
@@ -561,6 +547,122 @@ class Image {
 			return $erreur;
 		}
 
+		return TRUE;
+	}
+
+
+	public function createForBillet($files, Billet $billet)
+	{
+		/// 1 : vérifier que c'est une image
+		if (!$this->createFromFiles($files))
+		{
+			return ['error' => "Mauvais format image"];
+		}
+
+		/// 2 : renommer l'image selon id du billet
+		if (!$this->renameFromId($billet->get_id()))
+		{
+			return ['error' => "Erreur lors de la création de l'image à la une"];
+		}
+
+		/// 3 : copier l'image dans le dossier billet
+		$imageSource = self::DIR_SOURCE . $this->get_filename();
+		$imageBillet = self::DIR_BILLET . $this->get_filename();
+		$imageMiniature = self::DIR_VIGNETTE . $this->get_filename();
+
+		//copie de l'image source dans le dossier avatar
+		if (!copy($imageSource, $imageBillet)) return FALSE; // échec de la copie
+		if (!copy($imageSource, $imageMiniature)) return FALSE; // échec de la copie		
+
+		/// 4 : redimmensionner l'image
+		if (!$this->resize($imageBillet, self::BILLET_MAX_WIDTH, self::BILLET_MAX_HEIGHT)) return FALSE; // échec redim
+		if (!$this->resize($imageMiniature, self::VIGNETTE_MAX_WIDTH, self::VIGNETTE_MAX_HEIGHT)) return FALSE; // échec redim
+
+		/// 5 supprimer l'image source
+		$this->delete('source');
+
+		/// 6 : renvoyer l'image
+		$this->_billet = self::URL_BILLET . $this->get_filename();
+		$this->_vignette = self::URL_VIGNETTE . $this->get_filename();
+		return $this;
+	}
+
+
+
+
+	protected function resize($imageFile, $maxWidth, $maxHeight)
+	{
+		// fonctions PHP à appeler
+		// on remplace le type jpg par jpeg car les fonctions "jpg" n'existent pas
+		$type = $this->get_type();
+		if ($type == 'jpg')
+		{
+			$type = 'jpeg';
+		}
+		//-- creation des noms de fonction PHP
+		$imagecreatefromType = 'imagecreatefrom' . $type; // ex : imagecreatefrompng()
+		$imageType = 'image' . $type;	// ex : imagepng()
+
+		// on créer la miniature vide
+		$imgResized = imagecreatetruecolor($maxWidth, $maxHeight);
+		imagealphablending($imgResized, false);
+		imagesavealpha($imgResized, true);
+		
+		$imgSource = $imagecreatefromType($imageFile);
+		imagealphablending($imgSource, true);
+
+		// calcul des nouvelles dimensions
+		$widthSource = $this->get_img_width();
+		$heightSource = $this->get_img_height();
+		if ($widthSource > $maxWidth OR $heightSource > $maxHeight)
+		{
+			$limiteWidth = $widthSource * $maxHeight / $heightSource;
+			$limiteHeight = $heightSource * $maxWidth / $widthSource;
+
+			if ($limiteWidth >= $maxWidth)
+			{
+				$widthResized = $maxWidth;
+				$heightResized = $limiteHeight;
+			}
+			elseif ($limiteHeight >= $maxHeight)
+			{
+				$heightResized = $maxheight;
+				$widthResized = $limiteWidth;	
+			}
+			else
+			{
+				$widthResized = $maxWidth;
+				$heightResized = $maxHeight;
+			}
+		}
+
+		// calcul de la position de l'image redimensionnée dans l'image recrée
+		$decalageWidth = 0;
+		$decalageHeight = 0;
+		if ($widthResized < $maxWidth)
+		{
+			$decalageWidth = ($maxWidth - $widthResized) / 2;
+		}
+		if ($heightResized < $maxHeight)
+		{
+			$decalageHeight = ($maxHeight - $heightResized) / 2;
+		}
+
+		// on créer l'image redimensionnée
+		if (!imagecopyresampled($imgResized, $imgSource, $decalageWidth, $decalageHeight, 0, 0, $widthResized, $heightResized, $widthSource, $heightSource))
+		{
+			return FALSE;
+		}
+
+		// on enregistre la miniature en écrasant le fichier existant
+		if (!$imageType($imgResized, $imageFile))
+		{
+			return FALSE;
+		}
+
+		// on détruit les images stockées en ressource PHP
+		imagedestroy($imgResized);
+		imagedestroy($imgSource);
 		return TRUE;
 	}
 

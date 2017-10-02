@@ -30,6 +30,8 @@ class Billet {
 	protected $_date_modif;		// BDD : date_modif (date de modification)
 	protected $_image_id;		// BDD : image_id (image à la une)
 	protected $_statut;			// BDD : statut (brouillon, publié, supprimé)
+	protected $_image;			// url de l'image à la une;
+	protected $_miniature;		// url de l'image miniature
 
 
 	// constantes de la classe
@@ -62,6 +64,8 @@ class Billet {
 	public function get_date_modif()	{ return $this->_date_modif; 	}
 	public function get_image_id()		{ return $this->_image_id; 		}
 	public function get_statut()		{ return $this->_statut; 		}
+	public function get_image()			{ return $this->_image;			}
+	public function get_miniature()		{ return $this->_miniature;		}
 
 
 
@@ -78,6 +82,8 @@ class Billet {
 	public function set_date_modif($date)			{ return $this->setteur_date_modif($date); 		}
 	public function set_image_id($id)				{ return $this->setteur_image_id($id); 			}
 	public function set_statut($statut)				{ return $this->setteur_statut($statut); 		}
+	public function setImage($url)					{ $this->_image = $url; }
+	public function setMiniature($url)				{ $this->_miniature = $url; }
 
 
 	//====================
@@ -197,6 +203,12 @@ class Billet {
 	//====================
 	protected function setteur_image_id($id)
 	{
+		if (is_null($id))
+		{
+			$this->_image_id = 0;
+			return TRUE;			
+		}
+		
 		$id = (int) $id;
 		if (is_int($id) AND $id > 0)
 		{

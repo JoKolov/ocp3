@@ -133,11 +133,11 @@ class ImageMgr {
 			}
 			if (!isset($condition))
 			{
-				$condition = $key . ' = ' . $value;
+				$condition = $key . ' = ' . "'{$value}'";
 			} 
 			else
 			{
-				$condition .= ' AND ' . $key . ' = ' . $value;
+				$condition .= ' AND ' . $key . ' = ' . "'{$value}'";
 			}
 		}
 
@@ -147,7 +147,7 @@ class ImageMgr {
 
 		$req = SQLmgr::getPDO()->prepare($sql);
 		$rep = $req->execute();
-		
+	
 		if ($rep)
 		{
 			// on renvoi un tableau avec toutes les données de l'image en question

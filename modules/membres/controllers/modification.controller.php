@@ -235,7 +235,7 @@ class ModificationController {
 		$image = new Image;
 
 		// on vérifie que le fichier envoyé entre dans les critères
-		if (!$image->setfrom_FILE($filesImage))
+		if (!$image->createFromFiles($filesImage))
 		{
 			return ['error' => 'avatar.source'];
 		}

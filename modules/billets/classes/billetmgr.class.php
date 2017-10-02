@@ -158,7 +158,7 @@ class BilletMgr {
 			':contenu'		=> $billet->get_contenu(),
 			':extrait'		=> $billet->get_extrait(),
 			':auteur_id'	=> $billet->get_auteur_id(),
-			':image_id'		=> 0,
+			':image_id'		=> $billet->get_image_id(),
 			':statut'		=> $billet->get_statut()
 			);
 
@@ -190,7 +190,7 @@ class BilletMgr {
 			':contenu'		=> $billet->get_contenu(),
 			':extrait'		=> $billet->get_extrait(),
 			':auteur_id'	=> $billet->get_auteur_id(),
-			':image_id'		=> 0,
+			':image_id'		=> $billet->get_image_id(),
 			':statut'		=> $billet->get_statut(),
 			':id'			=> $billet->get_id()
 			);

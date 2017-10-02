@@ -96,7 +96,7 @@ class DossierController {
 		{
 			if ($com->get_auteur_id() > 0)
 			{
-				$auteur = $membreMgr->select($com->get_id());
+				$auteur = $membreMgr->select($com->get_auteur_id());
 				$com->setAuteur($auteur->get_pseudo());
 			}
 			else
