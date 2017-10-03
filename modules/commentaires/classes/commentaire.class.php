@@ -37,6 +37,7 @@ class Commentaire {
 
 	// constantes de la classe
 	const COM_LEVEL_MAX = 5;
+	const NB_SIGNALEMENTS_MAX = 10;
 
 
 	//------------------------------------------------------------
@@ -62,6 +63,7 @@ class Commentaire {
 	public function get_approuve()		{ return $this->_approuve; 		}
 	public function get_signalement()	{ return $this->_signalement; 	}
 	public function getAuteur()			{ return $this->_auteur; 		}
+	public function getNbLimitSignalements() { return self::NB_SIGNALEMENTS_MAX; }
 
 
 

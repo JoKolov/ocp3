@@ -155,9 +155,10 @@ class Billet {
 			return TRUE;
 		}
 		// on créer un extrait automatique
-		$contenu = $this->get_contenu();
-		$patternsAretirer = ["#<[a-z0-9]*>#", "#<[a-z0-9]*/>#"];
-		foreach ($patternsAretirer as $patternAretirer) {
+		$contenu = htmlspecialchars_decode($this->get_contenu());
+		$patternsAretirer = ["#<[a-z0-9]*>#", "#</[a-z0-9]*>#"];
+		foreach ($patternsAretirer as $patternAretirer)
+		{
 			$contenu = preg_replace($patternAretirer, "", $contenu);
 		}
 		$contenu = htmlspecialchars($contenu);

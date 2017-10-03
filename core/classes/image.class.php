@@ -58,6 +58,9 @@ class Image {
 	const IMG_SIZE_MAX 			= 	1048576;
 	const AVATAR_MAX_SIZE		= 	1048576;
 	const BILLET_MAX_SIZE		=	5242880;
+	const IMG_WIDTH_MAX			=	7000;
+	const IMG_HEIGHT_MAX		= 	7000;
+	const IMG_SURFACE_MAX		= 	37000000;
 	const AVATAR_MAX_WIDTH 		= 	200;
 	const AVATAR_MAX_HEIGHT 	= 	200;
 	const BILLET_MAX_WIDTH	 	= 	1140;
@@ -192,6 +195,13 @@ class Image {
 		if (file_exists($filename))
 		{
 			list($width, $height) = getimagesize($filename);
+
+			$imageSurface = $width * $height;
+			if ($imageSurface > self::IMG_SURFACE_MAX)
+			{
+				return FALSE;
+			}
+
 			$this->_img_sizes['width'] = $width;
 			$this->_img_sizes['height'] = $height;
 			return TRUE;
@@ -344,6 +354,13 @@ class Image {
 	// créer une image à partir de la variable $_FILE['...']
 	public function createFromFiles($file, $categorieImage = null)
 	{
+		// ajout après soutenance
+		if ($file['error'] > 0)
+		{ 
+			return FALSE;
+		}
+		// fin ajout après soutenance
+
 		$verif = array(
 			'name'	=> $this->set_name($file['name']),		// vérification du nom
 			'size'	=> $this->set_size($file['size']),		// vérification de la taille (size) en ko
@@ -374,6 +391,7 @@ class Image {
 				$sizeLimit = self::IMG_SIZE_MAX;
 				break;
 		}
+
 		if ($this->get_size() > $sizeLimit) return FALSE; // taille trop élevée
 
 		// on copie le fichier dans le répertoire des images
@@ -620,11 +638,11 @@ class Image {
 		$imagecreatefromType = 'imagecreatefrom' . $type; // ex : imagecreatefrompng()
 		$imageType = 'image' . $type;	// ex : imagepng()
 
-		// on créer la miniature vide
+		// on créer l'image résuite vide
 		$imgResized = imagecreatetruecolor($maxWidth, $maxHeight);
 		imagealphablending($imgResized, false);
 		imagesavealpha($imgResized, true);
-		
+
 		$imgSource = $imagecreatefromType($imageFile);
 		imagealphablending($imgSource, true);
 

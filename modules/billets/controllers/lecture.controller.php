@@ -67,6 +67,15 @@ class LectureController {
 		$membreMgr = new MembreMgr;
 		$auteur = $membreMgr->select($billet->get_auteur_id());
 
+		// Image à la Une
+		$imageManager = new ImageMgr;
+		$imageBillet = $imageManager->selectForBillet($billet);
+		if (!is_null($imageBillet))
+		{
+			$billet->setImage($imageBillet->get_billet());
+			$billet->setMiniature($imageBillet->get_vignette());
+		}
+
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
 			'membre' => $request->getMembre(),

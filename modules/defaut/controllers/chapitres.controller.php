@@ -55,8 +55,13 @@ class ChapitresController {
 		foreach ($billets as $billet)
 		{
 			$imageBillet = $imageManager->selectForBillet($billet);
-			$billet->setImage($imageBillet->get_billet());
-			$billet->setMiniature($imageBillet->get_vignette());
+			// ajout après soutenance
+			if (!is_null($imageBillet))
+			{
+				$billet->setImage($imageBillet->get_billet());
+				$billet->setMiniature($imageBillet->get_vignette());
+			}
+			// fin ajout après soutenance
 		}
 
 		// préparation de la réponse

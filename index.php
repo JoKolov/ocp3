@@ -18,9 +18,9 @@
 
 //------------------------------------------------------------
 // Initialisation des constantes
+ini_set('memory_limit','256M');
 define('EXECUTION', TRUE); // limiter les accès aux fichiers à l'appli
 define('SITE_ROOT', __DIR__ . '/');
-
 
 //------------------------------------------------------------
 // Initialisation des fichiers

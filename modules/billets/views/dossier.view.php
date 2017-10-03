@@ -87,74 +87,43 @@ if (!defined('EXECUTION')) exit;
 
 
 	<!-- PAGINATION -->
-	<?php 
-	if (count($pagination) > 1)
-	{
-	?>
+	<?php if (count($pagination) > 1) : ?>
 	<nav aria-label="Page navigation">
 	  <ul class="pagination">
 	    
-	    <?php
-	    	if ($pagiActive > 0)
-	    	{
-	    	?>
+	    <?php if ($pagiActive > 0) : ?>
 	    	<li>
 	    		<a href="?module=billets&page=dossier&dossier=<?= $dossier; ?>&nav=<?= $pagiActive; ?>" aria-label="Previous">
-	    	<?php
-	    	}
-	    	else
-	    	{
-	    	?>
+	    	<?php else : ?>
 	    	<li class="disabled">
 	    		<a href="#" aria-label="Previous">
-	    	<?php	
-	    	}
-	    ?>
+	    	<?php endif; ?>
 	        <span aria-hidden="true">&laquo;</span>
 	      </a>
 	    </li>
 
-	<?php
-		foreach ($pagination as $pagi => $page)
-		{
-			if ($pagi == $pagiActive)
-			{ ?>
+		<?php foreach ($pagination as $pagi => $page) : ?>
+			<?php if ($pagi == $pagiActive) : ?>
 				<li class="active"><a href="?module=billets&page=dossier&dossier=<?= $dossier; ?>&nav=<?= $page; ?>"><?= $page;?></a></li>
-	<?php	}
-			else
-			{ ?>
+			<?php else : ?>
 				<li><a href="?module=billets&page=dossier&dossier=<?= $dossier; ?>&nav=<?= $page; ?>"><?= $page;?></a></li>
-	<?php	} 
-	?>
-	    
-	<?php
-		}
-	?>
+			<?php endif; ?>
+		    
+		<?php endforeach; ?>
 
-	    <?php
-	    	if (isset($pagination[$pagiActive+1]))
-	    	{
-	    	?>
+	    <?php if (isset($pagination[$pagiActive+1])) : ?>
 	    	<li>
 	    		<a href="?module=billets&page=dossier&dossier=<?= $dossier; ?>&nav=<?= $pagiActive + 2; ?>" aria-label="Next">
-	    	<?php
-	    	}
-	    	else
-	    	{
-	    	?>
+	    <?php else : ?>
 	    	<li class="disabled">
 	    		<a href="#" aria-label="Next">
-	    	<?php	
-	    	}
-	    ?>
+	    <?php endif;  ?>
 	        <span aria-hidden="true">&raquo;</span>
 	      </a>
 	    </li>
 
 	  </ul>
 	</nav>
-	<?php 
-	}
-	?>
+	<?php endif; ?>
 
 </section>

@@ -64,7 +64,7 @@ class ControlPanelController {
 		$infoBillets['nbBillets'] = BilletMgr::countNbBillets();
 
 		$billetMgr = new BilletMgr;
-		$billets = $billetMgr->select_multi(['statut' => 'Brouillon'], [2, 0], ['last_date' => 'DESC']);
+		$derniersBrouillons = $billetMgr->select_multi(['statut' => 'Brouillon'], [2, 0], ['last_date' => 'DESC']);
 
 		//--- récupérations des infos membres
 		$infoMembres['nbAbonnes'] = MembreMgr::countNbAbonnes();
@@ -77,7 +77,8 @@ class ControlPanelController {
 			'infoCom'		=> $infoCom,
 			'infoBillets'	=> $infoBillets,
 			'infoMembres'	=> $infoMembres,
-			'derniersMembres' => $derniersMembres
+			'derniersMembres' => $derniersMembres,
+			'derniersBrouillons' => $derniersBrouillons
 		];
 
 

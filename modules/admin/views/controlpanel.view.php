@@ -45,7 +45,11 @@ if (!defined('EXECUTION')) exit;
 					<div class="panel-heading">Ecriture</div>
 					<ul class="list-group">
 						<a href="?module=billets&page=edition" type="button" class="list-group-item list-group-item-info" aria-label="Nouveau"><i class="fa fa-plus" aria-hidden="true"></i> Nouveau</a>
-						<a href="?module=billets&page=edition" type="button" class="list-group-item" aria-label="Dernier-brouillon"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Dernier brouillon</a>
+						<?php if (!empty($derniersBrouillons)) : ?>
+							<?php foreach ($derniersBrouillons as $brouillon) : ?>
+								<a href="?module=billets&page=edition&id=<?= $brouillon->get_id(); ?>" type="button" class="list-group-item" aria-label="Dernier-brouillon"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> <?= $brouillon->get_titre(); ?></a>
+							<?php endforeach; ?>
+						<?php endif; ?>
 					</ul>
 				</div>
 			</div>		

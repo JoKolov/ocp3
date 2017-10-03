@@ -11,8 +11,13 @@
 									<?php if (isset($membre) AND $membre->is_admin()) : ?>
 										<a href="?module=commentaires&page=effacer&action=submit&id=<?= $com->get_id(); ?>" type="button" class="btn btn-danger" aria-label="effacer" alt="Effacer"><i class="fa fa-eraser" aria-hidden="true"></i></a>
 									<?php endif; ?>
+									<?php if ($com->get_signalement() >= $com->getNbLimitSignalements()) : ?>
+									<a href="#com<?= $com->get_id(); ?>" type="button" class="btn btn-danger" aria-label="signaler"><i class="fa fa-bullhorn" aria-hidden="true" disabled="disabled"></i>
+										<?= $com->get_signalement(); ?></a>
+									<?php else : ?>
 									<a href="?module=commentaires&page=signaler&action=submit&id=<?= $com->get_id(); ?>" type="button" class="btn btn-danger" aria-label="signaler"><i class="fa fa-bullhorn" aria-hidden="true"></i>
 										<?= ($com->get_signalement() > 0) ? ' ' . $com->get_signalement() : ''; ?></a>
+									<?php endif; ?>
 									<?php if ($com->get_com_level() < Commentaire::COM_LEVEL_MAX) : ?>
 									<a href="?module=commentaires&page=repondre&id=<?= $com->get_id(); ?>" type="button" class="btn btn-info" aria-label="repondre"><i class="fa fa-comments" aria-hidden="true"></i> Rép.</a>
 									<?php endif; ?>

@@ -79,7 +79,7 @@ class DossierController {
 
 
 		// configuration de l'affichage
-		$limit = 20; // 20 billets par page
+		$limit = 10; // 10 billets par page
 
 
 		// récupération des billets
@@ -90,13 +90,15 @@ class DossierController {
 		//--- pagination des billets
 		$methodReqNbBillet = "getNb{$dossier}";
 		$totalBillets = $billetMgr::$methodReqNbBillet();
+
 		if ($totalBillets > 0)
 		{
 			$nbPages = $totalBillets / $limit;
+			$nbPages = ceil($nbPages);
 			$pagination = [];
-
-			for ($page=0; $page <= $nbPages; $page++) { 
-				array_push($pagination, $page + 1);
+			
+			for ($page = 1; $page <= $nbPages; $page++) { 
+				array_push($pagination, $page);
 			}
 		}
 

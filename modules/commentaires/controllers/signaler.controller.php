@@ -78,7 +78,8 @@ class SignalerController {
 		}
 
 		// le commentaire existe
-		$reportedCom->set_signalement($reportedCom->get_signalement() + 1);
+		$nbSignalements = $reportedCom->get_signalement() + 1;
+		$reportedCom->set_signalement($nbSignalements);
 		$confirmationUpdate = $comMgr->update($reportedCom);
 
 		if (!$confirmationUpdate)

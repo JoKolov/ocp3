@@ -339,6 +339,7 @@ class BilletMgr {
 			$billets = [];
 			while ($donnees = $req->fetch(PDO::FETCH_ASSOC)) {
 				$billet = New Billet;
+
 				$billet->setValues($donnees); // on hydrate l'objet billet avec les données de la BDD
 				array_push($billets, $billet);
 			}
