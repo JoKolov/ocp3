@@ -59,7 +59,7 @@ else
         <div class="collapse navbar-collapse" id="menu-nav">
           <ul class="nav navbar-nav">
             <li class="active"><a href="index.php">Accueil</a></li>
-            <li><a href="#">Chapitres</a></li>
+            <li><a href="?page=chapitres">Chapitres</a></li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->

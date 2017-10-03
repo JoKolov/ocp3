@@ -33,10 +33,12 @@ if (!defined('EXECUTION')) exit;
         <li role="presentation" class="<?= $adminNavActive['commentaires']; ?>">
           <a href="?module=commentaires&page=admin"><i class="fa fa-comments" aria-hidden="true"></i> Commentaires</a>
         </li>
-
+        
+        <!--
         <li role="presentation" class="<?= $adminNavActive['membres']; ?>">
           <a href="?module=membres&page=admin"><i class="fa fa-users" aria-hidden="true"></i> Membres</a>
         </li>
+        -->
 
       </ul>
     </div>

@@ -75,7 +75,7 @@ class DossierController {
 
 
 		// configuration de l'affichage
-		$limit = 2; // 10 commentaires par page
+		$limit = 10; // 10 commentaires par page
 
 
 		// récupération des commentaires

@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Commentaires
  * FILE/ROLE : Commentaire Manager
  *
- * File Last Update : 2017 09 26
+ * File Last Update : 2017 10 02
  *
  * File Description :
  * -> gestion des commentaires dans la BDD
@@ -155,7 +155,12 @@ class CommentaireMgr {
 
 		$req = SQLmgr::prepare($sql);
 		$rep = $req->execute($values);
-		if ($rep) { self::setLastId(self::getNewId()); }
+		if ($rep)
+		{
+			$idCommentaire = SQLmgr::getLastId();
+			self::setLastId($idCommentaire); 
+			return $idCommentaire;
+		}
 
 		return $rep;
 	}
@@ -247,6 +252,90 @@ class CommentaireMgr {
 			return $req->execute();
 		}
 		return FALSE;
+	}
+
+
+	//-------------------------
+	// Supprimer un commentaire ou effacer son contenu s'il a des enfants
+	public function tryDelete(Commentaire $commentaire)
+	{
+		// chercher tous les enfants du commentaire à supprimer
+		$billetId = $commentaire->get_billet_id();
+		$commentaireLevel = $commentaire->get_com_level();
+		$limit = null;
+		$offset = 0;
+		$where = "billet_id = '{$billetId}' AND com_level > '{$commentaireLevel}'";
+		$orderby = "date_trie ASC";
+		$commentairesEnfants = $this->selectList($limit, $offset, $where, $orderby);
+		if (empty($commentairesEnfants))
+		{
+			return $this->delete($commentaire->get_id());
+		}
+		else
+		{
+			$commentaire->set_contenu("commentaire supprimé");
+			$commentaire->set_auteur_id(0);
+			return $this->update($commentaire);
+		}
+		return FALSE;
+	}
+
+
+	//-------------------------
+	// Supprimer un commentaire et réaffecter ses enfants
+	public function deleteAndRechild(Commentaire $commentaire)
+	{
+		// chercher le parent du commentaire à supprimer
+		$idParentCommentaire = $commentaire->get_com_id();
+		if (is_null($idParentCommentaire))
+		{
+			$idParentCommentaire = 0;
+		}
+
+		// chercher tous les enfants du commentaire à supprimer
+		$billetId = $commentaire->get_billet_id();
+		$commentaireLevel = $commentaire->get_com_level();
+		$limit = 0;
+		$offset = 0;
+		$where = "billet_id = '{$billetId}' AND com_level > '{$commentaireLevel}'";
+		$orderby = "date_trie ASC";
+		$commentairesEnfants = $this->selectList($limit, $offset, $where, $orderby);
+		foreach ($commentairesEnfants as $commentaireEnfant)
+		{
+			if ($commentaireEnfant->get_id_com() == $commentaire->get_id())
+			{
+				$commentaireEnfant->set_id_com($idParentCommentaire);
+			}
+			$commentaireEnfantNewLevel = $commentaireEnfant->get_com_level() - 1;
+			($commentaireEnfantNewLevel < 0) ? 0 : $commentaireEnfantNewLevel;
+			$commentaireEnfant->set_com_level($commentaireEnfantNewLevel);
+		}
+		
+		// supprimer le commentaire
+		$delete = $this->delete($commentaire->get_id());
+		
+		// réaffecter les enfants au parent du commentaire supprimé
+		foreach ($commentairesEnfants as $commentaireEnfant)
+		{
+			$update = $this->update($commentaireEnfant);
+		}
+
+		return $delete;
+	}
+
+
+	//-------------------------
+	// Supprimer un commentaire
+	// $id = id du commentaire à supprimer
+	public function deleteFromBillet(Billet $billet)
+	{
+		$billetId = $billet->get_id();
+
+		$sql = 'DELETE FROM ' . self::TABLE_COM . " WHERE billet_id = '{$billetId}'";
+
+		$req = SQLmgr::prepare($sql);
+
+		return $req->execute();
 	}
 
 
@@ -400,5 +489,25 @@ class CommentaireMgr {
 		$comLevels = $req->fetch(PDO::FETCH_ASSOC);
 		$comLevelMax = (int) $comLevels['MAX(com_level)'];
 		return $comLevelMax;
+	}
+
+
+
+	//-------------------------
+	// Récupérer tous les commentaires d'un billet
+	// $where 	: array('colonne' => 'valeur')
+	// $limit 	: array(int - nombre de résultats max => int - à partir de quelle valeur commencer)
+	// $sortby 	: array('colonne' => 'ordre ASC/DESC')
+	public function selectListForBillet(Billet $billet)
+	{
+
+		$billetId = $billet->get_id();
+		$limit = 0;
+		$offset = 0;
+		$where = "billet_id = '{$billetId}'";
+		$orderby = "date_trie ASC";
+
+		return $this->selectList($limit, $offset, $where, $orderby);
+
 	}
 }

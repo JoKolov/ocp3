@@ -23,28 +23,21 @@ if (!defined('EXECUTION')) exit;
 		<div class="col-sm-12">
 			<h3>Editeur de billet</h3>
 
-			<?php
-				/**
-				 * Affichage de la confirmation d'enregistrement
-				 */
-				if (isset($success))
-				{
-			?>
-				<div class="alert alert-success" role="alert">
-				  <strong><?= $success; ?></strong>
-				</div>
-			<?php 
-				}
+			<?php if (isset($danger)) : ?>
+				<div class="alert alert-danger" role="alert"> <strong><?= $danger; ?></strong></div>
+			<?php endif; ?>
+			<?php if (isset($success)) : ?>
+				<div class="alert alert-success" role="alert"> <strong><?= $success; ?></strong></div>
+			<?php endif; ?>
+			<?php if (isset($warning)) : ?>
+				<div class="alert alert-warning" role="alert"> <strong><?= $warning; ?></strong></div>
+			<?php endif; ?>
 
-				/**
-				 * Affichage des erreurs
-				 */
-				if (isset($errors))
-				{
-				 	echo $errors['error'];
-				 	echo $errors['sql'];
-				}
-			?>
+			<?php  if (isset($errors))
+			{
+				echo $errors['error'];
+				echo $errors['sql'];
+			} ?>
 		</div>
 	</div>
 

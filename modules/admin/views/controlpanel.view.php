@@ -74,9 +74,15 @@ if (!defined('EXECUTION')) exit;
 			<div>
 				<div class="panel panel-default">
 					<div class="panel-heading">Derniers membres</div>
-					<div class="panel-body">
-						<p text-center>à venir</p>
-					</div>
+					<ul class="list-group">
+						<?php if (empty($derniersMembres)) : ?>
+							<li class="list-group-item">Aucun Abonné</li>
+						<?php else : ?>
+							<?php foreach($derniersMembres as $dernierMembre) : ?>
+								<li class="list-group-item"><?= $dernierMembre->get_pseudo(); ?></li>
+							<?php endforeach; ?>
+						<?php endif; ?>
+					</ul>
 				</div>
 			</div>
 		</div>

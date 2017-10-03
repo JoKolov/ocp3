@@ -7,7 +7,7 @@ if (!defined('EXECUTION')) exit;
  * MODULE : Billets
  * FILE/ROLE : Effacer un billet de la BDD
  *
- * File Last Update : 2017 09 25
+ * File Last Update : 2017 10 02
  *
  * File Description :
  * -> efface le billet de la BDD
@@ -80,6 +80,14 @@ class EffacerController {
 		{
 			$flash = new FlashValues(['success' => "Billet [ " . $billet->get_titre() . " ] effacé !"]);
 		}
+
+		// Effacer les commentaires du billet
+		$commentaireManager = new CommentaireMgr;
+		$commentaireManager->deleteFromBillet($billet);
+
+		// Effacer les images du billet
+		$imageManager = new ImageMgr;
+		$imageManager->deleteFromBillet($billet);
 
 
 		// Réponse à la requête

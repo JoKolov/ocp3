@@ -17,7 +17,8 @@ if (!defined('EXECUTION')) exit;
 <footer>
   <div id="page-content" class="container">
   	<div class="row">
-  		<div class="text-center footer-content">
+  		<div class="col-xs-12 text-center footer-content">
+  			<a href="#top" type="button" class="btn btn-default"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
 			<h6>Projet 3 - Formation Open Classrooms Chef de Projet Multimédia</h6>
   		</div>
   	</div>

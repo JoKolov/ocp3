@@ -122,8 +122,11 @@ class SQLmgr {
 		return self::getPDO()->prepare($sql);
 	}
 
-	//------------------------------------------------------------
-	// Méthodes magiques
+
+
+	public static function getLastId() {
+		return self::getPDO()->lastInsertId();
+	}
 
 
 

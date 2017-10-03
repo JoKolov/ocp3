@@ -4,17 +4,17 @@ if (!defined('EXECUTION')) exit;
  * @project : Blog Jean Forteroche
  * @author  <joffreynicoloff@gmail.com>
  * 
- * MODULE : Commentaires
- * FILE/ROLE : Effacer un commentaire
+ * MODULE : Defaut
+ * FILE/ROLE : Contrôleur d'affichage des chapitres du blog
  *
- * File Last Update : 2017 09 28
+ * File Last Update : 2017 10 03
  *
  * File Description :
- * -> efface le commentaire de la BDD
+ * -> compile les données à afficher
  *
  */
 
-class EffacerController {
+class ChapitresController {
 
 	//============================================================
 	// Attributs
@@ -46,12 +46,28 @@ class EffacerController {
 	 */
 	public function actionView($request)
 	{
-		user_connected_only();
-		admin_only();
+		// récupération de toutes les publications
+		$billetManager = new BilletMgr;
+		$billets = $billetManager->selectPublications();
 
-		return $this->actionSubmit($request);
+		// récupération des images
+		$imageManager = new ImageMgr;
+		foreach ($billets as $billet)
+		{
+			$imageBillet = $imageManager->selectForBillet($billet);
+			$billet->setImage($imageBillet->get_billet());
+			$billet->setMiniature($imageBillet->get_vignette());
+		}
 
+		// préparation de la réponse
+		$viewFilename = file_exists(APP['theme-dir'] . $request->getViewName() . '.php') ? APP['theme-dir'] . $request->getViewName() . '.php' : $request->getViewFilename();
+		$action = ['displayView' => $viewFilename];
+		$objects = [
+			'membre'	=> $request->getMembre(),
+			'billets'	=> $billets
+		];
 
+		return new Response($action, $objects);
 	}
 
 
@@ -63,32 +79,8 @@ class EffacerController {
 	 */
 	public function actionSubmit($request)
 	{
-		user_connected_only();
-		admin_only();
-
-		$idCom = (int) $request->get()['id'];
-
-		$comMgr = new commentaireMgr;
-		$com = $comMgr->select($idCom);
-		//$comDeleted = $comMgr->delete($idCom);
-		$comDeleted = $comMgr->tryDelete($com);
-
-		if (!$comDeleted)
-		{
-			$flash = new FlashValues(['warning' => "Une erreur est survenue : le commentaire n'a pas été effacé"]);
-		}
-		else
-		{
-			$flash = new FlashValues(['success' => "Commentaire effacé !"]);
-		}
-
-
-		// Réponse à la requête
-		$action = ['redirect' => $request->getLastUrl()];
-		$response = new Response($action, ['flash' => $flash]);
-
-		return $response;	
+		return $this->actionView($request);
 	}
 
 
-} // end of class EffacerController
+} // end of class ChapitresController

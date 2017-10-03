@@ -132,7 +132,6 @@ class BilletMgr {
 	public function insert(Billet $billet)
 	{
 		$sql = 'INSERT INTO ' . self::TABLE_BILLETS . ' (
-					id,
 					titre, 
 					contenu, 
 					extrait, 
@@ -142,7 +141,6 @@ class BilletMgr {
 					image_id, 
 					statut) 
 				VALUES (
-					:id,
 					:titre, 
 					:contenu, 
 					:extrait, 
@@ -153,7 +151,6 @@ class BilletMgr {
 					:statut) ';
 
 		$values = array(
-			':id'			=> $this->get_new_billets_id(),
 			':titre'		=> $billet->get_titre(),
 			':contenu'		=> $billet->get_contenu(),
 			':extrait'		=> $billet->get_extrait(),
@@ -164,9 +161,16 @@ class BilletMgr {
 
 		$req = SQLmgr::prepare($sql);
 		$rep = $req->execute($values);
-		if ($rep) { self::set_last_billets_id(self::get_new_billets_id()); }
-
-		return $rep;
+		if ($rep)
+		{ 
+			$id = SQLmgr::getLastId();
+			self::set_last_billets_id($id); 
+			return $id;
+		}
+		else
+		{
+			return FALSE;
+		}
 	}
 
 
@@ -393,6 +397,7 @@ class BilletMgr {
 					extrait, 
 					auteur_id, 
 					date_modif AS last_date, 
+					date_publie AS date_creation,
 					DATE_FORMAT(date_publie, "%d/%m/%Y à %k\h%H") AS date_publie, 
 					DATE_FORMAT(date_modif, "%d/%m/%Y à %k\h%H") AS date_modif, 
 					image_id, 
@@ -417,6 +422,16 @@ class BilletMgr {
 		{
 			return; // erreur dans la requête
 		}
+	}
+
+
+	// récupérer tous les billets publiés
+	public function selectPublications($limit = null)
+	{
+		$offset = 0;
+		$where = "statut = 'Publication'";
+		$orderby = "date_creation DESC";
+		return $this->selectList($limit, $offset, $where, $orderby);
 	}
 
 

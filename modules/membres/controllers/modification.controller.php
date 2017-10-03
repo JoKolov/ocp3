@@ -240,6 +240,9 @@ class ModificationController {
 			return ['error' => 'avatar.source'];
 		}
 
+		// On contrôle la taille du fichier
+		
+
 
 		// si c'est ok, le fichier temporaire est copié dans le dossier images
 		// on met à jour le nom de l'image dans le dossier

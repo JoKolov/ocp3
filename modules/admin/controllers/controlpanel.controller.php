@@ -68,13 +68,16 @@ class ControlPanelController {
 
 		//--- récupérations des infos membres
 		$infoMembres['nbAbonnes'] = MembreMgr::countNbAbonnes();
+		$membreManager = new MembreMgr;
+		$derniersMembres = $membreManager->selectListOfLastRegistered(3);
 
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
 			'membre' 		=> $request->getMembre(),
 			'infoCom'		=> $infoCom,
 			'infoBillets'	=> $infoBillets,
-			'infoMembres'	=> $infoMembres
+			'infoMembres'	=> $infoMembres,
+			'derniersMembres' => $derniersMembres
 		];
 
 

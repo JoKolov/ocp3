@@ -20,6 +20,9 @@ if (!defined('EXECUTION')) exit;
 
 	<!-- AFFICHAGE DU BILLET -->
 	<h6 class="text-right">Publié le <?= $billet->get_date_modif(); ?></h6>
+	<?php if (!is_null($imageBillet)) : ?>
+		<img src="<?= $imageBillet->get_billet(); ?>" class="img-responsive" alt="Responsive image" />
+	<?php endif; ?>
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3><?= $billet->get_titre(); ?></h3>

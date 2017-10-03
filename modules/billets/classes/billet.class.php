@@ -138,7 +138,7 @@ class Billet {
 		}
 
 		// Erreur
-		$this->contenu = '';
+		$this->_contenu = '';
 		return FALSE;
 	}
 
@@ -148,16 +148,23 @@ class Billet {
 	//====================
 	protected function setteur_extrait($text)
 	{
-		if (is_string($text) OR $text == '')
+		if (is_string($text) AND $text != '')
 		{
 			$text = htmlspecialchars($text);
 			$this->_extrait = $text;
 			return TRUE;
 		}
-
-		// Erreur
-		$this->extrait = '';
-		return FALSE;
+		// on créer un extrait automatique
+		$contenu = $this->get_contenu();
+		$patternsAretirer = ["#<[a-z0-9]*>#", "#<[a-z0-9]*/>#"];
+		foreach ($patternsAretirer as $patternAretirer) {
+			$contenu = preg_replace($patternAretirer, "", $contenu);
+		}
+		$contenu = htmlspecialchars($contenu);
+		$nbCaracteresDuContenu = strlen($contenu);
+		$nbCaracteresExtrait = ($nbCaracteresDuContenu > 300) ? 300 : $nbCaracteresDuContenu;
+		$this->_extrait = substr($contenu, 0, $nbCaracteresExtrait) . "[...]";
+		return TRUE;
 	}
 
 

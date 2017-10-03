@@ -138,46 +138,6 @@ class EditionController {
 		$billet = $billetOuErreur['billet'];
 		$billetMgr = new BilletMgr;
 
-		if (!is_null($billet->get_id()))
-		{
-			$billet = $billetMgr->select($billet->get_id());
-		}
-
-		// check de l'image à la une
-		if ($files['imageBillet']['name'] != '')
-		{
-			// vérification du fichier envoyé et création de l'image
-			$imageBillet = new Image;
-			$imageBillet = $imageBillet->createForBillet($files['imageBillet'], $billet);
-
-			if (!$imageBillet)
-			{
-				$action = ['redirect' => $request->getLastUrl()];
-				$flash = new FlashValues(['errors' => ['image' => "L'image n'a pas été prise en compte"]]);
-				$response = new Response($action, ['flash' => $flash]);
-				return $response;				
-			}
-
-			// enregistrement de l'image
-			$imageManager = new ImageMgr;
-
-			if ($billet->get_image_id() > 0)
-			{
-				//update
-				$imageBillet->set_id($billet->get_image_id());
-				$imageManager->update($imageBillet);
-			}
-			else
-			{
-				//insert
-				$insert = $imageManager->insert($imageBillet);
-				$urlImageBillet = $imageBillet->get_billet();
-				$imageBillet = $imageManager->select(['billet' => $urlImageBillet]);
-				$billet->set_image_id($imageBillet->get_id());
-			}
-		}
-
-
 		$membre = $request->getMembre();
 
 		$billet->set_auteur_id($membre->get_id());
@@ -192,22 +152,26 @@ class EditionController {
 			$billet->set_statut(Billet::STATUT['sauvegarder']);
 		}
 
+
 		// Est-ce un nouveau billet ou un billet existant ?
 		if (is_null($billet->get_id()))
 		{
 			// nouveau billet ou id erroné
-			$billet->set_id($billetMgr->get_new_billets_id());
+			//$billet->set_id($billetMgr->get_new_billets_id());
 
 			// >>>>>
 			// INSERT
-			if (!$billetMgr->insert($billet))
+			$idNouveauBillet = $billetMgr->insert($billet);
+
+			if (!$idNouveauBillet)
 			{
 				$errors = ['sql' => "Une erreur inattendue est survenue, réessayez l'enregistrement"];
 				$action = ['redirect' => $request->getLastUrl()];
-				$flash = new FlashValues(['errors' => $errors]);
+				$flash = new FlashValues(['errors' => $errors, 'billet' => $billet]);
 				$response = new Response($action, ['flash' => $flash]);
 				return $response;
 			}
+			$billet->set_id($idNouveauBillet);
 		}
 		else
 		{
@@ -223,15 +187,30 @@ class EditionController {
 						'id' => $billet->get_id()
 					])
 				];
-				$flash = new FlashValues(['errors' => $errors]);
+				$flash = new FlashValues(['errors' => $errors, 'billet' => $billet]);
 				$response = new Response($action, ['flash' => $flash]);
 				return $response;
 			}		
 		}
 
+		// check de l'image à la une (NON BLOQUANT pour ne pas pas pénaliser l'enregistrement du texte)
+		if ($files['imageBillet']['name'] != '')
+		{
+			$billetAvecImage = $this->enregistreImageUne($files['imageBillet'], $billet);
+			if (is_object($billetAvecImage))
+			{
+				$billetMgr->update($billetAvecImage);
+			}
+			else
+			{
+				$warningMessage = $billetAvecImage;
+			}
+		}
+
 		// Réponse à la requête
 		$action = ['redirect' => Response::urlFormat('billets','edition', '', ['id' => $billet->get_id()])];
-		$flash = new FlashValues(['success' => "Billet enregistré :)"]);
+		$flashValues = (isset($warningMessage)) ? ['success' => "Billet enregistré :)", 'warning' => $warningMessage] : ['success' => "Billet enregistré :)"];
+		$flash = new FlashValues($flashValues);
 		$response = new Response($action, ['flash' => $flash]);
 
 		return $response;
@@ -267,6 +246,15 @@ class EditionController {
 		{
 			unset($post['id']);
 		}
+		else
+		{
+			$billetMgr = new BilletMgr;
+			$billet = $billetMgr->select($post['id']);
+			if (!$billet)
+			{
+				$billet = new Billet;
+			}
+		}
 
 		$billet->setValues($post);
 		// Les données sont refusées
@@ -279,6 +267,41 @@ class EditionController {
 		return ['billet' => $billet];
 
 	}
+
+
+
+	private function enregistreImageUne($files, Billet $billet)
+	{
+		// vérification du fichier envoyé et création de l'image
+		$imageBillet = new Image;
+		$imageBillet = $imageBillet->createForBillet($files, $billet);
+
+		if (!is_object($imageBillet))
+		{
+			return $imageBillet; // message d'erreur
+		}
+
+		// enregistrement de l'image
+		$imageManager = new ImageMgr;
+
+		if ($billet->get_image_id() > 0)
+		{
+			//update
+			$imageBillet->set_id($billet->get_image_id());
+			$imageManager->update($imageBillet);
+		}
+		else
+		{
+			//insert
+			$insert = $imageManager->insert($imageBillet);
+			$urlImageBillet = $imageBillet->get_billet();
+			$imageBillet = $imageManager->select(['billet' => $urlImageBillet]);
+			$billet->set_image_id($imageBillet->get_id());
+		}
+		return $billet;
+	}
+
+
 
 
 } // end of class EditionController

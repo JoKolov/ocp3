@@ -25,5 +25,5 @@ else {
 		'host' 		=> 	'cl1-sql22', 	// serveur
 		'name' 		=>	'p6379_2',		// nom de la base de données
 		'login' 	=> 	'p6379_2',		// identifiant de connexion à la base de données
-		'password' 	=>	'@de$86h3LL'));	// mot de passe de connexion (MAMP = 'root', WAMP ='')
+		'password' 	=>	'@th3NA4sp!riT7'));	// mot de passe de connexion (MAMP = 'root', WAMP ='')
 }

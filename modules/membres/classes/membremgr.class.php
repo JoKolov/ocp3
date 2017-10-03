@@ -275,20 +275,64 @@ class MembreMgr {
 
 	//-------------------------
 	// Récupère plusieurs membres
-	public function selectList(array $where = null, array $limit = null, array $orderby = null)
+	public function selectList(int $limit = null, int $offset = 0, string $where = null, string $orderby = null)
 	{
-		$sql = 'SELECT * FROM ' . self::T_MEMBRES . ' WHERE id = :id';
+		// préparation des paramètres conditionnels de la requête
+		// WHERE
+		$sqlwhere = '';
+		if (!is_null($where))
+		{
+			$sqlwhere = " WHERE {$where}";
+		}
+		
+		// LIMIT ET OFFSET
+		$sqllimit = '';
+		if (!is_null($limit))
+		{ 
+			$offset = $offset - 1;
+			if ($offset < 0)
+			{
+				$offset = 0;
+			}
+			$offset *= $limit;
+			$sqllimit = ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		}
+	
+		// ORDER BY
+		$sqlorderby = '';
+		if (!is_null($orderby))
+		{ 
+			$sqlorderby = " ORDER BY {$orderby}";
+		}	
+
+		$sql = 'SELECT * FROM ' . self::T_MEMBRES . $sqlwhere . $sqlorderby . $sqllimit;
 		
 		$req = SQLmgr::prepare($sql);
 		$rep = $req->execute([':id' => $id]);
-		$donnees = $req->fetchAll(PDO::FETCH_ASSOC);
 		
-		if (!$rep OR !$donnees)
-		{
-			return FALSE; // la requête n'a pas fonctionnee
-		}
+		$membres = [];
 
-		return new Membre($donnees, FALSE);
+		if ($rep)
+		{
+			while ($donnees = $req->fetch(PDO::FETCH_ASSOC)) {
+				$membre = New Membre;
+				$membre->setFull($donnees); // on hydrate l'objet
+				array_push($membres, $membre);
+			}
+		}
+		return $membres; // on renvoi la liste des membres
+	}
+
+
+	//-------------------------
+	// Récupère les "x" derniers membres
+	public function selectListOfLastRegistered($nombreDeMembresMax = 0)
+	{
+		$limit = $nombreDeMembresMax;
+		$offset = 0;
+		$where = "statut = '2'"; // abonnés
+		$orderby = "date_create DESC";
+		return $this->selectList($limit, $offset, null, $orderby);
 	}
 
 

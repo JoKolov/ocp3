@@ -79,7 +79,7 @@ class DossierController {
 
 
 		// configuration de l'affichage
-		$limit = 2; // 10 billets par page
+		$limit = 20; // 20 billets par page
 
 
 		// récupération des billets

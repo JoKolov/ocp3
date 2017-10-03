@@ -102,13 +102,18 @@ class BilletController {
 		$auteur = $membreMgr->select($billet->get_auteur_id());	//getAuteurBillet
 		$nbComBillet = $comMgr->getNbComBillet($billetId);
 
+		// Image à la Une
+		$imageManager = new ImageMgr;
+		$imageBillet = $imageManager->selectForBillet($billet);
+
 		$action = ['displayView' => $request->getViewFilename()];
 		$objects = [
 			'membre' 	=> $request->getMembre(),
 			'billet' 	=> $billet,
 			'auteur' 	=> $auteur,
 			'nombreCommentaires' 	=> count($commentaires),
-			'commentairesPremierNiveau' => $commentairesPremierNiveau
+			'commentairesPremierNiveau' => $commentairesPremierNiveau,
+			'imageBillet' => $imageBillet
 		];
 
 		$response = new Response($action, $objects);

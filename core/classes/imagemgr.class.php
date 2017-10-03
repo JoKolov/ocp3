@@ -127,17 +127,14 @@ class ImageMgr {
 	public function select(array $critere)
 	{
 		foreach ($critere as $key => $value) {
-			if (is_string($value))
-			{
-				$value = '"' . $value . '"';
-			}
+			$value = '"' . $value . '"';
 			if (!isset($condition))
 			{
-				$condition = $key . ' = ' . "'{$value}'";
+				$condition = $key . ' = ' . $value;
 			} 
 			else
 			{
-				$condition .= ' AND ' . $key . ' = ' . "'{$value}'";
+				$condition .= ' AND ' . $key . ' = ' . $value;
 			}
 		}
 
@@ -153,7 +150,7 @@ class ImageMgr {
 			// on renvoi un tableau avec toutes les données de l'image en question
 			$donnees = $req->fetch(PDO::FETCH_ASSOC);
 			$image = New Image;
-			$image->setFull($donnees, TRUE); // on hydrate l'objet image avec les données de la BDD (TRUE indique à la fonction que les données proviennent de la BDD)
+			$image->setFull($donnees, TRUE); // on hydrate l'objet image avec les données de la BDD (TRUE indique à la fonction que les données proviennent de la BDD)			
 			return $image;
 		}
 		return FALSE; // image non trouvée
@@ -175,5 +172,65 @@ class ImageMgr {
 			return $req->execute();
 		}
 		return FALSE;
+	}
+
+
+	//-------------------------
+	// Supprimer une image
+	// $id = id de l'image à supprimer
+	public function deleteFromBillet(Billet $billet)
+	{
+		$idImage = $billet->get_image_id();
+
+		if (is_null($idImage))
+		{
+			return;
+		}
+
+		// récupération de l'image
+		$image = $this->select(['id' => $idImage]);
+
+		if (!$image)
+		{
+			return;
+		}
+		
+		// suppression des fichiers images sur le serveur
+		$image->delete();
+
+		// suppression des données dans la BDD
+		$this->delete($idImage);
+	}
+
+
+
+	//-------------------------
+	// Récupérer l'image d'un billet
+	public function selectForBillet(Billet $billet)
+	{
+		$idImage = $billet->get_image_id();
+		if (is_null($idImage))
+		{
+			return;
+		}
+
+		$sql = 'SELECT id, source, billet, vignette, description 
+				FROM ' . self::TABLE_IMAGES . ' 
+				WHERE id = "' . $idImage . '"';
+
+		$req = SQLmgr::getPDO()->prepare($sql);
+		$rep = $req->execute();
+		$donnees = $req->fetch(PDO::FETCH_ASSOC);
+
+		if (!$rep or empty($donnees))
+		{
+			return;
+		}
+
+		// on renvoi un tableau avec toutes les données de l'image en question
+		$image = New Image;
+		$image->setFull($donnees, TRUE); // on hydrate l'objet image avec les données de la BDD (TRUE indique à la fonction que les données proviennent de la BDD)
+
+		return $image;
 	}
 }

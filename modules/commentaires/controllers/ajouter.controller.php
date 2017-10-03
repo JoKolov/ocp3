@@ -121,14 +121,15 @@ class AjouterController {
 		// enregistrement du commetnaire
 		$comMgr = new CommentaireMgr;
 
-		$confirmInsertion = $comMgr->insert($com);
-		$idCom = $comMgr->getLastId();
+		//$confirmInsertion = $comMgr->insert($com);
+		//$idCom = $comMgr->getLastId();
+		$idCom = $comMgr->insert($com);
 
-		if (!$confirmInsertion)
+		if (!$idCom)
 		{
 			// erreur d'insertion du commentaire
-			$action = ['redirect' => Response::urlFormat('commentaires','admin')];
-			$flash = new FlashValues(['errors' => ['sql' => 'commentaire non enregistré']]);
+			$action = ['redirect' => $request->getLastUrl()];
+			$flash = new FlashValues(['warning' => "commentaire non enregistré"]);
 			return new Response($action, ['flash' => $flash, 'membre' => $request->getMembre()]);			
 		}
 

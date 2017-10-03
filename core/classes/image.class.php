@@ -56,9 +56,11 @@ class Image {
 	const IMG_DEFAUT_BILLET 	= 	'';
 	const IMG_DEFAUT_VIGNETTE 	= 	'';
 	const IMG_SIZE_MAX 			= 	1048576;
+	const AVATAR_MAX_SIZE		= 	1048576;
+	const BILLET_MAX_SIZE		=	5242880;
 	const AVATAR_MAX_WIDTH 		= 	200;
 	const AVATAR_MAX_HEIGHT 	= 	200;
-	const BILLET_MAX_WIDTH	 	= 	800;
+	const BILLET_MAX_WIDTH	 	= 	1140;
 	const BILLET_MAX_HEIGHT 	= 	400;
 	const VIGNETTE_MAX_WIDTH	= 	160;
 	const VIGNETTE_MAX_HEIGHT 	= 	80;
@@ -178,13 +180,8 @@ class Image {
 	//==============================
 	// SET _size
 	protected function setteur_size(int $size) {
-		if ($size <= self::IMG_SIZE_MAX)
-		{
-			$this->_size = $size;
-			return TRUE;
-		}
-		else
-		return FALSE;
+		$this->_size = $size;
+		return TRUE;
 	}
 
 
@@ -345,7 +342,7 @@ class Image {
 
 	//==============================
 	// créer une image à partir de la variable $_FILE['...']
-	public function createFromFiles($file)
+	public function createFromFiles($file, $categorieImage = null)
 	{
 		$verif = array(
 			'name'	=> $this->set_name($file['name']),		// vérification du nom
@@ -353,7 +350,7 @@ class Image {
 			'type'	=>	$this->set_type($file['name'])		// vérification du type
 			);
 
-		foreach ($verif as $key => $value)
+		foreach ($verif as $key => $value)  
 		{
 			if (!$value)
 			{
@@ -362,9 +359,27 @@ class Image {
 			}
 		}
 
+		// contrôle de la taille de l'image
+		switch ($categorieImage)
+		{
+			case 'AVATAR':
+				$sizeLimit = self::AVATAR_MAX_SIZE;
+				break;
+
+			case 'BILLET':
+				$sizeLimit = self::BILLET_MAX_SIZE;
+				break;
+				
+			default:
+				$sizeLimit = self::IMG_SIZE_MAX;
+				break;
+		}
+		if ($this->get_size() > $sizeLimit) return FALSE; // taille trop élevée
+
 		// on copie le fichier dans le répertoire des images
 		// et on renvoi FALSE si le fichier ne s'est pas copié
 		$filename = self::DIR_SOURCE . $this->get_filename();
+
 		if (!move_uploaded_file($file['tmp_name'], $filename)) { return FALSE; }
 
 		// on récupère la source
@@ -382,34 +397,31 @@ class Image {
 	// créer un nom d'image à partir d'un id
 	public function renameFromId(int $id) 
 	{
-		if ($id <> '' AND $id > 0)
+		// on met à jour le nom de l'image dans le dossier
+		$fileOldName = $this->get_filename();
+		$this->set_name(self::hashImgId($id) . '.' . $this->get_type());
+		$this->set_source();
+		$fileNewName = $this->get_filename();
+
+		$fichiers = array(
+			'source'		=> self::DIR_SOURCE, 
+			'billet' 	=>	self::DIR_BILLET, 
+			'vignette'	=> self::DIR_VIGNETTE,
+			'avatar'		=> self::DIR_AVATAR);
+
+		// pour chaque source possible,
+		// si le fichier existe, il est renommé
+		// et la source url est mise à jour dans l'objet
+		foreach ($fichiers as $key => $value)
 		{
-			// on met à jour le nom de l'image dans le dossier
-			$fileOldName = $this->get_filename();
-			$this->set_name(self::hashImgId($id) . '.' . $this->get_type());
-			$this->set_source();
-			$fileNewName = $this->get_filename();
-
-			$fichiers = array(
-				'source'		=> self::DIR_SOURCE, 
-				'billet' 	=>	self::DIR_BILLET, 
-				'vignette'	=> self::DIR_VIGNETTE,
-				'avatar'		=> self::DIR_AVATAR);
-
-			// pour chaque source possible,
-			// si le fichier existe, il est renommé
-			// et la source url est mise à jour dans l'objet
-			foreach ($fichiers as $key => $value) {
-				$method = 'set_' . $key;
-				if (file_exists($value . $fileOldName))
-				{
-					rename($value . $fileOldName, $value . $fileNewName);
-					$this->$method();
-				}
+			$method = 'set_' . $key;
+			if (file_exists($value . $fileOldName))
+			{
+				rename($value . $fileOldName, $value . $fileNewName);
+				$this->$method();
 			}
-			return TRUE;
 		}
-		return FALSE;
+		return TRUE;
 	}
 
 
@@ -554,15 +566,20 @@ class Image {
 	public function createForBillet($files, Billet $billet)
 	{
 		/// 1 : vérifier que c'est une image
-		if (!$this->createFromFiles($files))
+		if (!$this->createFromFiles($files, 'BILLET'))
 		{
-			return ['error' => "Mauvais format image"];
+			return "Erreur Image : Mauvais format image";
 		}
 
 		/// 2 : renommer l'image selon id du billet
-		if (!$this->renameFromId($billet->get_id()))
+		$imageNameAsId = $billet->get_id();
+		if (is_null($imageNameAsId))
 		{
-			return ['error' => "Erreur lors de la création de l'image à la une"];
+			$imageNameAsId = 0;
+		}
+		if (!$this->renameFromId($imageNameAsId))
+		{
+			return "Erreur Image : Erreur lors de la création de l'image à la une";
 		}
 
 		/// 3 : copier l'image dans le dossier billet
@@ -571,12 +588,12 @@ class Image {
 		$imageMiniature = self::DIR_VIGNETTE . $this->get_filename();
 
 		//copie de l'image source dans le dossier avatar
-		if (!copy($imageSource, $imageBillet)) return FALSE; // échec de la copie
-		if (!copy($imageSource, $imageMiniature)) return FALSE; // échec de la copie		
+		if (!copy($imageSource, $imageBillet)) return "Erreur Image : Echec copie de l'image source"; // échec de la copie
+		if (!copy($imageSource, $imageMiniature)) return "Erreur Image : Echec copie de la miniature"; // échec de la copie		
 
 		/// 4 : redimmensionner l'image
-		if (!$this->resize($imageBillet, self::BILLET_MAX_WIDTH, self::BILLET_MAX_HEIGHT)) return FALSE; // échec redim
-		if (!$this->resize($imageMiniature, self::VIGNETTE_MAX_WIDTH, self::VIGNETTE_MAX_HEIGHT)) return FALSE; // échec redim
+		if (!$this->resize($imageBillet, self::BILLET_MAX_WIDTH, self::BILLET_MAX_HEIGHT)) return "Erreur Image : Echec redimensionnement de l'image source"; // échec redim
+		if (!$this->resize($imageMiniature, self::VIGNETTE_MAX_WIDTH, self::VIGNETTE_MAX_HEIGHT)) return "Erreur Image : Echec redimensionnement de la miniature"; // échec redim
 
 		/// 5 supprimer l'image source
 		$this->delete('source');
@@ -614,11 +631,13 @@ class Image {
 		// calcul des nouvelles dimensions
 		$widthSource = $this->get_img_width();
 		$heightSource = $this->get_img_height();
+		$decalageWidthSource = 0;
+		$decalageHeightSource = 0;
 		if ($widthSource > $maxWidth OR $heightSource > $maxHeight)
 		{
 			$limiteWidth = $widthSource * $maxHeight / $heightSource;
 			$limiteHeight = $heightSource * $maxWidth / $widthSource;
-
+			/*
 			if ($limiteWidth >= $maxWidth)
 			{
 				$widthResized = $maxWidth;
@@ -626,9 +645,24 @@ class Image {
 			}
 			elseif ($limiteHeight >= $maxHeight)
 			{
-				$heightResized = $maxheight;
+				$heightResized = $maxHeight;
 				$widthResized = $limiteWidth;	
 			}
+			*/
+			if ($limiteWidth <= $maxWidth AND $widthSource > $heightSource)
+			{
+				$widthResized = $maxWidth;
+				$heightResized = $maxHeight;
+				//$decalageHeightSource = ($heightSource - $limiteHeight) / 2;
+				$heightSource = $heightSource * $maxHeight / $limiteHeight;
+			}
+			elseif ($limiteHeight <= $maxHeight AND $heightSource > $widthSource)
+			{
+				$heightResized = $maxHeight;
+				$widthResized = $maxWidth;	
+				//$decalageWidthSource = ($widthSource - $limiteWidth) / 2;
+				$widthSource = $widthtSource * $maxWidth / $limiteWidth;
+			}		
 			else
 			{
 				$widthResized = $maxWidth;
@@ -639,6 +673,7 @@ class Image {
 		// calcul de la position de l'image redimensionnée dans l'image recrée
 		$decalageWidth = 0;
 		$decalageHeight = 0;
+		/*
 		if ($widthResized < $maxWidth)
 		{
 			$decalageWidth = ($maxWidth - $widthResized) / 2;
@@ -647,9 +682,10 @@ class Image {
 		{
 			$decalageHeight = ($maxHeight - $heightResized) / 2;
 		}
+		*/
 
 		// on créer l'image redimensionnée
-		if (!imagecopyresampled($imgResized, $imgSource, $decalageWidth, $decalageHeight, 0, 0, $widthResized, $heightResized, $widthSource, $heightSource))
+		if (!imagecopyresampled($imgResized, $imgSource, $decalageWidth, $decalageHeight, $decalageWidthSource, $decalageHeightSource, $widthResized, $heightResized, $widthSource, $heightSource))
 		{
 			return FALSE;
 		}

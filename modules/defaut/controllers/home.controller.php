@@ -58,12 +58,27 @@ class HomeController {
 
 		// récupération du dernier Billet publié
 		$billetMgr = new BilletMgr;
-		$billets = $billetMgr->selectList(1,0,"statut = '" . Billet::STATUT['publier'] . "'", 'last_date DESC');
+		//$billets = $billetMgr->selectList(4,0,"statut = '" . Billet::STATUT['publier'] . "'", 'last_date DESC');
+		$billets = $billetMgr->selectPublications(4);
 
-		if (!is_null($billets))
+		// Image à la Une
+		$imageManager = new ImageMgr;
+		foreach ($billets as $billet)
 		{
-			$objects['billet'] = $billets[0];		
+			$imageBillet = $imageManager->selectForBillet($billet);
+			$billet->setImage($imageBillet->get_billet());
+			$billet->setMiniature($imageBillet->get_vignette());
 		}
+
+		if (!empty($billets))
+		{
+
+			$objects['dernierBillet'] = $billets[0];
+			unset($billets[0]);
+		}
+
+		$objects['billets'] = $billets;
+
 
 
 		$response->setObjects($objects);
